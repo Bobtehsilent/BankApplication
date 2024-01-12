@@ -5,6 +5,7 @@ from blueprints.contact_form import contact_form_bp
 from blueprints.accounts import account_bp
 from blueprints.customers import customer_bp
 from blueprints.transactions import transactions_bp
+from blueprints.login import login_bp, create_initial_users
 from models import db, seedData
 
  
@@ -29,5 +30,6 @@ def handle_exception(e):
 if __name__  == "__main__":
     with app.app_context():
         upgrade()
+        create_initial_users()
         #seedData(db)
     app.run()

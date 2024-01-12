@@ -32,4 +32,4 @@ def contact_form():
     db.session.add(new_contact)
     db.session.commit()
     # ADD IN PROTECTIONS FOR SQL INJECTIONS.
-    return redirect(url_for('main.index'))
+    return redirect(url_for('main.homepage'))
