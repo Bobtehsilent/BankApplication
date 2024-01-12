@@ -6,6 +6,9 @@ from blueprints.accounts import account_bp
 from blueprints.customers import customer_bp
 from blueprints.transactions import transactions_bp
 from blueprints.login import login_bp, create_initial_users
+from blueprints.admin_dashboard import admin_bp
+from blueprints.user_dashboard import user_bp
+
 from models import db, seedData
 
  
@@ -21,6 +24,8 @@ app.register_blueprint(contact_form_bp)
 app.register_blueprint(customer_bp)
 app.register_blueprint(account_bp)
 app.register_blueprint(transactions_bp)
+app.register_blueprint(admin_bp)
+app.register_blueprint(user_bp)
 
 @app.errorhandler(Exception)
 def handle_exception(e):

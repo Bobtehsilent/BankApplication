@@ -18,10 +18,10 @@ def login():
     if user and user.check_password(password):
         if user.Role == 'Admin':
             #opens the admin page
-            return render_template('admin_dashboard.html')
+            return redirect(url_for('admin.dashboard'))
         else:
             #opens the customer page
-            return render_template('user_dashboard.html')
+            return redirect(url_for('user_dashboard.html'))
     else:
         flash("Login failure, try again")
         return redirect(url_for('main.homepage'))
@@ -29,7 +29,7 @@ def login():
 #check if there is any customers/admins for testwork        
 def create_initial_users():
     #Check if there is atleast one admin
-    if not Customer.query.filter_by(Role='Admin'):
+    if not Customer.query.filter_by(Role='Admin').first():
         admin = Customer(
             GivenName= 'Sebastian',
             Surname = 'Admin',
@@ -37,16 +37,20 @@ def create_initial_users():
             City = 'Västerås',
             Zipcode = '14123',
             Country = 'Sweden',
-            CountryCode = '+46',
+            CountryCode = '46',
             Birthday = '1990-01-01',
             Telephone = '0739025151',
             EmailAddress = 'sebastian@admin.com'          
         )
         admin.set_password('password')
+        admin.set_swedish_personal_number()
         admin.Role = 'Admin'
         db.session.add(admin)
+
+        print("initial admin account added")
+
     #check if there is atleast one customer
-    if not Customer.query.filter_by(Role='Customer'):
+    if not Customer.query.filter_by(Role='Customer').first():
         customer = Customer(
             GivenName = 'Sebastian',
             Surname = 'Customer',
@@ -54,7 +58,7 @@ def create_initial_users():
             City = 'Västerås',
             Zipcode = '14123',
             Country = 'Sverige',
-            CountryCode = '+46',
+            CountryCode = '46',
             Birthday = '1990-10-21',
             Telephone = '072-232133',
             EmailAddress = 'Sebastian@customer.com'
@@ -63,6 +67,8 @@ def create_initial_users():
         customer.set_password('password')
         customer.set_swedish_personal_number()
         db.session.add(customer)
+        print("initial customer account added")
     
     db.session.commit()
+    print("both initial accounts created.")
         
