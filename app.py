@@ -26,6 +26,7 @@ app.register_blueprint(account_bp)
 app.register_blueprint(transactions_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(login_bp)
 
 @app.errorhandler(Exception)
 def handle_exception(e):

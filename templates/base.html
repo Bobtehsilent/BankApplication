@@ -11,9 +11,11 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='slick/slick.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='slick/slick-theme.css') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='jmap/jquery-jvectormap-2.0.5.css') }}">
+    <script>document.documentElement.className="js";var supportsCssVars=function(){var e,t=document.createElement("style");return t.innerHTML="root: { --tmp-var: bold; }",document.head.appendChild(t),e=!!(window.CSS&&window.CSS.supports&&window.CSS.supports("font-weight","var(--tmp-var)")),t.parentNode.removeChild(t),e};supportsCssVars()||alert("Please view this in a modern browser such as latest version of Chrome or Microsoft Edge.");</script>
     {% block head %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_classes %}{% endblock %}">
     <div id="tm-bg"></div>
     <div id="tm-wrap">
         <div class="tm-main-content">
@@ -31,6 +33,16 @@
     <script src="{{ url_for('static', filename='slick/slick.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/anime.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='jmap/jquery-jvectormap-2.0.5.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='jmap/jquery-jvectormap-europe-merc.js') }}"></script>
+    <script>
+        $(function(){
+            $('#europe-map').vectorMap({
+                map: 'europe_merc',
+                // additional options here
+            });
+        });
+    </script>
     <script>      
 
         function setupFooter() {
@@ -58,7 +70,6 @@
 
             $('.tm-current-year').text(new Date().getFullYear());  // Update year in copyright           
         });
-
     </script>   
     {% block scripts %}{% endblock %}
         

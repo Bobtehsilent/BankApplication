@@ -218,4 +218,12 @@
 	DOM.details = new Details();
 };
 
+$("#menu-toggle").click(function(e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled");
+});
+
+$(window).resize(function() {
+    $('#europe-map').vectorMap('updateSize');
+});
 

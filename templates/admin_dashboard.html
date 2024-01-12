@@ -3,11 +3,33 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-    {% include 'siderbar.html' %}
-    <!-- Admin specific content -->
-    <div class="admin-dashboard">
-        <!-- dashboard content -->
-        <h1>Hello admin</h1>
+    {% include 'admin_sidebar.html' %}
+    <div class="admin-content">
+        <div class="admin-header">
+            <h1>Admin Dashboard</h1>
+        </div>
+        <div class="admin-stats">
+            <div class="stat-item">
+                <h2>{{ customer_count }}</h2>
+                <p>Total customers</p>
+            </div>
+            <div class="stat-item">
+                <h2>{{ account_count }}</h2>
+                <p>Total Accounts</p>           
+            </div>  
+            <div class="stat-item">
+                <h2>{{ total_balance }}</h2>
+                <p>Total Balance</p>
+            </div>
+        </div>        
+        <!-- Jvectormap container -->
+        <div class="map-container" id="europe-map">
+            <script>
+                $(function(){
+                    $('#map').vectorMap({map: 'europe_merc'});
+                });
+            </script>
+        </div>
     </div>
 
 {% endblock %}

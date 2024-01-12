@@ -21,7 +21,7 @@ def login():
             return redirect(url_for('admin.dashboard'))
         else:
             #opens the customer page
-            return redirect(url_for('user_dashboard.html'))
+            return redirect(url_for('user.dashboard'))
     else:
         flash("Login failure, try again")
         return redirect(url_for('main.homepage'))
