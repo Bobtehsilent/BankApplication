@@ -3,6 +3,7 @@ import barnum
 import random
 from datetime import datetime  
 from datetime import timedelta  
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
@@ -17,13 +18,20 @@ class Customer(db.Model):
     Country = db.Column(db.String(30), unique=False, nullable=False)
     CountryCode = db.Column(db.String(2), unique=False, nullable=False)
     Birthday = db.Column(db.DateTime, unique=False, nullable=False)
-    NationalId = db.Column(db.String(20), unique=False, nullable=False)
+    PersonalNumber = db.Column(db.String(20), unique=False, nullable=False)
     TelephoneCountryCode = db.Column(db.Integer, unique=False, nullable=False)
     Telephone = db.Column(db.String(20), unique=False, nullable=False)
     EmailAddress = db.Column(db.String(50), unique=False, nullable=False)
-
+    Password = db.Column(db.String(128))
+    Role = db.Column(db.String(10), default='Customer')
     Accounts = db.relationship('Account', backref='Customer',
      lazy=True)
+    
+    def set_password(self, password):
+        self.Password = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self.Password, password)
 
 class Account(db.Model):
     __tablename__= "Accounts"
@@ -59,7 +67,7 @@ class CustomerContact(db.Model):
 
 def seedData(db):
     antal =  Customer.query.count()
-    while antal < 500:
+    while antal < 300:
         customer = Customer()
         
         customer.GivenName, customer.Surname = barnum.create_name()

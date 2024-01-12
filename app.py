@@ -2,7 +2,9 @@ from flask import Flask, render_template
 from flask_migrate import Migrate, upgrade
 from blueprints.main import main_bp
 from blueprints.contact_form import contact_form_bp
-
+from blueprints.accounts import account_bp
+from blueprints.customers import customer_bp
+from blueprints.transactions import transactions_bp
 from models import db, seedData
 
  
@@ -15,13 +17,17 @@ migrate = Migrate(app,db)
 
 app.register_blueprint(main_bp)
 app.register_blueprint(contact_form_bp)
+app.register_blueprint(customer_bp)
+app.register_blueprint(account_bp)
+app.register_blueprint(transactions_bp)
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    print(str(e)) 
+    app.logger.error(f"Error: {str(e)}")
+    return render_template('error.html'), 500
 
 if __name__  == "__main__":
     with app.app_context():
         upgrade()
-    seedData(db)
+        #seedData(db)
     app.run()

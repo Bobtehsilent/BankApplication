@@ -6,20 +6,25 @@ from werkzeug.security import check_password_hash, generate_password_hash
 login_bp = Blueprint('login', __name__)
 
 
-#route for login stuff
+#route for logging in
 @login_bp.route('/login', methods=['POST'])
 def login():
+    #login form
     username = request.form['username']
     password = request.form['password']
     user = Customer.query.filter_by(EmailAddress=username).first()
 
-    if user and user.password == password:
-        if is_admin == 'Admin':
-            return render_template('index_admin.html')
-        if is_admin == 'Customer':
-            return render_template('index_user.html')
+    #check if the user is admin or customer
+    if user and user.check_password(password):
+        if user.Role == 'Admin':
+            #opens the admin page
+            return render_template('admin_dashboard.html')
         else:
-            flash("Login failure, try again")
+            #opens the customer page
+            return render_template('user_dashboard.html')
+    else:
+        flash("Login failure, try again")
+        return redirect(url_for('main.homepage'))
         
     
     #Handle login failure
