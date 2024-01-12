@@ -1,10 +1,14 @@
-from flask import Blueprint, request, render_template, flash, redirect, url_for
+from flask import Blueprint, request, flash, redirect, url_for
 from models import db, Customer, CustomerContact
 
-contacts_bp = Blueprint('Contact', __name__)
+#Functionality for the contact form on the main page.
 
-@contacts_bp.route("/submit_contact_form", methods=['POST'])
+## IMPORTANT TO DO, PROTECTION AGAINST SQLINJECT AND SUCH
+contact_form_bp = Blueprint('contact_form_bp', __name__)
+
+@contact_form_bp.route("/contact_form", methods=['POST'])
 def contact_form():
+    print("Form Submitted")
     first_name = request.form['contact_first_name']
     last_name = request.form['contact_last_name']
     email = request.form['contact_email']
@@ -12,8 +16,7 @@ def contact_form():
 
     #Check if there is a customer with this name or email already
     existing_customer = Customer.query.filter(
-        (Customer.GivenName == first_name) &
-        (Customer.Surname == last_name) |
+        (Customer.GivenName == first_name) & (Customer.Surname == last_name) |
         (Customer.EmailAddress == email)
     ).first()
 
@@ -25,8 +28,8 @@ def contact_form():
         flash('Existing customer found: ' + existing_customer.GivenName + ' ' + existing_customer.Surname)
     else:
         flash('No existing customer found. contact information saved')
-
+    print(first_name, last_name, email, message)
     db.session.add(new_contact)
     db.session.commit()
-
-    return redirect(url_for('index'))
+    # ADD IN PROTECTIONS FOR SQL INJECTIONS.
+    return redirect(url_for('main.index'))

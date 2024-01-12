@@ -71,30 +71,39 @@ https://www.tooplate.com/view/2097-pop
                                     </div>
                                 </div>
 
-                                <div class="grid__item" id="team-link">
+                                <div class="grid__item" id="login-link">
                                     <div class="product">
                                         <div class="tm-nav-link">
-                                            <i class="fas fa-users fa-3x tm-nav-icon"></i>
-                                            <span class="tm-nav-text">Our Team</span>
+                                            <i class="fas fa-sign-in-alt fa-3x tm-nav-icon"></i>
+                                            <span class="tm-nav-text">Login</span>
                                             <div class="product__bg"></div>            
                                         </div>                                     
                                         <div class="product__description">
                                             <div class="p-sm-4 p-2">
                                                 <div class="row mb-3">
                                                     <div class="col-12">
-                                                        <h2 class="tm-page-title">Background of Our Team</h2>        
+                                                        <h2 class="tm-page-title">Login to Your Account</h2>        
                                                     </div>
                                                 </div>
-                                                <div class="row tm-reverse-sm">
-                                                    <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8">
-                                                        <p class="mb-4">Vestibulum aliquet, arcu accumsan lobortis bibendum, justo velit efficitur lorem, at pulvinar mi justo nec lacus. Nullam et libero aliquet, luctus nunc sit amet, tincidunt ligula. Sed finibus ante sed tortor cursus, nec malesuada lectus interdum.</p>
-                                                        <p class="mb-4">Sed ex turpis, vulputate in efficitur id, lobortis eget nibh. Pellentesque maximus ipsum eget velit imperdiet sodales. Suspendisse in blandit mi.</p>
-                                                        <p class="mb-5">Pellentesque finibus felis risus, ut malesuada felis viverra at. Quisque accumsan in mi non hendrerit.</p>
-                                                        <a href="#" class="btn tm-btn-gray">Read More</a>        
-                                                    </div>                                                
-                                                    <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4 mb-lg-0 mb-sm-4 mb-4">
-                                                        <img src="{{ url_for('static', filename='img/team.jpg') }}" class="img-fluid">
-                                                    </div>
+                                                <div class="col-12">
+                                                    <form action="{{ url_for('main.index') }}" method="post">
+                                                        <div class="form-group">
+                                                            <label for="username">Username</label> 
+                                                            <input type="text" id="username" name="username" class="form-control" placeholder="Enter Username" required>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="password">Password</label>
+                                                            <input type="text" id="password" name="password" class="form-control" placeholder="Enter Password" required>
+                                                        </div>
+                                                        <div class="form-group form-check">
+                                                            <select name="selection" class="form-check-input" id="isAdmin">
+                                                                <option value="Customer">Private Customer</option>
+                                                                <option value="Admin">Personnel</option>
+                                                            </select>
+
+                                                        </div>
+                                                    </form>
+                                                </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -160,15 +169,15 @@ https://www.tooplate.com/view/2097-pop
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-12">
-                                                        <form action="{{ url_for('submit_contact_form')}}" method="post" class="contact-form">
+                                                        <form action="{{ url_for('contact_form_bp.contact_form') }}" method="post" class="contact-form">
                                                             <div class="row">
-                                                                <div class="form-group col-md-6 col-lg-6 col-xl-6">
-                                                                  <input type="text" id="contact_first_name" name="contact_name" class="form-control" placeholder="First Name"  required/>
+                                                                <div class="form-group col-md-6">
+                                                                  <input type="text" id="contact_first_name" name="contact_first_name" class="form-control" placeholder="First Name"  required/>
                                                                 </div>
-                                                                <div class="form-group col-md-6 col-lg-6 col-xl-6">
-                                                                    <input type="text" id="contact_last_name" name="contact_name" class="form-control" placeholder="Last Name"  required/>
+                                                                <div class="form-group col-md-6">
+                                                                    <input type="text" id="contact_last_name" name="contact_last_name" class="form-control" placeholder="Last Name"  required/>
                                                                 </div>
-                                                                <div class="form-group col-md-6 col-lg-6 col-xl-6 tm-col-email">
+                                                                <div class="form-group col-md-12">
                                                                   <input type="email" id="contact_email" name="contact_email" class="form-control" placeholder="Email"  required/>
                                                                 </div>
                                                             </div>                                                        
@@ -228,7 +237,16 @@ https://www.tooplate.com/view/2097-pop
             $('.tm-current-year').text(new Date().getFullYear());  // Update year in copyright           
         });
 
-    </script>             
+    </script>   
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div>{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
 
 </body>
 </html>

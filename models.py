@@ -48,17 +48,18 @@ class Transaction(db.Model):
 
 class CustomerContact(db.Model):
     __tablename__= "CustomerContact"
+    Id = db.Column(db.Integer, primary_key=True)
     FirstName = db.Column(db.String(50))
     LastName = db.Column(db.String(50))
     Email = db.Column(db.String(50))
     Message = db.Column(db.String(255))
-    CustomerId = db.Column(db.Integer, db.ForeignKey('Customers.Id', nullable=True))
+    CustomerId = db.Column(db.Integer, db.ForeignKey('Customers.Id'), nullable=True)
 
     customer = db.relationship('Customer', backref='contacts', lazy=True)
 
 def seedData(db):
     antal =  Customer.query.count()
-    while antal < 5000:
+    while antal < 500:
         customer = Customer()
         
         customer.GivenName, customer.Surname = barnum.create_name()
