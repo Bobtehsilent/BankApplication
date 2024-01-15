@@ -29,20 +29,12 @@
     </footer>
 
     <!-- commmon scripts -->
-    <script src="{{ url_for('static', filename='js/jquery-3.2.1.slim.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='slick/slick.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/anime.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='jmap/jquery-jvectormap-2.0.5.min.js') }}"></script>
     <script src="{{ url_for('static', filename='jmap/jquery-jvectormap-europe-merc.js') }}"></script>
-    <script>
-        $(function(){
-            $('#europe-map').vectorMap({
-                map: 'europe_merc',
-                // additional options here
-            });
-        });
-    </script>
     <script>      
 
         function setupFooter() {

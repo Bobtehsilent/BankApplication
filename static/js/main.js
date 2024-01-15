@@ -1,4 +1,4 @@
-{
+{	
 	class Details {
 		constructor() {
 			this.DOM = {};
@@ -60,11 +60,10 @@
 			this.DOM.details.style.display = 'block';  
 
 			this.DOM.details.classList.add('details--open');
-
-			this.DOM.productBg = data.productBg;
-
-			this.DOM.productBg.style.opacity = 0;
-
+			if (data && data.productBg) {
+				this.DOM.productBg = data.productBg;
+				this.DOM.productBg.style.opacity = 0;
+			}
 			const rect = this.getProductDetailsRect();
 
 			this.DOM.bgDown.style.transform = `translateX(${rect.productBgRect.left-rect.detailsBgRect.left}px) translateY(${rect.productBgRect.top-rect.detailsBgRect.top}px) scaleX(${rect.productBgRect.width/rect.detailsBgRect.width}) scaleY(${rect.productBgRect.height/rect.detailsBgRect.height})`;
@@ -146,7 +145,9 @@
                 complete: () => {
                     this.DOM.bgDown.style.opacity = 0;
                     this.DOM.bgDown.style.transform = 'none';
-                    this.DOM.productBg.style.opacity = 1;
+					if (this.DOM.productBg) {
+                    	this.DOM.productBg.style.opacity = 1;
+					}
                     this.DOM.details.style.display = 'none';                    
                     this.isAnimating = false;
                 }
@@ -182,6 +183,14 @@
 		     	}	
 	        }          
         }
+		fillCountryData(countryData) {
+			let content = `<h2>Customers in ${countryData.countryName}</h2><ul>`;
+			countryData.customers.forEach(customer => {
+				content += `<li>${customer.name} - ${customer.email}</li>`;
+			});
+			content += `</ul>`;
+			this.DOM.description.innerHTML = content;
+		}
 	}; // class Details
 
 	class Item {
@@ -201,21 +210,38 @@
 			this.DOM.product.addEventListener('click', () => this.open());
 		}
 		open() {
-			DOM.details.fill(this.info);
-			DOM.details.open({
-				productBg: this.DOM.productBg
-			});
-		}
+			if (this.DOM.el.classList.contains('map-container')) {
+				// Handle map container differently or do nothing
+			} else {
+				if (this.DOM.productBg) {
+					DOM.details.fill(this.info);
+					DOM.details.open({
+						productBg: this.DOM.productBg
+					});
+				}
+			}
+		}		
 	}; // class Item
 
 	const DOM = {};
 	DOM.grid = document.querySelector('.grid');
 	DOM.content = DOM.grid.parentNode;
-	DOM.gridItems = Array.from(DOM.grid.querySelectorAll('.grid__item'));
+	DOM.gridItems = Array.from(DOM.grid.querySelectorAll('.grid__item')).filter(item => item.querySelector('.product'));
 	let items = [];
 	DOM.gridItems.forEach(item => items.push(new Item(item)));
 
 	DOM.details = new Details();
+
+	window.DOM = DOM;
+	
+	function openDetailsWithData(data) {
+		console.log("Data received:", data); // Debugging line 
+		//if (!data.productBg) {
+		//	data.productBg = someDefaultElement;
+		//}
+		DOM.details.fillCountryData(data);
+		DOM.details.open(data);
+	}
 };
 
 $("#menu-toggle").click(function(e) {
@@ -227,3 +253,4 @@ $(window).resize(function() {
     $('#europe-map').vectorMap('updateSize');
 });
 
+window.openDetailsWithData = openDetailsWithData;
