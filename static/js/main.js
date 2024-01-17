@@ -191,6 +191,15 @@
 			content += `</ul>`;
 			this.DOM.description.innerHTML = content;
 		}
+		fillCustomerData(customerData) {
+			console.log(customerData); // Check what data is received
+			let content = `<h2>${customerData.GivenName} ${customerData.Surname}</h2>`;
+			content += `<p>Email: ${customerData.EmailAddress}</p>`;
+			content += `<p>Country: ${customerData.Country}</p>`;
+			// Add other fields as needed
+			this.DOM.description.innerHTML = content;
+			this.DOM.details.classList.add('customer-details-box');
+		}
 	}; // class Details
 
 	class Item {
@@ -222,8 +231,34 @@
 			}
 		}		
 	}; // class Item
+	class CustomerItem {
+		constructor(el) {
+			this.DOM = { el: el };
+			try {
+				console.log(this.DOM.el.getAttribute('data-customer'));
+				this.customerData = JSON.parse(this.DOM.el.getAttribute('data-customer'));
+			} catch (e) {
+				console.error('Error parsing JSON:', e);
+				// Handle the error or set a default value
+				this.customerData = {};
+			}
+			this.i
+			this.initEvents();
+		}
+		initEvents() {
+			this.DOM.el.addEventListener('click', () => {
+				DOM.details.fillCustomerData(this.customerData);
+				DOM.details.open();
+			});
+			this.DOM.el.addEventListener('click', () => {
+				document.querySelectorAll('.customer-row').forEach(row => row.classList.remove('active'));
+				this.DOM.el.classList.add('active');
+			});
+		}
+	};
 
 	const DOM = {};
+
 	DOM.grid = document.querySelector('.grid');
 	if (DOM.grid) {
 		DOM.content = DOM.grid.parentNode;
@@ -233,8 +268,15 @@
 		DOM.details = new Details();
 	}
 
+	if (document.querySelector('.customer-list')) {
+		DOM.customerRows = document.querySelectorAll('.customer-row');
+		DOM.customerRows.forEach(row => new CustomerItem(row));
+		DOM.details = new Details();
+	}
+
 	window.DOM = DOM;
 	
+
 	function openDetailsWithData(data) {
 		console.log("Data received:", data); // Debugging line 
 		//if (!data.productBg) {

@@ -440,6 +440,11 @@ p:last-child {
 
 #sidebar-wrapper .list-group {
   width: 15rem;
+  background-color: #666;
+}
+
+.list-group.list-group-flush {
+  background-color: #666;
 }
 
 #page-content-wrapper {
@@ -557,3 +562,66 @@ th, td {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   display: none;
 }
+
+.active {
+  border-color: #fff;
+  color: white;
+}
+
+/* customer detail css */
+.customer-row:hover {
+  background-color: gray;
+  cursor: pointer;
+}
+
+.customer-row.active {
+  background: gray;
+}
+
+.details.customer-details-box {
+  /* Override the width and height */
+  width: auto;
+  height: auto;
+  /* Keep the box centered */
+  justify-content: center;
+  align-items: center;
+  /* Other styles */
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.customer-details-box {
+  /* Custom styles for the customer details box */
+  background-color: #505050; /* Example background color */
+  color: white; /* Example text color */
+  max-width: 600px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  vertical-align: center;
+}
+
+.details.customer-details-box .details__bg--down {
+  /* Specific styles for the inner background */
+  background-color: #343a40;
+  padding: 20px;
+  /* Set a maximum width and center it */
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.customer-details-box .details__description {
+  font-size: 16px;
+  line-height: 1.6;
+}
+.customer-details-box .details__close {
+  color: #333;
+}
+
+.customer-details-box .details__close:hover {
+  color: #000;
+}
+

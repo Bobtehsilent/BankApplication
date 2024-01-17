@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Details{% endblock %}
+
+{% block content %}
+    {% include 'admin_sidebar.html' %}
+    <div class="customer-details">
+        <h2>Customer Details: {{ customer.GivenName }} {{ customer.Surname }}</h2>
+        <p><strong>Email:</strong> {{ customer.EmailAddress }}</p>
+        <p><strong>Phone:</strong> {{ customer.Telephone }}</p>
+        <p><strong>Address:</strong> {{ customer.Streetaddress }}, {{ customer.City }}, {{ customer.Zipcode }}, {{ customer.Country }}</p>
+        <p><strong>Personal Number:</strong> {{ customer.PersonalNumber }}</p>
+        <!-- Add more fields as needed -->
+    </div>
+{% endblock %}

@@ -1,14 +1,34 @@
 from flask import Blueprint, request, render_template
+from flask_login import login_required
 from models import Customer, db
 
 customer_bp = Blueprint('customer', __name__, url_prefix='/customers')
 
-@customer_bp.route('/')
+@customer_bp.route('/customer_list', endpoint='customer_list')
 def customer_list():
+    all_customers = [customer_to_dict(customer) for customer in Customer.query.all()]
     page = request.args.get('page', 1, type=int)
-    paginated_customers = Customer.query.paginate(page, per_page=20, error_out=False)
+    per_page = 20
+    paginated_customers = Customer.query.paginate(page=page, per_page=per_page, error_out=False)
 
-    return render_template('customers.html', customers=paginated_customers)
+    return render_template('customers.html', customers=paginated_customers, all_customers=all_customers)
+
+@customer_bp.route('/customer_detail/<int:id>', methods=['GET'], endpoint='get_customer_details')
+def get_customer(id):
+    customer = customer.query.get_or_404(id)
+    return render_template('customer_detail.html', customer=customer)
+
+def customer_to_dict(customer):
+    return {
+        'Id': customer.Id,
+        'GivenName': customer.GivenName,
+        'Surname': customer.Surname,
+        'Country': customer.Country,
+        'Telephone': customer.Telephone,
+        'EmailAddress': customer.EmailAddress,
+        'PersonalNumber': customer.PersonalNumber
+        # Add other fields as needed
+    }
 
 @customer_bp.route('/add_customer', methods=['POST'])
 def add_customer():

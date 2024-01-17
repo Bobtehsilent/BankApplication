@@ -1,2 +1,58 @@
 {% extends 'base.html' %}
 
+{% block title %}Customers list{% endblock %}
+{% block content %}
+    {% include 'admin_sidebar.html' %}
+    <div class="customer-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer name
+
+                    </th>
+                    <th>Country
+
+                    </th>
+                    <th>Phone number     
+
+                    </th>
+                    <th>Email
+
+                    </th>
+                    <th>Personal number
+
+                    </th>
+                    <th>Additional information
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in all_customers %}
+                <tr class="customer-row" data-customer='{{ customer | tojson | safe}}'>
+                    <td>{{ customer.GivenName ~ ', ' ~ customer.Surname }}</td>
+                    <td>{{ customer.Country }}</td>
+                    <td>{{ customer.Telephone }}</td>
+                    <td>{{ customer.EmailAddress }}</td>
+                    <td>{{ customer.PersonalNumber }}</td>
+                    <td>Click</td>
+                </tr>
+                {% endfor %}
+                <!-- pagination links -->
+                {% if customers.has_prev %}
+                    <a href="{{ url_for('customer.customer_list', page=customers.prev_num) }}">Previous</a>
+                {% endif %}
+                {% if customers.has_next %}
+                    <a href="{{ url_for('customer.customer_list', page=customers.next_num) }}">Next</a>
+                {% endif %}
+            </tbody>
+        </table>
+        <div class="customer-details" style="display: none;">
+            <div class="details__bg details__bg--down customer-detail-description">
+                <button class="details__close"><i class="fas fa-2x fa-times icon--cross tm-fa-close"></i></button>
+                <div class="details__description customer-detail-description">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

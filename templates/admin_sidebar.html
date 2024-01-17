@@ -2,10 +2,10 @@
     <div class="bg-dark border-right" id="sidebar-wrapper">
         <div class="sidebar-heading">Admin Dashboard</div>
         <div class="list-group list-group-flush">
-            <a href="#" class="list-group-item list-group-item-action bg-light">Dashboard</a>
-            <a href="#" class="list-group-item list-group-item-action bg-light">Customers</a>
-            <a href="#" class="list-group-item list-group-item-action bg-light">Accounts</a>
-            <a href="{{ url_for('login.logout') }}" class="list-group-item list-group-item-action bg-light">Logout</a>
+            <a href="{{ url_for('admin.dashboard') }}" class="list-group-item list-group-item-action bg-dark {{ 'active' if request.endpoint == 'admin.dashboard' else 'bg-dark' }}">Main</a>
+            <a href="{{ url_for('customer.customer_list') }}" class="list-group-item list-group-item-action bg-dark {{ 'active' if request.endpoint == 'customer.customer_list' else 'bg-dark' }}">Customers</a>
+            <a href="#" class="list-group-item list-group-item-action bg-light {{ 'active' if request.endpoint == 'accounts' else 'bg-dark' }}">Accounts</a>
+            <a href="{{ url_for('login.logout') }}" class="list-group-item list-group-item-action bg-dark">Logout</a>
 
             <!-- More Links Here -->
             
