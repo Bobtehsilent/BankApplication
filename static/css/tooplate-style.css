@@ -147,6 +147,7 @@ p {
 .grid {
   display: flex;
   flex-wrap: wrap;
+
 }
 .grid__item {
   margin: 10px;
@@ -453,34 +454,45 @@ p:last-child {
 }
 
 /* Admin Dashboard Stats */
-.admin-stats {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  flex-wrap: wrap; /* Allows items to wrap in smaller screens */
-  margin-bottom: 20px; /* Spacing between stats and map */
-}
-
-.grid__item .stat-item {
-  flex: 1; /* Each item takes equal space */
-  min-width: 200px; /* Minimum width for each stat item */
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin: 10px;
-  text-align: center;
-}
 .admin-content {
   width: 100%;
 }
-.admin-stats h2 {
-  font-size: 2em;
-  margin-bottom: 0.5em;
 
+.grid.admin {
+  justify-content: space-around;
 }
 
-.admin-stats p {
-  font-size: 1.2em;
+.grid__item.stat-item {
+  flex: 1 1 calc(33.333% - 20px); /* Each item takes equal space */
+  min-width: 200px; /* Minimum width for each stat item */
+  margin: 10px;
+  text-align: center;
+}
+
+.grid.admin .map-container {
+  width: 100%;
+  margin: 10px 0;
+}
+
+.admin-nav-link {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: auto;
+  border: 1px solid white;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .grid.admin .grid__item .stat-item {
+    flex-basis: 100%;
+    margin: 10px 0;
+  }
+  .map-container {
+    height: 300px;
+  }
 }
 
 /* Map Container */
@@ -495,13 +507,53 @@ p:last-child {
   height: 400px;
 }
 
-/* Responsive adjustments */
- @media (max-width: 768px) {
-  .admin-stats {
-    flex-direction: column;
-  }
 
-  .map-container {
-    height: 300px; /* Smaller height for smaller screens */
+
+/* CSS för Boktabell */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+table, th, td {
+  border: 1px solid #ddd;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+
+/* th {
+  background-color: #f4f4f4;
+} */
+
+/* tr:nth-child(even) {
+  background-color: #f9f9f9;
+} */
+
+/* tr:hover {
+  background-color: #f1f1f1;
+} */
+
+@media (max-width: 600px) {
+  table {
+      display: block;
+      overflow-x: auto;
   }
-} 
+}
+
+.flash-message {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  background-color: white;
+  color: black;
+  border: 1px solid gray;
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  display: none;
+}

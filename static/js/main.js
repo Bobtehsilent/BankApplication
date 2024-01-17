@@ -225,12 +225,13 @@
 
 	const DOM = {};
 	DOM.grid = document.querySelector('.grid');
-	DOM.content = DOM.grid.parentNode;
-	DOM.gridItems = Array.from(DOM.grid.querySelectorAll('.grid__item')).filter(item => item.querySelector('.product'));
-	let items = [];
-	DOM.gridItems.forEach(item => items.push(new Item(item)));
-
-	DOM.details = new Details();
+	if (DOM.grid) {
+		DOM.content = DOM.grid.parentNode;
+		DOM.gridItems = Array.from(DOM.grid.querySelectorAll('.grid__item')).filter(item => item.querySelector('.product'));
+		let items = [];
+		DOM.gridItems.forEach(item => items.push(new Item(item)));
+		DOM.details = new Details();
+	}
 
 	window.DOM = DOM;
 	
@@ -249,8 +250,10 @@ $("#menu-toggle").click(function(e) {
     $("#wrapper").toggleClass("toggled");
 });
 
-$(window).resize(function() {
-    $('#europe-map').vectorMap('updateSize');
-});
+// $(window).resize(function() {
+//     var map = $('#europe-map').vectorMap('get', 'mapObject');
+//     map.updateSize();
+// });
+
 
 window.openDetailsWithData = openDetailsWithData;

@@ -27,11 +27,26 @@ class Customer(db.Model):
     Accounts = db.relationship('Account', backref='Customer',
      lazy=True)
     
+    #creating and checking passwords
     def set_password(self, password):
         self.Password = generate_password_hash(password)
     
     def check_password(self, password):
         return check_password_hash(self.Password, password)
+    
+    #flask_login integration
+
+    def is_authenticated(self):
+        return True
+    
+    def is_active(self):
+        return True
+    
+    def is_anonymous(self):
+        return False
+    
+    def get_id(self):
+        return str(self.Id)
     
 
     def calculate_luhn(self, number):

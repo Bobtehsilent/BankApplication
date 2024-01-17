@@ -16,6 +16,13 @@
     {% block head %}{% endblock %}
 </head>
 <body class="{% block body_classes %}{% endblock %}">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     <div id="tm-bg"></div>
     <div id="tm-wrap">
         <div class="tm-main-content">
@@ -62,15 +69,15 @@
 
             $('.tm-current-year').text(new Date().getFullYear());  // Update year in copyright           
         });
+        
+        $(document).ready(function() {
+            // Check if there is a flash message
+            if ($('.flash-message').length) {
+                // Show the flash message
+                $('.flash-message').slideDown(300).delay(3000).slideUp(300);
+            }
+        });
     </script>   
     {% block scripts %}{% endblock %}
-        
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <div>{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
 </body>
 </html>

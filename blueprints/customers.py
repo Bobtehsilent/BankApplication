@@ -1,7 +1,14 @@
 from flask import Blueprint, request, render_template
 from models import Customer, db
 
-customer_bp = Blueprint('customer', __name__)
+customer_bp = Blueprint('customer', __name__, url_prefix='/customers')
+
+@customer_bp.route('/')
+def customer_list():
+    page = request.args.get('page', 1, type=int)
+    paginated_customers = Customer.query.paginate(page, per_page=20, error_out=False)
+
+    return render_template('customers.html', customers=paginated_customers)
 
 @customer_bp.route('/add_customer', methods=['POST'])
 def add_customer():

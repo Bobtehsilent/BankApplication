@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from models import Customer, db
+from flask_login import login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 #Logging in blueprint and functionality
@@ -12,10 +13,13 @@ def login():
     #login form
     username = request.form['username']
     password = request.form['password']
+    print(username)
+    print(password)
     user = Customer.query.filter_by(EmailAddress=username).first()
-
     #check if the user is admin or customer
     if user and user.check_password(password):
+        login_user(user)
+
         if user.Role == 'Admin':
             #opens the admin page
             return redirect(url_for('admin.dashboard'))
@@ -25,6 +29,11 @@ def login():
     else:
         flash("Login failure, try again")
         return redirect(url_for('main.homepage'))
+    
+@login_bp.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('main.homepage'))
 
 #check if there is any customers/admins for testwork        
 def create_initial_users():
@@ -37,7 +46,7 @@ def create_initial_users():
             City = 'Västerås',
             Zipcode = '14123',
             Country = 'Sweden',
-            CountryCode = '46',
+            CountryCode = 'SE',
             Birthday = '1990-01-01',
             Telephone = '0739025151',
             EmailAddress = 'sebastian@admin.com'          
@@ -58,7 +67,7 @@ def create_initial_users():
             City = 'Västerås',
             Zipcode = '14123',
             Country = 'Sverige',
-            CountryCode = '46',
+            CountryCode = 'SE',
             Birthday = '1990-10-21',
             Telephone = '072-232133',
             EmailAddress = 'Sebastian@customer.com'
