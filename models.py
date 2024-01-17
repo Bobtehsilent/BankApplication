@@ -4,6 +4,7 @@ import random
 from datetime import datetime  
 from datetime import timedelta  
 from werkzeug.security import generate_password_hash, check_password_hash
+from dateutil.relativedelta import relativedelta
 
 db = SQLAlchemy()
 
@@ -12,17 +13,16 @@ class Customer(db.Model):
     Id = db.Column(db.Integer, primary_key=True)
     GivenName = db.Column(db.String(50), unique=False, nullable=False)
     Surname = db.Column(db.String(50), unique=False, nullable=False)
-    Streetaddress = db.Column(db.String(50), unique=False, nullable=False)
-    City = db.Column(db.String(50), unique=False, nullable=False)
-    Zipcode = db.Column(db.String(10), unique=False, nullable=False)
-    Country = db.Column(db.String(30), unique=False, nullable=False)
-    CountryCode = db.Column(db.String(2), unique=False, nullable=False)
-    Birthday = db.Column(db.DateTime, unique=False, nullable=False)
+    Streetaddress = db.Column(db.String(50), unique=False)
+    City = db.Column(db.String(50), unique=False)
+    Zipcode = db.Column(db.String(10), unique=False)
+    Country = db.Column(db.String(30), unique=False)
+    CountryCode = db.Column(db.String(2), unique=False)
+    Birthday = db.Column(db.DateTime, unique=False)
     PersonalNumber = db.Column(db.String(20), unique=False, nullable=False)
-    TelephoneCountryCode = db.Column(db.Integer, unique=False, nullable=False)
-    Telephone = db.Column(db.String(20), unique=False, nullable=False)
+    Telephone = db.Column(db.String(20), unique=False)
     EmailAddress = db.Column(db.String(50), unique=False, nullable=False)
-    Password = db.Column(db.String(128))
+    Password = db.Column(db.String(255))
     Role = db.Column(db.String(10), default='Customer')
     Accounts = db.relationship('Account', backref='Customer',
      lazy=True)
@@ -32,6 +32,41 @@ class Customer(db.Model):
     
     def check_password(self, password):
         return check_password_hash(self.Password, password)
+    
+
+    def calculate_luhn(self, number):
+        def digits_of(n):
+            return [int(d) for d in str(n)]
+        digits = digits_of(number)
+        odd_digits = digits[-1::-2]
+        even_digits = digits[-2::-2]
+        checksum = sum(odd_digits)
+        for d in even_digits:
+            checksum += sum(digits_of(d*2))
+        return (10 - (checksum % 10)) % 10
+    
+    #i changed nationalid to personalnumber. since it is a swedish bank you must have one.
+    def set_swedish_personal_number(self):
+        #generate a random date between 1900 and 2020
+        start_date = datetime(1900, 1, 1)
+        end_date = datetime(2020, 12, 31)
+        time_between_dates = end_date - start_date
+        days_between_dates = time_between_dates.days
+        random_number_of_days = random.randrange(days_between_dates)
+        random_date = start_date + relativedelta(days=random_number_of_days)
+
+        #format it to yyyymmdd
+        date_part = random_date.strftime('%Y%m%d')
+
+        #generate three random digits
+        three_digits = random.randint(100,999)
+
+        #combine and calculate the control using luhn
+        temp_number = f"{date_part}{three_digits}"
+        control_digit = self.calculate_luhn(temp_number)
+
+        self.PersonalNumber = f"{date_part}-{three_digits}{control_digit}"
+    
 
 class Account(db.Model):
     __tablename__= "Accounts"
@@ -43,6 +78,12 @@ class Account(db.Model):
      lazy=True)
     CustomerId = db.Column(db.Integer, db.ForeignKey('Customers.Id'), nullable=False)
 
+    # def withdraw(self, amount):
+    #     account = Account.query.get_or_404()
+    #     account.Balance += amount
+    #     db.session.add()
+    #     db.session.commit()
+    #     return f"{amount} has been withdrawn"
 
 class Transaction(db.Model):
     __tablename__= "Transactions"

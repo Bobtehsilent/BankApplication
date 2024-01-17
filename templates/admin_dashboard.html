@@ -3,10 +3,112 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-    {% include 'siderbar.html' %}
-    <!-- Admin specific content -->
-    <div class="admin-dashboard">
-        <!-- dashboard content -->
+    {% include 'admin_sidebar.html' %}
+    <div class="admin-content">
+        <div class="admin-header">
+            <h1>Admin Dashboard</h1>
+        </div>
+        <div class="grid">
+            <div class="grid__item stat-item">
+                <div class="product">
+                    <div class="product__bg"></div>
+                    <div class="tm-nav-link">
+                        <h2>{{ customer_count }}</h2>
+                        <p>Total customers</p>
+                    </div>
+                    <div class="product__description">
+                        <!-- Content that will be shown in the details overlay-->
+                    </div>
+                </div>
+            </div>
+            <div class="grid__item stat-item">
+                <div class="product">
+                    <div class="product__bg"></div>
+                    <div class="tm-nav-link">
+                        <h2>{{ account_count }}</h2>
+                        <p>Total Accounts</p>    
+                    </div>
+                    <div class="product__description">
+                        <!-- Content that will be shown in the details overlay-->
+                    </div>
+                </div>       
+            </div>  
+            <div class="grid__item stat-item">
+                <div class="product">
+                    <div class="product__bg"></div>
+                    <div class="tm-nav-link">
+                        <h2>{{ total_balance }}</h2>
+                        <p>Total Balance</p>
+                    </div>
+                    <div class="product__description">
+                        <!-- Content that will be shown in the details overlay-->
+                    </div>
+                </div>
+            </div>
+            <div class="grid__item country-details" style="display: none;">
+                <div class="product">
+                    <div class="tm-nav-link">
+                        <h2 id="country-name">yes</h2>
+                    </div>
+                    <div class="product__description">
+                        <ul id="country-customers">yes</ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Jvectormap container -->
+            <div class="grid__item map-container">
+                <div class="product">
+                    <div id="europe-map"></div>
+                    <div class="product__description">
+                        <p>hello</p>
+                    <!-- content for map details overlay-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Details overlay structure -->
+        <div class="details">
+            <div class="details__bg details__bg--down">
+                <button class="details__close"><i class="fas fa-2x fa-times icon--cross tm-fa-close"></i></button>
+                <div class="details__description"></div>
+            </div>
+        </div>
     </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script class="text/javascript">
+    $(function(){
+        var customerData = {{ customer_data | tojson }};
+        var countryCustomerData = {{ country_customer_data | tojson }};
+        console.log(customerData)
+        $('#europe-map').vectorMap({
+            map: 'europe_merc',
+            series: {
+                regions: [{
+                    values: customerData,
+                    scale: ['#00ff51', '#005b1d'],
+                    normalizeFunction: 'polynomial'
+                }]
+            },
+            onRegionTipShow: function(e, el, code){
+                el.html(el.html() + ' (Customers - ' + (customerData[code] || 0) + ')');
+            },
+            onRegionClick: function(event, code) {
+                var countryData = countryCustomerData[code] || [];
+                var preparedData = {
+                    countryName: code,
+                    customers: countryData.map(customer => {
+                        return {
+                            name: customer.name,
+                            email: customer.email
+                        };
+                    })
+                };
+                openDetailsWithData(preparedData);
+            }
+        });
+    });
+</script>
 {% endblock %}
