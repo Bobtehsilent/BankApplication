@@ -12,6 +12,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='slick/slick-theme.css') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='jmap/jquery-jvectormap-2.0.5.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script>document.documentElement.className="js";var supportsCssVars=function(){var e,t=document.createElement("style");return t.innerHTML="root: { --tmp-var: bold; }",document.head.appendChild(t),e=!!(window.CSS&&window.CSS.supports&&window.CSS.supports("font-weight","var(--tmp-var)")),t.parentNode.removeChild(t),e};supportsCssVars()||alert("Please view this in a modern browser such as latest version of Chrome or Microsoft Edge.");</script>
     {% block head %}{% endblock %}
 </head>
@@ -29,11 +30,11 @@
             {% block content %}{% endblock %}
         </div>
     </div>
-    <footer>
+    <!-- <footer>
         <p class="small tm-copyright-text">Copyright &copy; <span class="tm-current-year">2020</span> Your Company. 
                 
         Design: <a rel="nofollow" href="https://www.tooplate.com" class="tm-text-highlight">Tooplate</a></p>
-    </footer>
+    </footer> -->
 
     <!-- commmon scripts -->
     <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>

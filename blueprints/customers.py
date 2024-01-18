@@ -4,20 +4,35 @@ from models import Customer, db
 
 customer_bp = Blueprint('customer', __name__, url_prefix='/customers')
 
+
+#list customers
 @customer_bp.route('/customer_list', endpoint='customer_list')
 def customer_list():
-    all_customers = [customer_to_dict(customer) for customer in Customer.query.all()]
     page = request.args.get('page', 1, type=int)
-    per_page = 20
-    paginated_customers = Customer.query.paginate(page=page, per_page=per_page, error_out=False)
+    per_page = 12
+    search_query = request.args.get('search', '')
+    sort_column = request.args.get('sort_column', 'Surname')
+    sort_order = request.args.get('sort_order', 'asc')
 
-    return render_template('customers.html', customers=paginated_customers, all_customers=all_customers)
+    if request.args.get('sort_column') == sort_column:
+        sort_order = 'desc' if sort_order == 'asc' else 'asc'
+    else:
+        sort_order = 'asc'
 
-@customer_bp.route('/customer_detail/<int:id>', methods=['GET'], endpoint='get_customer_details')
-def get_customer(id):
-    customer = customer.query.get_or_404(id)
-    return render_template('customer_detail.html', customer=customer)
+    query = Customer.query
+    if search_query:
+        query = query.filter(Customer.GivenName.contains(search_query) |
+                             Customer.Surname.contains(search_query) |
+                             Customer.EmailAddress.contains(search_query)) #add more later like phone number etc
 
+    paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
+    customers_dict = [customer_to_dict(customer) for customer in paginated_customers.items]
+    return render_template('customers.html', customers=customers_dict, 
+                           paginated=paginated_customers, 
+                           sort_column=sort_column, sort_order=sort_order,
+                           search_query=search_query)
+
+#Important for the customer list page.
 def customer_to_dict(customer):
     return {
         'Id': customer.Id,
@@ -30,6 +45,13 @@ def customer_to_dict(customer):
         # Add other fields as needed
     }
 
+#Get customer details
+@customer_bp.route('/customer_detail/<int:id>', methods=['GET'], endpoint='get_customer_details')
+def get_customer(id):
+    customer = customer.query.get_or_404(id)
+    return render_template('customer_detail.html', customer=customer)
+
+#adding customers
 @customer_bp.route('/add_customer', methods=['POST'])
 def add_customer():
     GivenName = request.form['first_name']
@@ -57,12 +79,7 @@ def add_customer():
 
     return 'customer added successfully'
 
-
-@customer_bp.route('/customers/<int:id>', methods=['GET'])
-def get_customer(id):
-    customer = Customer.query.get_or_404(id)
-    return render_template('customer_detail.html', customer=customer)
-
+# updating customer
 @customer_bp.route('/customers/update/<int:id>', methods=['POST'])
 def update_customer(id):
     customer = Customer.query.get_or_404(id)
@@ -82,6 +99,7 @@ def update_customer(id):
     db.session.commit()
     return 'Customer updated Successfully'
 
+#Deleting a customer
 @customer_bp.route('/customers/delete/<int:id>', methods=['POST'])
 def delete_customer(id):
     customer = Customer.query.get_or_404(id)
@@ -89,6 +107,7 @@ def delete_customer(id):
     db.session.commit()
     return 'Customer deleted successfully'
 
+#Customer count
 @customer_bp.route('/customer_count', methods=['GET'])
 def customer_count():
     pass

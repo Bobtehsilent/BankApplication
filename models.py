@@ -5,6 +5,7 @@ from datetime import datetime
 from datetime import timedelta  
 from werkzeug.security import generate_password_hash, check_password_hash
 from dateutil.relativedelta import relativedelta
+import string
 
 db = SQLAlchemy()
 
@@ -34,6 +35,9 @@ class Customer(db.Model):
     def check_password(self, password):
         return check_password_hash(self.Password, password)
     
+    def generate_password(self, length=6):
+        letters = string.ascii_letters
+        return ''.join(random.choice(letters) for i in range(length))
     #flask_login integration
 
     def is_authenticated(self):
@@ -48,7 +52,7 @@ class Customer(db.Model):
     def get_id(self):
         return str(self.Id)
     
-
+    #LUHN CALCULATION for personalnumbers
     def calculate_luhn(self, number):
         def digits_of(n):
             return [int(d) for d in str(n)]
@@ -62,8 +66,8 @@ class Customer(db.Model):
     
     #i changed nationalid to personalnumber. since it is a swedish bank you must have one.
     def set_swedish_personal_number(self):
-        #generate a random date between 1900 and 2020
-        start_date = datetime(1900, 1, 1)
+        #generate a random date between 1960 and 2020
+        start_date = datetime(1960, 1, 1)
         end_date = datetime(2020, 12, 31)
         time_between_dates = end_date - start_date
         days_between_dates = time_between_dates.days
@@ -82,6 +86,7 @@ class Customer(db.Model):
 
         self.PersonalNumber = f"{date_part}-{three_digits}{control_digit}"
     
+
 
 class Account(db.Model):
     __tablename__= "Accounts"
@@ -121,83 +126,100 @@ class CustomerContact(db.Model):
 
     customer = db.relationship('Customer', backref='contacts', lazy=True)
 
-def seedData(db):
-    antal =  Customer.query.count()
-    while antal < 300:
-        customer = Customer()
+def read_european_countries(file_path):
+    countries = []
+    with open(file_path, 'r') as file:
+        for line in file:
+            _, code, name = line.strip().split('\t')
+            countries.append((code, name))
+        return countries
+
+def seedData(db, european_countries):
+    try:
+        current_count =  Customer.query.count()
+        target_count = 300
         
-        customer.GivenName, customer.Surname = barnum.create_name()
-
-        customer.Streetaddress = barnum.create_street()
-        customer.Zipcode, customer.City, _  = barnum.create_city_state_zip()
-        customer.Country = "USA"
-        customer.CountryCode = "US"
-        customer.Birthday = barnum.create_birthday()
-        n = barnum.create_cc_number()
-        customer.NationalId = customer.Birthday.strftime("%Y%m%d-") + n[1][0][0:4]
-        customer.TelephoneCountryCode = 55
-        customer.Telephone = barnum.create_phone()
-        customer.EmailAddress = barnum.create_email().lower()
-
-        for x in range(random.randint(1,4)):
-            account = Account()
-
-            c = random.randint(0,100)
-            if c < 33:
-                account.AccountType = "Personal"    
-            elif c < 66:
-                account.AccountType = "Checking"    
-            else:
-                account.AccountType = "Savings"    
-
-
-            start = datetime.now() + timedelta(days=-random.randint(1000,10000))
-            account.Created = start
-            account.Balance = 0
+        while current_count < target_count:
+            customer = Customer()
             
-            for n in range(random.randint(0,30)):
-                belopp = random.randint(0,30)*100
-                tran = Transaction()
-                start = start+ timedelta(days=-random.randint(10,100))
-                if start > datetime.now():
-                    break
-                tran.Date = start
-                account.Transactions.append(tran)
-                tran.Amount = belopp
-                if account.Balance - belopp < 0:
-                    tran.Type = "Debit"
+            customer.GivenName, customer.Surname = barnum.create_name()
+            customer.Streetaddress = barnum.create_street()
+            customer.Zipcode, customer.City, _  = barnum.create_city_state_zip()
+            country_code, country_name = random.choice(european_countries)
+            customer.Country = country_name
+            customer.CountryCode = country_code
+            customer.Birthday = barnum.create_birthday()
+            customer.set_swedish_personal_number()
+            customer.Telephone = barnum.create_phone()
+            customer.EmailAddress = barnum.create_email().lower()
+            customer_password = customer.generate_password()
+            customer.set_password(customer_password)
+
+            for x in range(random.randint(1,4)):
+                account = Account()
+
+                c = random.randint(0,100)
+                if c < 33:
+                    account.AccountType = "Personal"    
+                elif c < 66:
+                    account.AccountType = "Checking"    
                 else:
-                    if random.randint(0,100) > 70:
+                    account.AccountType = "Savings"    
+
+
+                start = datetime.now() + timedelta(days=-random.randint(1000,10000))
+                account.Created = start
+                account.Balance = 0
+                
+                for n in range(random.randint(0,30)):
+                    belopp = random.randint(0,30)*100
+                    tran = Transaction()
+                    start = start+ timedelta(days=-random.randint(10,100))
+                    if start > datetime.now():
+                        break
+                    tran.Date = start
+                    account.Transactions.append(tran)
+                    tran.Amount = belopp
+                    if account.Balance - belopp < 0:
                         tran.Type = "Debit"
                     else:
-                        tran.Type = "Credit"
+                        if random.randint(0,100) > 70:
+                            tran.Type = "Debit"
+                        else:
+                            tran.Type = "Credit"
 
-                r = random.randint(0,100)
-                if tran.Type == "Debit":
-                    account.Balance = account.Balance + belopp
-                    if r < 20:
-                        tran.Operation = "Deposit cash"
-                    elif r < 66:
-                        tran.Operation = "Salary"
+                    r = random.randint(0,100)
+                    if tran.Type == "Debit":
+                        account.Balance = account.Balance + belopp
+                        if r < 20:
+                            tran.Operation = "Deposit cash"
+                        elif r < 66:
+                            tran.Operation = "Salary"
+                        else:
+                            tran.Operation = "Transfer"
                     else:
-                        tran.Operation = "Transfer"
-                else:
-                    account.Balance = account.Balance - belopp
-                    if r < 40:
-                        tran.Operation = "ATM withdrawal"
-                    if r < 75:
-                        tran.Operation = "Payment"
-                    elif r < 85:
-                        tran.Operation = "Bank withdrawal"
-                    else:
-                        tran.Operation = "Transfer"
+                        account.Balance = account.Balance - belopp
+                        if r < 40:
+                            tran.Operation = "ATM withdrawal"
+                        if r < 75:
+                            tran.Operation = "Payment"
+                        elif r < 85:
+                            tran.Operation = "Bank withdrawal"
+                        else:
+                            tran.Operation = "Transfer"
 
-                tran.NewBalance = account.Balance
+                    tran.NewBalance = account.Balance
 
 
-            customer.Accounts.append(account)
+                customer.Accounts.append(account)
 
-        db.session.add(customer)
-        db.session.commit()
-        
-        antal = antal + 1
+            db.session.add(customer)
+            if current_count % 20 == 0:
+                print(f"20 records made: current: {current_count}")
+                db.session.commit()
+            current_count += 1
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"an error occurred: {e}")
+    print("Data seeding complete")

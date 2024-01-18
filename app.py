@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from flask_migrate import Migrate, upgrade
 from flask_login import LoginManager
-from models import Customer
+from models import Customer, read_european_countries
 from blueprints.main import main_bp
 from blueprints.contact_form import contact_form_bp
 from blueprints.accounts import account_bp
@@ -43,10 +43,10 @@ def load_user(user_id):
 def handle_exception(e):
     app.logger.error(f"Error: {str(e)}")
     return render_template('error.html'), 500
-
+european_countries = read_european_countries('static/countrycodes/country_codes.txt')
 if __name__  == "__main__":
     with app.app_context():
         upgrade()
         create_initial_users()
-        #seedData(db)
+        seedData(db, european_countries)
     app.run()

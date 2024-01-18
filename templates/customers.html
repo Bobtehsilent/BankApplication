@@ -2,35 +2,48 @@
 
 {% block title %}Customers list{% endblock %}
 {% block content %}
+{% macro sort_link(column, title) %}
+    <a href="{{ url_for('customer.customer_list', sort_column=column, sort_order=sort_order) }}">
+        {{ title }}
+        {% if sort_column == column %}
+            {% if sort_order == 'asc' %}
+                <span class="sort-arrow">&#9650;</span> <!-- Up arrow -->
+            {% else %}
+                <span class="sort-arrow">&#9660;</span> <!-- Down arrow -->
+            {% endif %}
+        {% endif %}
+    </a>
+{% endmacro %}
     {% include 'admin_sidebar.html' %}
     <div class="customer-list">
         <table>
+            <form method="GET" action="{{ url_for('customer.customer_list') }}">
+                <div class="search-bar">
+                    <input type="text" name="search" placeholder="Search customers...">
+                    <button type="submit">Search</button>
+                </div>
+            </form>
             <thead>
                 <tr>
-                    <th>Customer name
-
-                    </th>
-                    <th>Country
-
-                    </th>
-                    <th>Phone number     
-
-                    </th>
-                    <th>Email
-
-                    </th>
-                    <th>Personal number
-
-                    </th>
-                    <th>Additional information
-
+                    <th>{{ sort_link('Surname', 'Customer name') }}</th>
+                    <th>{{ sort_link('Country', 'Country') }}</th>
+                    <th>{{ sort_link('Telephone', 'Phone Number') }}</th>
+                    <th>{{ sort_link('EmailAddress', 'Email') }}</th>
+                    <th>{{ sort_link('PersonalNumber', 'Personal Number') }}</th>
+                    <th>Placeholder, total accountvalue
+                        <!-- <a href="{{ url_for('customer.customer_list', sort_column = 'placeholder', sort_order = 'asc') }}">
+                            <i class='bx bxs-up-arrow'></i>
+                        </a>
+                        <a href="{{ url_for('customer.customer_list', sort_column = 'placeholder', sort_order = 'desc') }}">
+                            <i class="bx bxs-down-arrow"></i> -->
+                        </a>
                     </th>
                 </tr>
             </thead>
             <tbody>
-                {% for customer in all_customers %}
+                {% for customer in customers %}
                 <tr class="customer-row" data-customer='{{ customer | tojson | safe}}'>
-                    <td>{{ customer.GivenName ~ ', ' ~ customer.Surname }}</td>
+                    <td>{{ customer.Surname ~ ', ' ~ customer.GivenName }}</td>
                     <td>{{ customer.Country }}</td>
                     <td>{{ customer.Telephone }}</td>
                     <td>{{ customer.EmailAddress }}</td>
@@ -38,15 +51,40 @@
                     <td>Click</td>
                 </tr>
                 {% endfor %}
-                <!-- pagination links -->
-                {% if customers.has_prev %}
-                    <a href="{{ url_for('customer.customer_list', page=customers.prev_num) }}">Previous</a>
-                {% endif %}
-                {% if customers.has_next %}
-                    <a href="{{ url_for('customer.customer_list', page=customers.next_num) }}">Next</a>
-                {% endif %}
             </tbody>
         </table>
+            <div class="customer-row-pagination">
+                <!-- pagination links -->
+                {% set total_pages = paginated.pages %}
+                {% set current_page = paginated.page %}
+                {% set has_prev = paginated.has_prev %}
+                {% set has_next = paginated.has_next %}
+                {% set prev_num = paginated.prev_num %}
+                {% set next_num = paginated.next_num %}
+                
+                <!-- Pagination page link -->
+
+                {% if has_prev %}
+                    <a href="{{ url_for('customer.customer_list', page=prev_num) }}">&lt;</a>
+                {% endif %}
+
+                <!-- Page numbers -->
+
+                {% for page in range(1, total_pages + 1) %}
+                    {% if page == current_page %}
+                        <span class="active">{{ page }}</span>
+                    {% elif page == 1 or page == total_pages or page == current_page - 1 or page == current_page + 1 %}
+                        <a href="{{ url_for('customer.customer_list', page=page) }}">{{ page }}</a>
+                    {% elif page == current_page - 2 or page == current_page + 2 %}
+                        <span class="dots">...</span>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Next page link -->
+                {% if has_next %}
+                    <a href="{{ url_for('customer.customer_list', page=next_num, search=search_query, sort_column=sort_column, sort_order=sort_order) }}">&gt;</a>
+                {% endif %}
+            </div>
         <div class="customer-details" style="display: none;">
             <div class="details__bg details__bg--down customer-detail-description">
                 <button class="details__close"><i class="fas fa-2x fa-times icon--cross tm-fa-close"></i></button>
