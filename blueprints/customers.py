@@ -14,16 +14,21 @@ def customer_list():
     sort_column = request.args.get('sort_column', 'Surname')
     sort_order = request.args.get('sort_order', 'asc')
 
-    if request.args.get('sort_column') == sort_column:
-        sort_order = 'desc' if sort_order == 'asc' else 'asc'
-    else:
-        sort_order = 'asc'
-
+    if 'page' not in request.args and 'search' not in request.args:
+        if request.args.get('sort_column') == sort_column:
+            sort_order = 'desc' if sort_order == 'asc' else 'asc'
+            
     query = Customer.query
     if search_query:
         query = query.filter(Customer.GivenName.contains(search_query) |
                              Customer.Surname.contains(search_query) |
-                             Customer.EmailAddress.contains(search_query)) #add more later like phone number etc
+                             Customer.EmailAddress.contains(search_query) |
+                             Customer.Country.contains(search_query)) #add more later like phone number etc
+    if sort_order == 'asc':
+        query = query.order_by(getattr(Customer, sort_column).asc())
+    else:
+        query = query.order_by(getattr(Customer, sort_column).desc())
+
 
     paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
     customers_dict = [customer_to_dict(customer) for customer in paginated_customers.items]
@@ -32,7 +37,7 @@ def customer_list():
                            sort_column=sort_column, sort_order=sort_order,
                            search_query=search_query)
 
-#Important for the customer list page.
+#Important for the customer list page. makes the detail page work
 def customer_to_dict(customer):
     return {
         'Id': customer.Id,

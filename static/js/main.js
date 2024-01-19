@@ -198,7 +198,7 @@
 			content += `<p>Country: ${customerData.Country}</p>`;
 			// Add other fields as needed
 			this.DOM.description.innerHTML = content;
-			this.DOM.details.classList.add('customer-details-box');
+			this.DOM.details.classList.add('table-details-box');
 		}
 	}; // class Details
 
@@ -251,11 +251,36 @@
 				DOM.details.open();
 			});
 			this.DOM.el.addEventListener('click', () => {
-				document.querySelectorAll('.customer-row').forEach(row => row.classList.remove('active'));
+				document.querySelectorAll('.table-row').forEach(row => row.classList.remove('active'));
 				this.DOM.el.classList.add('active');
 			});
 		}
-	};
+	}; //Customer item class
+
+	class AdminItem {
+		constructor(el) {
+			this.DOM = { el: el};
+			this.DOM.product = this.DOM.el.querySelector('.product');
+			this.DOM.productBg = this.DOM.product.querySelector('.product__bg');
+
+			this.info = {
+				description: this.DOM.product.querySelector('.product__description').innerHTML
+			};
+
+			this.initEvents();
+		}
+		initEvents() {
+			this.DOM.product.addEventListener('click', () => this.open());
+		}
+		open() {
+			if (this.DOM.productBg) {
+				DOM.details.fill(this.info);
+				DOM.details.open({
+					productBg: this.DOM.productBg
+				});
+			}
+		}
+	}
 
 	const DOM = {};
 
@@ -268,8 +293,15 @@
 		DOM.details = new Details();
 	}
 
-	if (document.querySelector('.customer-list')) {
-		DOM.customerRows = document.querySelectorAll('.customer-row');
+	DOM.adminItems = document.querySelectorAll('.admin-stat-item');
+    if (DOM.adminItems.length) {
+        let adminItems = [];
+        DOM.adminItems.forEach(item => adminItems.push(new AdminItem(item)));
+        DOM.details = new Details();
+    }
+
+	if (document.querySelector('.table-list')) {
+		DOM.customerRows = document.querySelectorAll('.table-row');
 		DOM.customerRows.forEach(row => new CustomerItem(row));
 		DOM.details = new Details();
 	}
@@ -290,6 +322,16 @@
 $("#menu-toggle").click(function(e) {
     e.preventDefault();
     $("#wrapper").toggleClass("toggled");
+});
+
+function clearSearch() {
+	document.querySelector('input[name="search"]').value = '';
+	document.querySelector('form').submit();
+}
+
+document.getElementById('sidebarToggle').addEventListener('click', function() {
+    var sidebar = document.getElementById('sidebar-wrapper');
+    sidebar.classList.toggle('collapsed');
 });
 
 // $(window).resize(function() {
