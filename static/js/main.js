@@ -112,7 +112,7 @@
 
 			anime({
                 targets: this.DOM.close,
-                duration: 250,
+                duration: 100,
                 easing: 'easeOutSine',
                 translateY: '100%',
                 opacity: 0
@@ -128,7 +128,7 @@
             const rect = this.getProductDetailsRect();
             anime({
                 targets: [this.DOM.bgDown],
-                duration: 250,
+                duration: 100,
                 easing: 'easeOutSine',                
                 translateX: (target, index) => {
                     return index ? rect.productImgRect.left-rect.detailsImgRect.left : rect.productBgRect.left-rect.detailsBgRect.left;
@@ -193,12 +193,56 @@
 		}
 		fillCustomerData(customerData) {
 			console.log(customerData); // Check what data is received
-			let content = `<h2>${customerData.GivenName} ${customerData.Surname}</h2>`;
-			content += `<p>Email: ${customerData.EmailAddress}</p>`;
-			content += `<p>Country: ${customerData.Country}</p>`;
+			let content =  `<div class="customer-details-container">`
+
+			//column 1
+			content += `<div class="customer-info">
+							<h2>${customerData.GivenName} ${customerData.Surname}</h2>
+							<p>Birthday:\n ${customerData.Birthday}</p>
+							<p>Personal Number:\n ${customerData.PersonalNumber}</p>
+							<p>Address: ${customerData.Streetaddress}</p>
+							<p>Zipcode:\n ${customerData.Zipcode}, City: ${customerData.City}</p>
+							<p>Country:\n ${customerData.Country}</p>
+							<p>Phone Number:\n ${customerData.Telephone}</p>
+							<p>Email:\n ${customerData.EmailAddress}</p>
+						</div>`;
+
+			content += `<div class="customer-accounts">
+						<h3>Accounts</h3>`;
+			if (customerData.Accounts) {
+				var i = 1;
+				customerData.Accounts.forEach(account => {
+					content += `<p>${account.AccountType} ${i}: ${account.Balance}</p>`;
+					i++
+				});
+			} else {
+				content += `<div class="customer-accounts">
+								<p>No accounts found</p>`;
+			}
+			content += `<p class="total-balance">Total Balance: ${customerData.total_balance}</p>
+						</div>`;
+
+				content += `<div class="customer-transactions">
+                    <canvas id="balanceGraph"></canvas>
+                    <div>
+                        <!-- Buttons to toggle account types in the graph -->
+                        <button onclick="toggleAccountType('savings')">Savings</button>
+                        <button onclick="toggleAccountType('checking')">Checking</button>
+                        <!-- Add more buttons as needed -->
+                    </div>
+                </div>`;
+
+    		content += `</div>`; // Closing the container div
+
 			// Add other fields as needed
 			this.DOM.description.innerHTML = content;
 			this.DOM.details.classList.add('table-details-box');
+
+			fetch(`/graph_transactions/${customerData.Id}`)
+				.then(response => response.json())
+				.then(transactionData => {
+					renderGraph(transactionData);
+			});
 		}
 	}; // class Details
 
@@ -324,15 +368,100 @@ $("#menu-toggle").click(function(e) {
     $("#wrapper").toggleClass("toggled");
 });
 
+//function for clear button on searches
 function clearSearch() {
 	document.querySelector('input[name="search"]').value = '';
 	document.querySelector('form').submit();
 }
 
-document.getElementById('sidebarToggle').addEventListener('click', function() {
-    var sidebar = document.getElementById('sidebar-wrapper');
-    sidebar.classList.toggle('collapsed');
+// function managing closing and opening the side dashboards
+
+document.addEventListener("DOMContentLoaded", function() {
+    const sidebarWrapper = document.getElementById('sidebar-wrapper');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+
+    // Function to set sidebar state
+    function setSidebarState(collapsed) {
+        if (collapsed) {
+            sidebarWrapper.classList.add('collapsed');
+        } else {
+            sidebarWrapper.classList.remove('collapsed');
+        }
+        localStorage.setItem('sidebarCollapsed', collapsed);
+    }
+
+    // Function to toggle sidebar state
+    function toggleSidebar() {
+        const isCollapsed = sidebarWrapper.classList.contains('collapsed');
+        setSidebarState(!isCollapsed);
+    }
+
+    // Set initial state of sidebar from localStorage
+    const sidebarShouldBeCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    setSidebarState(sidebarShouldBeCollapsed);
+
+    // Toggle sidebar on button click
+    sidebarToggle.addEventListener('click', toggleSidebar);
 });
+
+function openGraph(customerId) {
+    // Fetch data
+    fetch(`/graph_transactions/${customerId}?account_types=savings&account_types=checking`)
+        .then(response => response.json())
+        .then(data => {
+            // Process data and render graph
+            renderGraph(data);
+        });
+}
+
+function renderGraph(data) {
+    // Example data processing (modify according to your data structure)
+    const labels = data.map(item => item.date); // Array of dates
+    const dataPoints = data.map(item => item.balance); // Array of balances
+
+    const ctx = document.getElementById('balanceGraph').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Account Balance',
+                data: dataPoints,
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Show the graph container
+    document.getElementById('graph-container').style.display = 'block';
+}
+
+function toggleAccountType(accountType) {
+    // Get all transaction elements
+    const transactionElements = document.querySelectorAll('.transaction');
+
+    // Loop through each transaction element
+    transactionElements.forEach(transactionEl => {
+        // Check if the transaction belongs to the specified account type
+        if (transactionEl.dataset.accountType === accountType) {
+            // Toggle visibility
+            if (transactionEl.style.display === 'none') {
+                transactionEl.style.display = '';
+            } else {
+                transactionEl.style.display = 'none';
+            }
+        }
+    });
+}
 
 // $(window).resize(function() {
 //     var map = $('#europe-map').vectorMap('get', 'mapObject');

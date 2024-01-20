@@ -1,15 +1,18 @@
 from flask import Blueprint, request, render_template
+from flask_login import login_required
 from sqlalchemy import func
 from datetime import datetime
 from models import Account, db, Customer
+from .customers import database_to_dict
 
 account_bp = Blueprint('account', __name__)
 
 
 @account_bp.route('/account_list', endpoint='account_list')
+@login_required
 def account_list():
     page = request.args.get('page', 1, type=int)
-    per_page = 8
+    per_page = 10
     search_query = request.args.get('search', '')
     sort_column = request.args.get('sort_column', 'Surname')
     sort_order = request.args.get('sort_order', 'asc')
@@ -31,24 +34,9 @@ def account_list():
         query = query.order_by(getattr(Customer, sort_column).desc())
 
     paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
-    customer_account_data = []
-
-    for customer in paginated_customers.items:
-        accounts = Account.query.filter_by(CustomerId=customer.Id).all()
-        account_info = {
-            'Id': customer.Id,
-            'GivenName': customer.GivenName,
-            'Surname': customer.Surname,
-            'Country': customer.Country,
-            'Telephone': customer.Telephone,
-            'EmailAddress': customer.EmailAddress,
-            'PersonalNumber': customer.PersonalNumber,
-            'accounts': [{'type': acc.AccountType, 'balance': acc.Balance} for acc in accounts],
-            'total_balance': sum(acc.Balance for acc in accounts)
-        }
-        customer_account_data.append(account_info)
+    customer_account_data = database_to_dict(paginated_customers.items)
+    print(customer_account_data)
     
-
     return render_template('accounts.html', customer_account_data=customer_account_data,
                            paginated=paginated_customers, search_query=search_query,
                            sort_column=sort_column, sort_order=sort_order)

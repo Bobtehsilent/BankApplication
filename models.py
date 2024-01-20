@@ -98,12 +98,7 @@ class Account(db.Model):
      lazy=True)
     CustomerId = db.Column(db.Integer, db.ForeignKey('Customers.Id'), nullable=False)
 
-    # def withdraw(self, amount):
-    #     account = Account.query.get_or_404()
-    #     account.Balance += amount
-    #     db.session.add()
-    #     db.session.commit()
-    #     return f"{amount} has been withdrawn"
+
 
 class Transaction(db.Model):
     __tablename__= "Transactions"

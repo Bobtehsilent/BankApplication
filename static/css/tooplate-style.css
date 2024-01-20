@@ -51,9 +51,9 @@ h1 {
 
 #tm-wrap {
   display: flex;
-  align-items: center;
-  height: 100%;
+  align-items: stretch;
   min-height: 100vh;
+  height: 100vh;
 }
 
 p {
@@ -398,8 +398,10 @@ p:last-child {
   }
 }
 
-@media (max-width: 544px) {
+@media (max-width: 768px) {
   .tm-main-content {
+    display: block;
+    position: relative;
     flex-direction: column;
   }
   .details__bg {
@@ -453,15 +455,32 @@ p:last-child {
   display: none;
   font-size: 1.5rem;
 } */
-
-.navigation {
+.my-main-content {
+  display: flex;
+  align-items: stretch;
   min-height: 100vh;
+  height: 100vh;
+}
+
+.sidebar-flex {
+  height: 100%;
+  width: 240px;
+}
+.navigation {
   width: 15rem;
   background-color: #343a40;
-  transition: width 0.25s ease-out;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  border: 2px solid #666;
+  position: relative;
+  top: 0;
+
+
+}
+
+.navigation.collapsed {
+  width: 4rem;
 }
 
 .navigation .sidebar-heading {
@@ -472,53 +491,47 @@ p:last-child {
 .nav-link-group{
   width: 100%;
 }
+
+.nav-section {
+  padding: 10px 0;
+}
+
+.nav-section-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+  padding-left: 1rem;
+}
+
+.nav-section-title i {
+  margin-right: 5px;
+}
+
+.nav-section-divider {
+  border: 0;
+  height: 1px;
+  background-color: #666;
+  margin-bottom: 10px;
+}
+
 .nav-link {
   display: flex;
   align-items: center;
   text-decoration: none;
   color: var(--c-text-tertiary);
   padding: 0.5rem 1rem;
-  transition: transform 0.25 ease, color 0.25s ease;
+  /* transition: transform 0.25 ease, color 0.25s ease; */
   border-left: 3px solid transparent;
   width: 100%;
 }
 
 .nav-link i {
   margin-right: 0.75rem;
-  font-size: 1.25em;
 }
-
-.nav-link:hover, .nav-link:focus, .nav-link.active {
-  background-color: #666;
-  color: var(--c-text-primary);
+.navigation.collapsed .nav-section-title span {
+  display: none;
 }
-
-#page-content-wrapper {
-  width: 100%;
-  padding-top: 20px;
-}
-
-@media (max-width: 768px) {
-  .navigation {
-    width: 4rem;
-  }
-
-  .nav-link {
-    justify-content: center;
-    padding: 0.5rem;
-  }
-  .nav-link i {
-    margin-right: 0;
-  }
-  .nav-link span {
-    display: none;
-  }
-}
-
-.navigation.collapsed {
-  width: 4rem;
-}
-
 .navigation.collapsed .nav-link {
   justify-content: center;
 }
@@ -535,6 +548,96 @@ p:last-child {
   margin-right: 0;
 }
 
+.nav-link:hover, .nav-link:focus, .nav-link.active {
+  background-color: #666;
+  border-color: 0;
+  color: var(--c-text-primary);
+}
+
+#page-content-wrapper {
+  padding-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .sidebar-flex {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+  }
+  .navigation {
+    min-height: auto;
+    width: 100%; /* Full width */
+    height: 60px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    border-bottom: 1px solid #666;
+  }
+
+  .nav-link-group {
+    display: flex;
+    width: auto;
+  }
+
+  .nav-link {
+    justify-content: center;
+    padding: 0.5rem;
+    flex-grow: 1;
+    text-align: center;
+  }
+
+  .nav-link i {
+    margin-right: 0;
+  }
+
+  .nav-link span {
+    display: none;
+  }
+
+  #page-content-wrapper {
+    margin-top: 60px;
+  }
+
+  .sidebar-heading {
+    display: none;
+  }
+
+  .navigation.collapsed {
+    width: 100%;
+  }
+
+  .navigation.collapsed .nav-link {
+    justify-content: center;
+  }
+
+  .navigation.collapsed .nav-link span {
+    display: inline;
+  }
+}
+
+/* sidebar collapsed */
+
+@media (max-width: 768px) {
+  .sidebar-collapsed .navigation {
+    width: 4px;
+  }
+  .sidebar-collapsed .nav-link {
+    justify-content: center;
+    padding: 0.5rem;
+  }
+  .sidebar-collapsed .nav-link i {
+    margin-right: 0;
+  }
+  .sidebar-collapsed .nav-link span {
+    display: none;
+  }
+  .sidebar-collapsed .navigation .sidebar-heading button span {
+    display: none;
+  }
+  .sidebar-collapsed .navigation .sidebar-heading button i {
+    margin-right: 0;
+  }
+}
 
 
 /* Admin Dashboard Stats */
@@ -577,6 +680,11 @@ p:last-child {
 }
 
 @media (max-width: 768px) {
+  .admin-nav-link {
+    border: transparent;
+    border-top: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+  }
   .admin-stat-item {
     min-width: 100%;
     margin: 10px 0;
@@ -616,12 +724,15 @@ table {
   border-collapse: collapse;
   font-size: 16px;
 }
-
+thead {
+  border: 2px solid #666;
+  border-left: none;
+}
 th {
   background-color: #343a40;
   color: #ffffff;
   text-align: left;
-  padding: 15px;
+  padding: 8px;
   border-bottom: solid 2px #d8d8d8;
 }
 
@@ -631,7 +742,7 @@ th a {
 
 
 td {
-  padding: 15px;
+  padding: 5px;
   text-align: left;
   border: solid 1px #d8d8d8;
   white-space: nowrap;
@@ -643,14 +754,24 @@ td {
 }
 
 .inner-table td {
-  width: calc(33.333%);
-  border-right: 1px solid #ddd;
-
+  width: 33%;
+  border: none;
+  padding: 5px;
+  text-align: center;
 }
 
+
+.account-type-separator td {
+  border-right: 1px solid #ddd;
+  padding: 0; 
+}
+
+.inner-table tr.account-type-separator:first-child td {
+  border-top: none;
+}
 /* .inner-table tr:last-child td {
   border-bottom: 1px solid #ddd;
-} */
+}  */
 
 tbody tr {
   transition: background-color 150ms ease-out;
@@ -666,8 +787,8 @@ tbody tr {
 
 .search-bar {
   display: flex;
+  padding: 5px;
   align-items: center;
-  margin-bottom: 5px;
 }
 
 .search-bar input[type="text"] {
@@ -676,7 +797,7 @@ tbody tr {
   background-color: #555;
   border: none;
   border-radius: 4px;
-  flex-grow: 0.5;
+  flex-grow: 1;
 }
 
 .search-bar button {
@@ -695,7 +816,6 @@ tbody tr {
 
 /* Pagination Styles */
 .table-row-pagination {
-  background-color: #343a40;
   display: flex;
   justify-content: center;
   padding: 10px;
@@ -706,8 +826,9 @@ tbody tr {
   padding: 4px 8px;
   margin: 0 5px;
   border-radius: 4px;
-  background-color: #000;
+  background-color: #343a40;
   text-decoration: none;
+  
 }
 
 .table-row-pagination a:hover {
@@ -723,7 +844,7 @@ tbody tr {
 }
 .table-row-pagination span.dots {
   color: white;
-  background-color: #000;
+  background-color: #343a40;
   padding: 4px 8px;
   margin: 0 5px;
   border-radius: 4px;
@@ -749,10 +870,10 @@ tbody tr {
   display: none;
 }
 
-.active {
+/* .active {
   border-color: #fff;
   color: white;
-}
+} */
 
 /* customer detail css */
 
@@ -765,20 +886,39 @@ tbody tr {
   background: gray;
 }
 
+.customer-details-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.customer-info, .customer-accounts, .customer-transactions {
+  flex: 1;
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid #ddd; /* Optional */
+}
+.customer-accounts .total-balance {
+  border: 1px solid #ddd;
+  padding: 5px;
+}
+/* Adjust the width if necessary */
+.customer-details-container > div {
+  width: 40% 20% 40%;
+}
+
 .details.table-details-box {
-  background-color: #fff;
   color: #ecf0f1;
   border-radius: 8px;
   padding: 2px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-  max-width: 600px;
   margin: 20px auto;
 } 
 
 .table-details-box {
 /* more if required */
 }
-
+.details.table-details-box .details__bg {
+  max-width: 1100px;
+}
 .details.table-details-box .details__bg--down {
   background-color: #000;
 }
@@ -799,7 +939,7 @@ tbody tr {
 
 .table-details-box p {
   margin-bottom: 15px; /* Adds space below each paragraph */
-  border-bottom: 1px solid #7f8c8d; /* Optional: adds a line below each paragraph */
+  /* border: 1px solid #7f8c8d; Optional: adds a line below each paragraph */
 }
 
 .table-details-box h2, .table-details-box h3 {

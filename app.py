@@ -33,7 +33,7 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(login_bp)
 
-login_manager.login_view = 'login.login'
+login_manager.login_view = 'main.homepage'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -43,6 +43,7 @@ def load_user(user_id):
 def handle_exception(e):
     app.logger.error(f"Error: {str(e)}")
     return render_template('error.html'), 500
+
 european_countries = read_european_countries('static/countrycodes/country_codes.txt')
 if __name__  == "__main__":
     with app.app_context():

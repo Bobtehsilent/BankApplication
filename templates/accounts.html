@@ -40,12 +40,12 @@
                             <td>{{ customer_account.Surname ~ ', ' ~ customer_account.GivenName }}</td>
                             <td colspan="3">
                                 <table class="inner-table">
-                                    {% for account in customer_account.accounts %}
+                                    {% for account_type, account_info in customer_account.GroupedAccounts.items() %}
                                         <tr>
-                                            <td>{{ account.type }}</td>
-                                            <td>{{ account.balance }} SEK</td>
+                                            <td>{{ account_type }} {% if account_info.count > 1 %} x {{ account_info.count }}{% endif %}</td>
+                                            <td>{{ account_info.total_balance }} SEK</td>
                                             {% if loop.first %}
-                                                <td rowspan="{{ customer_account.accounts|length }}">{{ customer_account.total_balance }} SEK</td>
+                                                <td rowspan="{{ customer_account.GroupedAccounts|length }}">{{ customer_account.total_balance }} SEK</td>
                                             {% endif %}
                                         </tr>
                                     {% endfor %}
