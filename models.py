@@ -3,6 +3,7 @@ import barnum
 import random
 from datetime import datetime  
 from datetime import timedelta  
+from flask_login import current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from dateutil.relativedelta import relativedelta
 import string
@@ -21,36 +22,12 @@ class Customer(db.Model):
     CountryCode = db.Column(db.String(2), unique=False)
     Birthday = db.Column(db.DateTime, unique=False)
     PersonalNumber = db.Column(db.String(20), unique=False, nullable=False)
+    TelephoneCountryCode = db.Column(db.String(20))
     Telephone = db.Column(db.String(20), unique=False)
     EmailAddress = db.Column(db.String(50), unique=False, nullable=False)
-    Password = db.Column(db.String(255))
-    Role = db.Column(db.String(10), default='Customer')
     Accounts = db.relationship('Account', backref='Customer',
      lazy=True)
     
-    #creating and checking passwords
-    def set_password(self, password):
-        self.Password = generate_password_hash(password)
-    
-    def check_password(self, password):
-        return check_password_hash(self.Password, password)
-    
-    def generate_password(self, length=6):
-        letters = string.ascii_letters
-        return ''.join(random.choice(letters) for i in range(length))
-    #flask_login integration
-
-    def is_authenticated(self):
-        return True
-    
-    def is_active(self):
-        return True
-    
-    def is_anonymous(self):
-        return False
-    
-    def get_id(self):
-        return str(self.Id)
     
     #LUHN CALCULATION for personalnumbers
     def calculate_luhn(self, number):
@@ -99,7 +76,6 @@ class Account(db.Model):
     CustomerId = db.Column(db.Integer, db.ForeignKey('Customers.Id'), nullable=False)
 
 
-
 class Transaction(db.Model):
     __tablename__= "Transactions"
     Id = db.Column(db.Integer, primary_key=True)
@@ -109,6 +85,52 @@ class Transaction(db.Model):
     Amount = db.Column(db.Integer, unique=False, nullable=False)
     NewBalance = db.Column(db.Integer, unique=False, nullable=False)
     AccountId = db.Column(db.Integer, db.ForeignKey('Accounts.Id'), nullable=False)
+
+class User(db.Model):
+    __tablename__= "User"
+    Id = db.Column(db.Integer, primary_key=True)
+    Username = db.Column(db.String(50))
+    Password = db.Column(db.String(255))
+    CompanyEmail = db.Column(db.String(50))
+    FirstName = db.Column(db.String(50))
+    LastName = db.Column(db.String(50))
+    Role = db.Column(db.String(50), default='Cashier') #admin or cashier
+    # Permissions
+    InformationPermission = db.Column(db.Boolean, default=True)
+    ManagementPermission = db.Column(db.Boolean, default=False)
+    #to be added later i guess
+    PlaceholderPermission = db.Column(db.Boolean, default=False)
+
+
+    def is_admin():
+        return current_user.is_authenticated and current_user.Role == 'Admin'
+    
+    def is_cashier():
+        return current_user.is_authenticated and current_user.Role == 'Cashier'
+
+    #creating and checking passwords
+    def set_password(self, password):
+        self.Password = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self.Password, password)
+    
+    def generate_password(self, length=6):
+        letters = string.ascii_letters
+        return ''.join(random.choice(letters) for i in range(length))
+    #flask_login integration
+
+    def is_authenticated(self):
+        return True
+    
+    def is_active(self):
+        return True
+    
+    def is_anonymous(self):
+        return False
+    
+    def get_id(self):
+        return str(self.Id)
 
 class CustomerContact(db.Model):
     __tablename__= "CustomerContact"
@@ -147,8 +169,6 @@ def seedData(db, european_countries):
             customer.set_swedish_personal_number()
             customer.Telephone = barnum.create_phone()
             customer.EmailAddress = barnum.create_email().lower()
-            customer_password = customer.generate_password()
-            customer.set_password(customer_password)
 
             for x in range(random.randint(1,4)):
                 account = Account()

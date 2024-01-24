@@ -4,10 +4,10 @@ from sqlalchemy.sql import func
 from models import Customer, Account, db
 
 
-admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+interface_bp = Blueprint('user_interface', __name__, url_prefix='/user')
 
 
-@admin_bp.route('/dashboard')
+@interface_bp.route('/interface')
 @login_required
 def dashboard():
     customer_count = Customer.query.count()
@@ -24,7 +24,7 @@ def dashboard():
         country_customer_data[country_code] = customer_list
     all_customers = Customer.query.all()
 
-    return render_template('admin_dashboard.html', 
+    return render_template('user_interface.html', 
                            customer_data=customer_data, 
                            country_customer_data=country_customer_data, 
                            customer_count=customer_count, 
@@ -32,7 +32,7 @@ def dashboard():
                            total_balance=total_balance,
                            all_customers=all_customers)
 
-@admin_bp.route('/get-customers-for-country')
+@interface_bp.route('/get-customers-for-country')
 def get_customers_for_country():
     country_code = request.args.get('country_code')
     try:

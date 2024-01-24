@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from models import Customer, db
+from models import Customer, db, User
 from flask_login import login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -10,23 +10,23 @@ login_bp = Blueprint('login', __name__)
 #route for logging in
 @login_bp.route('/login', methods=['POST'])
 def login():
-    #login form
-    username = request.form['username']
-    password = request.form['password']
-    print(username)
-    print(password)
-    user = Customer.query.filter_by(EmailAddress=username).first()
-    #check if the user is admin or customer
-    if user and user.check_password(password):
-        login_user(user)
-
-        if user.Role == 'Admin':
-            #opens the admin page
-            return redirect(url_for('admin.dashboard'))
+    try:
+        #login form
+        username = request.form['username']
+        password = request.form['password']
+        print(password)
+        user = User.query.filter_by(Username=username).first()
+        print(user.Username)
+        print(user.Password)
+        #check if the user is admin or customer
+        if user and user.check_password(password):
+            login_user(user)
+            print('logging in!')
+            return redirect(url_for('user_interface.dashboard'))
         else:
-            #opens the customer page
-            return redirect(url_for('user.dashboard'))
-    else:
+            flash("Login failure, try again")
+            return redirect(url_for('main.homepage'))
+    except:
         flash("Login failure, try again")
         return redirect(url_for('main.homepage'))
     
@@ -35,49 +35,47 @@ def logout():
     logout_user()
     return redirect(url_for('main.homepage'))
 
-#check if there is any customers/admins for testwork        
+#check/create if there is any cashier/admin   
 def create_initial_users():
-    #Check if there is atleast one admin
-    if not Customer.query.filter_by(Role='Admin').first():
-        admin = Customer(
-            GivenName= 'Sebastian',
-            Surname = 'Admin',
-            Streetaddress = 'Slottsgatan 21',
-            City = 'Västerås',
-            Zipcode = '14123',
-            Country = 'Sweden',
-            CountryCode = 'SE',
-            Birthday = '1990-01-01',
-            Telephone = '0739025151',
-            EmailAddress = 'sebastian@admin.com'          
+    #Check if there is atleast one cashier
+    if not User.query.filter_by(Role='Cashier').first():
+        cashier = User(
+            Username = 'cashiertest'  ,
+            Password = 'password',
+            FirstName = 'Keso',
+            LastName = 'Oboy',
+            Role = 'Cashier',
+            CompanyEmail = 'keso.oboy@test.com',
+            InformationPermission = True,
+            ManagementPermission = True,
+            #to be added later i guess
+            PlaceholderPermission = False
         )
-        admin.set_password('password')
-        admin.set_swedish_personal_number()
-        admin.Role = 'Admin'
-        db.session.add(admin)
+        cashier.set_password('password')
+        db.session.add(cashier)
 
-        print("initial admin account added")
+        print("initial Cashier account added")
 
     #check if there is atleast one customer
-    if not Customer.query.filter_by(Role='Customer').first():
-        customer = Customer(
-            GivenName = 'Sebastian',
-            Surname = 'Customer',
-            Streetaddress = 'Slottsgatan 21',
-            City = 'Västerås',
-            Zipcode = '14123',
-            Country = 'Sverige',
-            CountryCode = 'SE',
-            Birthday = '1990-10-21',
-            Telephone = '072-232133',
-            EmailAddress = 'Sebastian@customer.com'
+    if not User.query.filter_by(Role='Admin').first():
+        admin = User(
+            Username = 'admintest',
+            Password = 'password',
+            FirstName = 'Joakim',
+            LastName = 'Norborg',
+            Role = 'Admin',
+            CompanyEmail = 'joakim.norborg@test.com',
+            # Permissions
+            InformationPermission = True,
+            ManagementPermission = True,
+            #to be added later i guess
+            PlaceholderPermission = True
         )
         #using functions to hash password and generate a personal number
-        customer.set_password('password')
-        customer.set_swedish_personal_number()
-        db.session.add(customer)
-        print("initial customer account added")
+        admin.set_password('password')
+        db.session.add(admin)
+        print("initial Admin account created")
     
     db.session.commit()
-    print("both initial accounts created.")
+    print("Initial users found. Starting application")
         

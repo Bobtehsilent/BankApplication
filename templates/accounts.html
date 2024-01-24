@@ -2,7 +2,7 @@
 
 {% block title %}Account list{% endblock %}
 {% block content %}
-{% include 'admin_sidebar.html' %}
+{% include 'interface_sidebar.html' %}
     {% macro sort_link(column, title) %}
         {% set new_sort_order = 'asc' if sort_order == 'desc' and sort_column == column else 'desc' %}
         <a href="{{ url_for('account.account_list', page=1, sort_column=column, sort_order=new_sort_order, search=search_query) }}">
@@ -38,19 +38,17 @@
                     {% for customer_account in customer_account_data %}
                         <tr class="table-row" data-customer='{{ customer_account | tojson | safe }}'>
                             <td>{{ customer_account.Surname ~ ', ' ~ customer_account.GivenName }}</td>
-                            <td colspan="3">
+                            <td colspan="2">
                                 <table class="inner-table">
                                     {% for account_type, account_info in customer_account.GroupedAccounts.items() %}
                                         <tr>
                                             <td>{{ account_type }} {% if account_info.count > 1 %} x {{ account_info.count }}{% endif %}</td>
                                             <td>{{ account_info.total_balance }} SEK</td>
-                                            {% if loop.first %}
-                                                <td rowspan="{{ customer_account.GroupedAccounts|length }}">{{ customer_account.total_balance }} SEK</td>
-                                            {% endif %}
                                         </tr>
                                     {% endfor %}
                                 </table>
                             </td>
+                            <td>{{ customer_account.total_balance }} SEK</td>
                         </tr>
                     {% endfor %}
                 {% else %}

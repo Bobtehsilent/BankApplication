@@ -24,7 +24,7 @@
                 <div class="flash-message">{{ message }}</div>
             {% endfor %}
         {% endif %}
-    {% endwith %}
+    {% endwith %}     
     <div id="tm-bg"></div>
     <div id="tm-wrap">
         <div class="tm-main-content">
@@ -79,7 +79,8 @@
                 $('.flash-message').slideDown(300).delay(3000).slideUp(300);
             }
         });
-    </script>   
+    </script>
+
     {% block scripts %}{% endblock %}
 </body>
 </html>

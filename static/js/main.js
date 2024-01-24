@@ -39,8 +39,8 @@
 			this.DOM.description.innerHTML = info.description;
 		}		
 		getProductDetailsRect(){
-			var p = 0;
-			var d = 0;
+			let p = 0;
+			let d = 0;
 
 			try {
 				p = this.DOM.productBg.getBoundingClientRect();
@@ -85,9 +85,9 @@
             // animate content
             anime({
                 targets: [this.DOM.description],
-                duration: 1000,
+                duration: 250,
                 easing: 'easeOutExpo',                
-                translateY: ['100%',0],
+                // translateY: ['100%',0],
                 opacity: 1
             });
 
@@ -156,7 +156,7 @@
 		// Slick Carousel
         setCarousel() {
           
-	        var slider = $('.details .tm-img-slider');
+	        let slider = $('.details .tm-img-slider');
 
 	        if(slider.length) { // check if slider exist
 
@@ -210,7 +210,7 @@
 			content += `<div class="customer-accounts">
 						<h3>Accounts</h3>`;
 			if (customerData.Accounts) {
-				var i = 1;
+				let i = 1;
 				customerData.Accounts.forEach(account => {
 					content += `<p>${account.AccountType} ${i}: ${account.Balance}</p>`;
 					i++
@@ -379,13 +379,16 @@ function clearSearch() {
 document.addEventListener("DOMContentLoaded", function() {
     const sidebarWrapper = document.getElementById('sidebar-wrapper');
     const sidebarToggle = document.getElementById('sidebarToggle');
+    const pageContentWrapper = document.getElementById('page-content-wrapper');
 
     // Function to set sidebar state
     function setSidebarState(collapsed) {
         if (collapsed) {
             sidebarWrapper.classList.add('collapsed');
+            pageContentWrapper.classList.remove('expanded'); // Remove expanded class when collapsed
         } else {
             sidebarWrapper.classList.remove('collapsed');
+            pageContentWrapper.classList.add('expanded'); // Add expanded class when not collapsed
         }
         localStorage.setItem('sidebarCollapsed', collapsed);
     }
@@ -403,6 +406,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Toggle sidebar on button click
     sidebarToggle.addEventListener('click', toggleSidebar);
 });
+
 
 function openGraph(customerId) {
     // Fetch data
@@ -463,8 +467,21 @@ function toggleAccountType(accountType) {
     });
 }
 
+document.getElementById('navToggle').addEventListener('click', function() {
+    var linksContainer = document.querySelector('.tm-nav-table-container');
+    var mainContent = document.querySelector('.tm-main-content');
+    linksContainer.classList.toggle('active');
+
+    if (linksContainer.classList.contains('active')) {
+        mainContent.style.marginTop = (linksContainer.offsetHeight + 60) + 'px';
+    } else {
+        mainContent.style.marginTop = '60px';
+    }
+});
+
+
 // $(window).resize(function() {
-//     var map = $('#europe-map').vectorMap('get', 'mapObject');
+//     let map = $('#europe-map').vectorMap('get', 'mapObject');
 //     map.updateSize();
 // });
 

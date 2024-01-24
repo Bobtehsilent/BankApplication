@@ -9,7 +9,7 @@ customer_bp = Blueprint('customer', __name__, url_prefix='/customers')
 
 
 #list customers
-@customer_bp.route('/customer_list', endpoint='customer_list')
+@customer_bp.route('/customer_list>', endpoint='customer_list')
 @login_required
 def customer_list():
     page = request.args.get('page', 1, type=int)
