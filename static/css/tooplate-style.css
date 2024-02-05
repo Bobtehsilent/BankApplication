@@ -556,18 +556,6 @@ p:last-child {
   padding: 5px;
 }
 
-.nav-section-title {
-  display: flex;
-  align-items: center;
-  font-size: 1.2rem;
-  margin-bottom: 5px;
-  padding-left: 1rem;
-}
-
-.nav-section-title i {
-  margin-right: 5px;
-}
-
 .nav-section-divider {
   border: 0;
   height: 1px;
@@ -589,9 +577,7 @@ p:last-child {
 .nav-link i {
   margin-right: 0.75rem;
 }
-.navigation.collapsed .nav-section-title span {
-  display: none;
-}
+
 .navigation.collapsed .nav-link {
   justify-content: center;
 }
@@ -637,13 +623,6 @@ p:last-child {
 
   #page-content-wrapper.expanded {
     display: none;
-  }
-  .nav-section-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 0.5rem;
   }
 
   .nav-link {

@@ -1,0 +1,115 @@
+General Model Tests
+
+    Creation and Retrieval:
+        Test creating and retrieving each model instance from the database.
+        Ensure that the creation of a model instance with required fields works as expected.
+        Test retrieving an instance by its ID or other unique identifiers.
+
+    Field Validations:
+        Test validations for each field (e.g., string length, required fields, unique constraints).
+        Ensure that trying to save a model with invalid fields raises an error.
+
+    Relationships:
+        Test the relationships between models (e.g., a Customer can have multiple Accounts; an Account can have multiple Transactions).
+        Ensure that related objects are correctly associated and can be accessed as expected.
+
+    Methods and Business Logic:
+        Test custom methods defined in your models (e.g., calculate_luhn, set_swedish_personal_number in Customer, password hashing and checking in User).
+        Ensure that these methods return expected results and affect instances correctly.
+
+Specific Model Tests
+Customer Model
+
+    Test the calculate_luhn method with known inputs and outputs.
+    Test the set_swedish_personal_number method to ensure it generates valid numbers.
+    Test creating a customer with various valid and invalid personal numbers.
+
+Account Model
+
+    Test account creation with different AccountType values.
+    Test the balance updates correctly after transactions are added.
+
+Transaction Model
+
+    Test creating transactions with different types (Debit, Credit) and ensure the balance is updated correctly.
+    Test the date and amount fields to ensure they accept only valid inputs.
+
+User Model
+
+    Test the set_password and check_password methods to ensure they work as expected.
+    Test the generate_password method to ensure it generates passwords of the correct length.
+    Test the is_admin and is_cashier methods based on different user roles.
+
+CustomerContact Model
+
+    Test creating a CustomerContact instance and linking it to a Customer.
+    Ensure that the email and message fields accept valid inputs and reject invalid ones.
+
+Integration Tests
+
+    Test the interaction between models, such as creating a customer, then creating an account for that customer, and adding transactions to the account.
+    Test cascading deletes (if applicable) to ensure that deleting a parent object (e.g., a Customer) correctly deletes or affects related objects (e.g., Accounts, Transactions).
+
+Edge Cases and Error Handling
+
+    Test how your models handle edge cases, such as extremely large numbers, unexpected input types, or null values in non-nullable fields.
+    Ensure that your application gracefully handles errors, such as constraint violations or database errors.
+
+Performance Considerations
+
+    While not typically the focus of unit testing, be mindful of queries or operations that could impact performance, such as those that might cause N+1 query problems or excessively large data retrieval.
+
+
+
+    General Model Testing Guidelines
+
+    Model Creation: Test if instances of your models (Customer, Account, Transaction, User, CustomerContact) can be created successfully and saved to the database.
+
+    Field Validations: Ensure that model fields validate input as expected. This includes testing for nullable fields, unique constraints, and any custom validation logic you might have.
+
+    Relationships: Verify the relationships between models (e.g., Customer to Account, Account to Transaction). This includes testing both forward and backward relationships (e.g., accessing a customer's accounts and accessing the customer from an account).
+
+    Methods and Business Logic: Test any custom methods or business logic within your models. For example, the calculate_luhn method in the Customer model, password hashing and checking in the User model, and any other logic that manipulates data or performs calculations.
+
+    Queries: Test complex queries or any database operation that involves filtering, sorting, or aggregating data. Ensure that these operations return the expected results.
+
+Specific Tests Based on Your Models
+
+    Customer Model:
+        Test the calculate_luhn method with known inputs to ensure it calculates correctly.
+        Test the set_swedish_personal_number method to ensure it generates valid numbers according to your logic.
+        Ensure that creating a customer with minimal required fields works and fails if required fields are missing.
+
+    Account Model:
+        Test account creation linked to a customer.
+        Verify that transactions can be correctly added to an account and that the balance updates accordingly.
+
+    Transaction Model:
+        Test creating different types of transactions (debit, credit) and ensure they affect account balances as expected.
+
+    User Model:
+        Test user creation, including setting and verifying passwords.
+        Test the admin and cashier role checks (is_admin, is_cashier) to ensure they correctly identify user roles.
+
+    CustomerContact Model:
+        Test creating customer contact messages and linking them to customers.
+
+Integration with Flask Application
+
+    Application Factory: Refactor your application to support an application factory pattern. This allows you to create instances of your app with different configurations for testing, development, and production.
+
+    Database Setup for Testing: Configure a separate test database, ideally in-memory, that is used exclusively for testing purposes to avoid affecting your development database.
+
+    Blueprints and Views: While not directly related to model testing, ensure that your blueprints and views correctly handle requests and interact with your models as expected. This includes rendering templates with the correct context and handling form submissions.
+
+Writing Tests
+
+For each test case, follow this basic structure:
+
+    Setup: Prepare the environment, which includes creating an app context, setting up a test database, and adding any initial data required for the test.
+
+    Execution: Perform the action you want to test, such as creating a model instance or calling a method.
+
+    Assertion: Verify the outcome is as expected. This could involve checking that data was added to the database, verifying that returned values are correct, or ensuring that certain conditions are met (e.g., an error is raised for invalid input).
+
+    Teardown: Clean up any resources used in the test, ensuring each test is isolated and does not affect others.

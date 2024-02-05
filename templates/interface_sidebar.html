@@ -9,11 +9,6 @@
         <div class="nav-link-group">
             {% if current_user.InformationPermission %}
                 <div class="nav-section">
-                    <div class="nav-section-title">
-                        <i class="fa fa-database" aria-hidden="true"></i>
-                        <span>Information</span>
-                    </div>
-                    <hr class="nav-section-divider">
                     <a href="{{ url_for('user_interface.dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'user_interface.dashboard' else '' }}">
                         <i class="fas fa-home"></i><span>Main</span>
                     </a>
@@ -31,18 +26,13 @@
             {% endif %}
             {% if current_user.ManagementPermission %}
                 <div class="nav-section">
-                    <div class="nav-section-title">
-                        <i class="fa fa-database" aria-hidden="true"></i>
-                        <span>Management</span>
-                    </div>
-                    <hr class="nav-section-divider">
-                    <a href="#" class="nav-link {{ 'active' if request.endpoint == 'user_interface.dashboard' else '' }}">
+                    <a href="#" class="nav-link">
                         <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
                     </a>
-                    <a href="#" class="nav-link {{ 'active' if request.endpoint == 'customer.customer_list' else '' }}">
+                    <a href="#" class="nav-link">
                         <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
                     </a>
-                    <a href="#" class="nav-link {{ 'active' if request.endpoint == 'account.account_list' else '' }}">
+                    <a href="#" class="nav-link">
                         <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
                     </a>
                     <a href="{{ url_for('login.logout') }}" class="nav-link">
@@ -53,18 +43,14 @@
             {% endif %}
             {% if current_user.PlaceholderPermission %}
                 <div class="nav-section">
-                    <div class="nav-section-title">
-                        <i class="fa fa-database" aria-hidden="true"></i>
-                        <span>Placeholder</span>
-                    </div>
                     <hr class="nav-section-divider">
-                    <a href="#" class="nav-link {{ 'active' if request.endpoint == 'user_interface.dashboard' else '' }}">
+                    <a href="#" class="nav-link">
                         <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
                     </a>
-                    <a href="#" class="nav-link {{ 'active' if request.endpoint == 'customer.customer_list' else '' }}">
+                    <a href="#" class="nav-link">
                         <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
                     </a>
-                    <a href="#" class="nav-link {{ 'active' if request.endpoint == 'account.account_list' else '' }}">
+                    <a href="#" class="nav-link">
                         <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
                     </a>
                     <a href="{{ url_for('login.logout') }}" class="nav-link">
