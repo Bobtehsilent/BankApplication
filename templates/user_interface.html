@@ -2,15 +2,13 @@
 
 {% block title %}Admin Dashboard{% endblock %}
 {% block content %}
-    {% include 'interface_sidebar.html' %}
-    
-    <div class="admin-content">
-        <div class="admin-stats">
-            <div class="admin-block-stat-item">
-                <div class="admin-stat-item">
+    <div class="user-content">
+        <div class="user-stats">
+            <div class="user-block-stat-item">
+                <div class="user-stat-item">
                     <div class="product">
                         <div class="product__bg"></div>
-                        <div class="admin-nav-link">
+                        <div class="user-nav-link">
                             <h2>{{ customer_count }}</h2>
                             <p>Total customers</p>
                         </div>
@@ -20,10 +18,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="admin-stat-item">
+                <div class="user-stat-item">
                     <div class="product">
                         <div class="product__bg"></div>
-                        <div class="admin-nav-link">
+                        <div class="user-nav-link">
                             <h2>{{ account_count }}</h2>
                             <p>Total Accounts</p>    
                         </div>
@@ -33,10 +31,10 @@
                         </div>
                     </div>       
                 </div>  
-                <div class="admin-stat-item">
+                <div class="user-stat-item">
                     <div class="product">
                         <div class="product__bg"></div>
-                        <div class="admin-nav-link">
+                        <div class="user-nav-link">
                             <h2>{{ total_balance }}</h2>
                             <p>Total Balance</p>
                         </div>
@@ -48,7 +46,7 @@
             </div>
             <div class="grid__item country-details" style="display: none;">
                 <div class="product">
-                    <div class="admin-nav-link">
+                    <div class="user-nav-link">
                         <h2 id="country-name">yes</h2>
                     </div>
                     <div class="product__description">
@@ -57,7 +55,7 @@
                 </div>
             </div>
             <!-- Jvectormap container -->
-            <div class="admin-map-container">
+            <div class="user-map-container">
                 <div class="product">
                     <div id="europe-map"></div>
                     <div class="product__description">
@@ -65,13 +63,6 @@
                     <!-- content for map details overlay-->
                     </div>
                 </div>
-            </div>
-        </div>
-        <!-- Details overlay structure -->
-        <div class="details">
-            <div class="details__bg details__bg--down">
-                <button class="details__close"><i class="fas fa-2x fa-times icon--cross tm-fa-close"></i></button>
-                <div class="details__description"></div>
             </div>
         </div>
     </div>

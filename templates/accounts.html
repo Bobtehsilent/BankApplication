@@ -2,7 +2,6 @@
 
 {% block title %}Account list{% endblock %}
 {% block content %}
-{% include 'interface_sidebar.html' %}
     {% macro sort_link(column, title) %}
         {% set new_sort_order = 'asc' if sort_order == 'desc' and sort_column == column else 'desc' %}
         <a href="{{ url_for('account.account_list', page=1, sort_column=column, sort_order=new_sort_order, search=search_query) }}">

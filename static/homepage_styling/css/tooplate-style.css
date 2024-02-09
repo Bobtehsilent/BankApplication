@@ -14,13 +14,11 @@ body {
   position: relative;
 }
 
-body.homepage #tm-bg {
+body #tm-bg {
   background-image: url(../img/pop-bg.jpg);
 }
 
-body:not(.homepage) {
-  background-color: #323643;
-}
+
 
 /* Header */
 

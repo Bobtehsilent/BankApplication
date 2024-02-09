@@ -14,7 +14,8 @@
 			this.DOM.details.className = 'details';
 			this.DOM.details.innerHTML = detailsTmpl;
 			// DOM.content.appendChild(this.DOM.details);
-			document.getElementById('tm-wrap').appendChild(this.DOM.details);
+			const appendTarget = document.getElementById('tm-wrap') || document.body;
+			appendTarget.appendChild(this.DOM.details);
 			this.init();
 		}
 		init() {
@@ -337,7 +338,7 @@
 		DOM.details = new Details();
 	}
 
-	DOM.adminItems = document.querySelectorAll('.admin-stat-item');
+	DOM.adminItems = document.querySelectorAll('.user-stat-item');
     if (DOM.adminItems.length) {
         let adminItems = [];
         DOM.adminItems.forEach(item => adminItems.push(new AdminItem(item)));
@@ -374,38 +375,29 @@ function clearSearch() {
 	document.querySelector('form').submit();
 }
 
-// function managing closing and opening the side dashboards
-
 document.addEventListener("DOMContentLoaded", function() {
     const sidebarWrapper = document.getElementById('sidebar-wrapper');
     const sidebarToggle = document.getElementById('sidebarToggle');
-    const pageContentWrapper = document.getElementById('page-content-wrapper');
-
-    // Function to set sidebar state
-    function setSidebarState(collapsed) {
-        if (collapsed) {
-            sidebarWrapper.classList.add('collapsed');
-            pageContentWrapper.classList.remove('expanded'); // Remove expanded class when collapsed
-        } else {
-            sidebarWrapper.classList.remove('collapsed');
-            pageContentWrapper.classList.add('expanded'); // Add expanded class when not collapsed
-        }
-        localStorage.setItem('sidebarCollapsed', collapsed);
-    }
 
     // Function to toggle sidebar state
     function toggleSidebar() {
         const isCollapsed = sidebarWrapper.classList.contains('collapsed');
-        setSidebarState(!isCollapsed);
+        sidebarWrapper.classList.toggle('collapsed', !isCollapsed);
+        localStorage.setItem('sidebarCollapsed', !isCollapsed);
     }
 
     // Set initial state of sidebar from localStorage
     const sidebarShouldBeCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-    setSidebarState(sidebarShouldBeCollapsed);
+    if (sidebarShouldBeCollapsed) {
+        sidebarWrapper.classList.add('collapsed');
+    } else {
+        sidebarWrapper.classList.remove('collapsed');
+    }
 
     // Toggle sidebar on button click
     sidebarToggle.addEventListener('click', toggleSidebar);
 });
+
 
 
 function openGraph(customerId) {
@@ -467,23 +459,22 @@ function toggleAccountType(accountType) {
     });
 }
 
-document.getElementById('navToggle').addEventListener('click', function() {
-    var linksContainer = document.querySelector('.tm-nav-table-container');
-    var mainContent = document.querySelector('.tm-main-content');
-    linksContainer.classList.toggle('active');
+const navToggle = document.getElementById('navToggle');
+if (navToggle) {
+    navToggle.addEventListener('click', function() {
+        var linksContainer = document.querySelector('.tm-nav-table-container');
+        var mainContent = document.querySelector('.tm-main-content');
+        if (linksContainer && mainContent) {
+            linksContainer.classList.toggle('active');
 
-    if (linksContainer.classList.contains('active')) {
-        mainContent.style.marginTop = (linksContainer.offsetHeight + 60) + 'px';
-    } else {
-        mainContent.style.marginTop = '60px';
-    }
-});
-
-
-// $(window).resize(function() {
-//     let map = $('#europe-map').vectorMap('get', 'mapObject');
-//     map.updateSize();
-// });
+            if (linksContainer.classList.contains('active')) {
+                mainContent.style.marginTop = (linksContainer.offsetHeight + 60) + 'px';
+            } else {
+                mainContent.style.marginTop = '60px';
+            }
+        }
+    });
+}
 
 
 window.openDetailsWithData = openDetailsWithData;

@@ -6,13 +6,9 @@
     <title>{% block title %}Default Title{% endblock %}</title>
         <!-- load CSS -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300">  <!-- Google web font "Open Sans" -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/fontawesome-all.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='slick/slick.css') }}"/>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='slick/slick-theme.css') }}"/>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='homepage_styling/fontawesome/css/fontawesome-all.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='jmap/jquery-jvectormap-2.0.5.css') }}">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script>document.documentElement.className="js";var supportsCssVars=function(){var e,t=document.createElement("style");return t.innerHTML="root: { --tmp-var: bold; }",document.head.appendChild(t),e=!!(window.CSS&&window.CSS.supports&&window.CSS.supports("font-weight","var(--tmp-var)")),t.parentNode.removeChild(t),e};supportsCssVars()||alert("Please view this in a modern browser such as latest version of Chrome or Microsoft Edge.");</script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     {% block head %}{% endblock %}
@@ -24,22 +20,22 @@
                 <div class="flash-message">{{ message }}</div>
             {% endfor %}
         {% endif %}
-    {% endwith %}     
-    <div id="tm-bg"></div>
-    <div id="tm-wrap">
-        <div class="tm-main-content">
-            {% block content %}{% endblock %}
+    {% endwith %}
+    <div class="flex-container"> 
+        {% include 'interface_sidebar.html' %}
+        <div class="main-content">
+            {% block content %} {% endblock %}
         </div>
     </div>
-    <!-- <footer>
-        <p class="small tm-copyright-text">Copyright &copy; <span class="tm-current-year">2020</span> Your Company. 
-                
-        Design: <a rel="nofollow" href="https://www.tooplate.com" class="tm-text-highlight">Tooplate</a></p>
-    </footer> -->
-
-    <!-- commmon scripts -->
+            <!-- Details overlay structure -->
+    <div class="details">
+        <div class="details__bg details__bg--down">
+            <button class="details__close"><i class="fas fa-2x fa-times icon--cross tm-fa-close"></i></button>
+            <div class="details__description"></div>
+        </div>
+    </div>
     <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='slick/slick.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='homepage_styling/slick/slick.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/anime.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='jmap/jquery-jvectormap-2.0.5.min.js') }}"></script>
@@ -57,20 +53,10 @@
             else {
                 main.removeClass('tm-footer-relative');   
             }
-        }
+        } 
 
         /* DOM is ready
         ------------------------------------------------*/
-        $(function(){
-
-            setupFooter();
-
-            $(window).resize(function(){
-                setupFooter();
-            });
-
-            $('.tm-current-year').text(new Date().getFullYear());  // Update year in copyright           
-        });
         
         $(document).ready(function() {
             // Check if there is a flash message

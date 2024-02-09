@@ -118,8 +118,8 @@ class User(db.Model):
     def generate_password(self, length=6):
         letters = string.ascii_letters
         return ''.join(random.choice(letters) for i in range(length))
+    
     #flask_login integration
-
     def is_authenticated(self):
         return True
     

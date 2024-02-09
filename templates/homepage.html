@@ -1,8 +1,31 @@
-{% extends 'base.html' %}
-{% block body_classes %}homepage{% endblock %}
-{% block title %}Welcome to SpringBank{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-{% block content %}
+    <title>Pop HTML CSS Template</title>
+<!--
+
+Template 2097 Pop
+
+https://www.tooplate.com/view/2097-pop
+
+-->
+    <!-- load CSS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300">  <!-- Google web font "Open Sans" -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='homepage_styling/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='homepage_styling/fontawesome/css/fontawesome-all.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='homepage_styling/slick/slick.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='homepage_styling/slick/slick-theme.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='homepage_styling/css/tooplate-style.css') }}">
+
+
+    <script>document.documentElement.className="js";var supportsCssVars=function(){var e,t=document.createElement("style");return t.innerHTML="root: { --tmp-var: bold; }",document.head.appendChild(t),e=!!(window.CSS&&window.CSS.supports&&window.CSS.supports("font-weight","var(--tmp-var)")),t.parentNode.removeChild(t),e};supportsCssVars()||alert("Please view this in a modern browser such as latest version of Chrome or Microsoft Edge.");</script>
+    
+</head>
+
+<body>
 <div id="tm-bg"></div>
     <div id="tm-wrap">
         <div class="tm-main-content">
@@ -11,7 +34,7 @@
                     <div class="col-sm-12 col-md-6 col-lg-6 col-md-col-xl-6 mb-md-0 mb-sm-4 mb-4 tm-site-header-col">
                         <div class="tm-site-header">
                             <h1 class="mb-4">SpringBank</h1>
-                            <img src="{{ url_for('static', filename='img/underline.png') }}" class="img-fluid mb-4">
+                            <img src="{{ url_for('static', filename='homepage_styling/img/underline.png') }}" class="img-fluid mb-4">
                             <p>New banking with experiences you will cherish forever</p>        
                         </div>                        
                     </div>
@@ -33,14 +56,14 @@
                                             </div>                                        
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                                                    <img src="{{ url_for('static', filename='img/welcome-1.jpg') }}" class="img-fluid mb-3">
+                                                    <img src="{{ url_for('static', filename='homepage_styling/img/welcome-1.jpg') }}" class="img-fluid mb-3">
                                                     <p>You are allowed to download, modify and use this template for your commercial or business websites. </p>
                                                     <p>Please tell your friends about <a rel="nofollow" href="https://fb.com/tooplate" target="_parent">Tooplate</a>. That will be very helpful for us. Thank you.</p>    
                                                 </div>
                                                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                                                     <p>You are NOT allowed to put this template ZIP file for a download purpose on any template collection website.</p>
                                                     <p>If you have any kind of question or comment, please feel free to <a rel="nofollow" href="https://www.tooplate.com/contact" target="_parent">contact us</a>. You are welcome.</p>
-                                                    <img src="{{ url_for('static', filename='img/welcome-2.jpg') }}" class="img-fluid">
+                                                    <img src="{{ url_for('static', filename='homepage_styling/img/welcome-2.jpg') }}" class="img-fluid">
                                                 </div>                                        
                                             </div>
                                             
@@ -103,12 +126,12 @@
                                                     <div class="col-12">
                                                         <div class="p-sm-4 p-2 tm-img-container">
                                                             <div class="tm-img-slider" id="tmImgSlider">
-                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='img/gallery-img-01-tn.jpg') }}" alt="Image 1" class="img-fluid tm-slider-img"></a>
-                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='img/gallery-img-02-tn.jpg') }}" alt="Image 2" class="img-fluid tm-slider-img"></a>
-                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='img/gallery-img-03-tn.jpg') }}" alt="Image 3" class="img-fluid tm-slider-img"></a>
-                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='img/gallery-img-04-tn.jpg') }}" alt="Image 4" class="img-fluid tm-slider-img"></a>
-                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='img/gallery-img-05-tn.jpg') }}" alt="Image 5" class="img-fluid tm-slider-img"></a>
-                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='img/gallery-img-06-tn.jpg') }}" alt="Image 6" class="img-fluid tm-slider-img"></a>
+                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='homepage_styling/img/gallery-img-01-tn.jpg') }}" alt="Image 1" class="img-fluid tm-slider-img"></a>
+                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='homepage_styling/img/gallery-img-02-tn.jpg') }}" alt="Image 2" class="img-fluid tm-slider-img"></a>
+                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='homepage_styling/img/gallery-img-03-tn.jpg') }}" alt="Image 3" class="img-fluid tm-slider-img"></a>
+                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='homepage_styling/img/gallery-img-04-tn.jpg') }}" alt="Image 4" class="img-fluid tm-slider-img"></a>
+                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='homepage_styling/img/gallery-img-05-tn.jpg') }}" alt="Image 5" class="img-fluid tm-slider-img"></a>
+                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='homepage_styling/img/gallery-img-06-tn.jpg') }}" alt="Image 6" class="img-fluid tm-slider-img"></a>
                                                             </div>
                                                         </div>  
                                                     </div>
@@ -169,4 +192,56 @@
         </div>
     </div>
 </div>
-{% endblock %}
+    <footer>
+        <p class="small tm-copyright-text">Copyright &copy; <span class="tm-current-year">2020</span> Your Company. 
+        
+        Design: <a rel="nofollow" href="https://www.tooplate.com" class="tm-text-highlight">Tooplate</a></p>
+    </footer>
+</div> <!-- .tm-main-content -->  
+    </div>
+    <!-- load JS -->
+    <script src="{{ url_for('static', filename='js/jquery-3.2.1.slim.min.js') }}"></script>    
+    <script src="{{ url_for('static', filename='homepage_styling/slick/slick.min.js') }}"></script>  
+    <script src="{{ url_for('static', filename='js/anime.min.js') }}"></script> 
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>  
+    <script>      
+
+        function setupFooter() {
+        var pageHeight = $('.tm-site-header-container').height() + $('footer').height() + 100;
+
+        var main = $('.tm-main-content');
+
+        if($(window).height() < pageHeight) {
+            main.addClass('tm-footer-relative');
+        }
+        else {
+            main.removeClass('tm-footer-relative');   
+        }
+        }
+
+        /* DOM is ready
+        ------------------------------------------------*/
+        $(function(){
+
+        setupFooter();
+
+        $(window).resize(function(){
+            setupFooter();
+        });
+
+        $('.tm-current-year').text(new Date().getFullYear());  // Update year in copyright           
+        });
+
+    </script>   
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div>{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+
+</body>
+</html>
