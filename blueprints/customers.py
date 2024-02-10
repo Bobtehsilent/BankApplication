@@ -1,5 +1,6 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template, jsonify
 from flask_login import login_required
+from sqlalchemy import or_
 from datetime import datetime
 from models import Customer, db, Account
 from sqlalchemy.orm import joinedload
@@ -9,37 +10,57 @@ customer_bp = Blueprint('customer', __name__, url_prefix='/customers')
 
 
 #list customers
-@customer_bp.route('/customer_list>', endpoint='customer_list')
+@customer_bp.route('/customer_list', methods=['GET'])
 @login_required
 def customer_list():
     page = request.args.get('page', 1, type=int)
-    per_page = 15
-    search_query = request.args.get('search', '')
+    per_page = 50
     sort_column = request.args.get('sort_column', 'Surname')
     sort_order = request.args.get('sort_order', 'asc')
+    search_query = request.args.get('search', '').strip()
 
-    if 'page' not in request.args and 'search' not in request.args:
-        if request.args.get('sort_column') == sort_column:
-            sort_order = 'desc' if sort_order == 'asc' else 'asc'
-            
-    query = Customer.query.options(joinedload(Customer.Accounts).joinedload(Account.Transactions))
+    query = Customer.query
+
     if search_query:
-        query = query.filter(Customer.GivenName.contains(search_query) |
-                             Customer.Surname.contains(search_query) |
-                             Customer.EmailAddress.contains(search_query) |
-                             Customer.Country.contains(search_query)) #add more later like phone number etc
+        query = query.filter(
+            or_(
+                Customer.GivenName.contains(search_query),
+                Customer.Surname.contains(search_query),
+                Customer.EmailAddress.contains(search_query),
+                Customer.Country.contains(search_query),
+                Customer.PersonalNumber.contains(search_query)
+            ))
+        
     if sort_order == 'asc':
         query = query.order_by(getattr(Customer, sort_column).asc())
     else:
         query = query.order_by(getattr(Customer, sort_column).desc())
+        
+    # if 'page' not in request.args and 'search' not in request.args:
+    #     if request.args.get('sort_column') == sort_column:
+    #         sort_order = 'desc' if sort_order == 'asc' else 'asc'
+    
+    if request.args.get('ajax', '0') == '1':
+        paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
+        customers = [customer_to_dict(customer) for customer in paginated_customers]
 
-
-    paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
-    customers_dict = database_to_dict(paginated_customers)
-    return render_template('customers.html', customers=customers_dict, 
+        return jsonify({
+            'customers': customers,
+            'pagination': {
+                'total_pages': paginated_customers.pages,
+                'current_page': paginated_customers.page,
+                'has_prev': paginated_customers.has_prev,
+                'has_next': paginated_customers.has_next,
+                'prev_num': paginated_customers.prev_num if paginated_customers.has_prev else None,
+                'next_num': paginated_customers.next_num if paginated_customers.has_next else None,
+            }
+        })
+    else:
+        paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
+        customers_dict = database_to_dict(paginated_customers)
+        return render_template('customers.html', customers=customers_dict, 
                            paginated=paginated_customers, 
-                           sort_column=sort_column, sort_order=sort_order,
-                           search_query=search_query)
+                           sort_column=sort_column, sort_order=sort_order)
 
 #Important for the customer list page. makes the detail page work
 def database_to_dict(customers):

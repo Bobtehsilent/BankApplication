@@ -24,6 +24,22 @@
     <div class="flex-container"> 
         {% include 'interface_sidebar.html' %}
         <div class="main-content">
+            <header>
+                <!-- header -->
+                <div class="page-content-wrapper">
+                    <div class="page-header">
+                        <div class="search-container">
+                            <input type="text" id="headerCustomerSearch" placeholder="Search Customers..." oninput="searchInformation()">
+                            <div id="searchDropdown" class="search-dropdown">
+                                <!-- Search results -->
+                            </div>
+                        </div>
+                        <div class="user-info">
+                            <span>{{ current_user.FirstName }} {{ current_user.LastName }}</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
             {% block content %} {% endblock %}
         </div>
     </div>

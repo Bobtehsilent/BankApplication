@@ -102,10 +102,10 @@ class User(db.Model):
     PlaceholderPermission = db.Column(db.Boolean, default=False)
 
 
-    def is_admin():
+    def is_admin(self):
         return current_user.is_authenticated and current_user.Role == 'Admin'
     
-    def is_cashier():
+    def is_cashier(self):
         return current_user.is_authenticated and current_user.Role == 'Cashier'
 
     #creating and checking passwords

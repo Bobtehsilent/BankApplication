@@ -2,36 +2,44 @@
 
 {% block title %}Customers list{% endblock %}
 {% block content %}
-    {% macro sort_link(column, title, current_sort_order, current_search_query, current_page) %}
+    <!-- {% macro sort_link(column, title, current_sort_order, current_search_query, current_page) %}
         {% set new_sort_order = 'asc' if current_sort_order == 'desc' and sort_column == column else 'desc' %}
         <a href="{{ url_for('customer.customer_list', page=current_page, sort_column=column, sort_order=new_sort_order, search=current_search_query) }}">
             {{ title }}
             {% if sort_column == column %}
                 {% if current_sort_order == 'asc' %}
-                    <span class="sort-arrow">&#9650;</span> <!-- Up arrow -->
+                    <span class="sort-arrow">&#9650;</span> 
                 {% else %}
-                    <span class="sort-arrow">&#9660;</span> <!-- Down arrow -->
+                    <span class="sort-arrow">&#9660;</span> 
                 {% endif %}
             {% endif %}
         </a>
-    {% endmacro %}
+    {% endmacro %} -->
     <div class="table-list">
         <table>
-            <form method="GET" action="{{ url_for('customer.customer_list') }}">
-                <div class="search-bar">
-                    <input type="text" name="search" placeholder="Search customers...">
-                    <button type="submit">Search</button>
-                    <button type="button" onclick="clearSearch()">Clear</button>
+            <div class="filter-section" id="filterSection">
+                <div class="filter-header">
+                    <button id="filterToggle" class="filter-toggle">Filters</button>
                 </div>
-            </form>
+                <div class="filter-content">
+                    <!-- Filter form or filter options go here -->
+                    <form id="filterForm" onsubmit="event.preventDefault(); filterCustomers();">
+                        <input type="text" id="listCustomerSearch" name="name" placeholder="Name..." oninput="filterCustomers()">
+                        <!-- You can remove the filter button or keep it for manual refresh -->
+                        <button type="button" onclick="filterCustomers()">Filter</button>
+                    </form>
+                    
+                </div>
+            </div>            
             <thead>
                 <tr>
-                    <th>{{ sort_link('Surname', 'Customer name', sort_order, search_query, current_page) }}</th>
-                    <th>{{ sort_link('Country', 'Country', sort_order, search_query, current_page) }}</th>
-                    <th>{{ sort_link('Telephone', 'Phone Number', sort_order, search_query, current_page) }}</th>
-                    <th>{{ sort_link('EmailAddress', 'Email', sort_order, search_query, current_page) }}</th>
-                    <th>{{ sort_link('PersonalNumber', 'Personal Number', sort_order, search_query, current_page) }}</th>
-                    <th>Placeholder, total accountvalue
+                    <th data-sort-column="Surname" data-sort-order="asc" class="sortable-column">Customer name</th>
+                    <th data-sort-column="Country" data-sort-order="asc" class="sortable-column">Country</th>
+                    <th data-sort-column="Telephone" data-sort-order="asc" class="sortable-column">Telephone</th>
+                    <th data-sort-column="EmailAddress" data-sort-order="asc" class="sortable-column">Email Address</th>
+                    <th data-sort-column="PersonalNumber" data-sort-order="asc" class="sortable-column">Personal Number</th>
+                    <th>Placeholder</th>
+                    
                         <!-- <a href="{{ url_for('customer.customer_list', sort_column = 'placeholder', sort_order = 'asc') }}">
                             <i class='bx bxs-up-arrow'></i>
                         </a>
@@ -41,57 +49,13 @@
                     </th>
                 </tr>
             </thead>
-            <tbody>
-                {% if customers %}
-                    {% for customer in customers %}
-                    <tr class="table-row" data-customer='{{ customer | tojson | safe}}'>
-                        <td>{{ customer.Surname ~ ', ' ~ customer.GivenName }}</td>
-                        <td>{{ customer.Country }}</td>
-                        <td>{{ customer.Telephone }}</td>
-                        <td>{{ customer.EmailAddress }}</td>
-                        <td>{{ customer.PersonalNumber }}</td>
-                        <td>Click</td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                <tr>
-                    <td colspan="6">No accounts were found.</td>
-                </tr>
-            {% endif %}
+            <tbody id="customerListBody">
+                
             </tbody>
         </table>
-            <div class="table-row-pagination">
-                <!-- pagination links -->
-                {% set total_pages = paginated.pages %}
-                {% set current_page = paginated.page %}
-                {% set has_prev = paginated.has_prev %}
-                {% set has_next = paginated.has_next %}
-                {% set prev_num = paginated.prev_num %}
-                {% set next_num = paginated.next_num %}
-                
-                <!-- Pagination page link -->
-
-                {% if has_prev %}
-                    <a href="{{ url_for('customer.customer_list', page=prev_num, search=search_query, sort_column=sort_column, sort_order=sort_order) }}">&lt;</a>
-                {% endif %}
-
-                <!-- Page numbers -->
-
-                {% for page in range(1, total_pages + 1) %}
-                    {% if page == current_page %}
-                        <span class="active">{{ page }}</span>
-                    {% elif page == 1 or page == total_pages or page == current_page - 1 or page == current_page + 1 %}
-                        <a href="{{ url_for('customer.customer_list', page=page, search=search_query, sort_column=sort_column, sort_order=sort_order, current_page=current_page) }}">{{ page }}</a>
-                    {% elif page == current_page - 2 or page == current_page + 2 %}
-                        <span class="dots">...</span>
-                    {% endif %}
-                {% endfor %}
-
-                <!-- Next page link -->
-                {% if has_next %}
-                    <a href="{{ url_for('customer.customer_list', page=next_num, search=search_query, sort_column=sort_column, sort_order=sort_order) }}">&gt;</a>
-                {% endif %}
-            </div>
+        <div class="table-row-pagination">
+            <!-- filled by javascript -->
+        </div>
         <div class="table-details" style="display: none;">
             <div class="details__bg details__bg--down table-detail-description">
                 <button class="details__close"><i class="fas fa-2x fa-times icon--cross tm-fa-close"></i></button>

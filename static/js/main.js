@@ -371,10 +371,178 @@ $("#menu-toggle").click(function(e) {
 
 //function for clear button on searches
 function clearSearch() {
-	document.querySelector('input[name="search"]').value = '';
+	document.querySelector('input[name="customerSearch"]').value = '';
 	document.querySelector('form').submit();
 }
 
+// Filter functions
+let currentSortColumn = 'Surname';
+let currentSortOrder = 'asc';
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize customer list on page load
+    filterCustomers(); // Initial fetch with default sort parameters
+
+    // Sorting Event Listeners
+    document.querySelectorAll('.sortable-column').forEach(column => {
+		column.addEventListener('click', () => {
+			const sortColumn = column.getAttribute('data-sort-column');
+			const newSortOrder = column.getAttribute('data-sort-order') === 'asc' ? 'desc' : 'asc';
+			
+			// Remove existing arrows from all sortable columns
+			document.querySelectorAll('.sortable-column').forEach(col => {
+				col.innerHTML = col.innerHTML.replace(' ↑', '').replace(' ↓', ''); // Adjust based on your actual content
+			});
+			
+			// Set the new sort order for the next click and update the UI
+			column.setAttribute('data-sort-order', newSortOrder);
+			currentSortColumn = sortColumn;
+			currentSortOrder = newSortOrder;
+	
+			// Append the correct arrow to the clicked column header
+			column.innerHTML += newSortOrder === 'asc' ? ' ↑' : ' ↓';
+	
+			filterCustomers(1, sortColumn, newSortOrder); // Fetch with new sort parameters
+		});
+	});
+
+    // Search Event Listener
+    const listCustomerSearchInput = document.getElementById('listCustomerSearch');
+    if (listCustomerSearchInput) {
+        listCustomerSearchInput.addEventListener('input', () => {
+            filterCustomers(1, currentSortColumn, currentSortOrder); // Fetch with current sort parameters
+        });
+    }
+});
+
+function filterCustomers(pageNum = 1) {
+    let searchQuery = document.getElementById('listCustomerSearch').value;
+
+    fetch(`/customers/customer_list?ajax=1&search=${encodeURIComponent(searchQuery)}&page=${pageNum}&sort_column=${currentSortColumn}&sort_order=${currentSortOrder}`)
+    .then(response => response.json())
+    .then(data => {
+        const tbody = document.getElementById('customerListBody');
+        if (!tbody) {
+            console.error('Tbody element not found');
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        if (data.customers && data.customers.length) {
+            data.customers.forEach(customer => {
+                const row = document.createElement('tr');
+                row.className = 'table-row';
+                row.setAttribute('data-customer', JSON.stringify(customer));
+                row.innerHTML = `
+                    <td>${customer.Surname}, ${customer.GivenName}</td>
+                    <td>${customer.Country}</td>
+                    <td>${customer.Telephone}</td>
+                    <td>${customer.EmailAddress}</td>
+                    <td>${customer.PersonalNumber}</td>
+                    <td class="details-link">Details</td>
+                `;
+
+                // Attach click event listener for each row
+                row.addEventListener('click', () => {
+                    DOM.details.fillCustomerData(customer);
+                    DOM.details.open();
+                });
+
+                tbody.appendChild(row);
+            });
+			updatePaginationControls(data.pagination);
+        } else {
+            tbody.innerHTML = '<tr><td colspan="6">No customers found.</td></tr>';
+        }
+    })
+    .catch(error => console.error('Error during fetch:', error));
+}
+
+
+function updatePaginationControls(pagination) {
+    const paginationContainer = document.querySelector('.table-row-pagination');
+    paginationContainer.innerHTML = ''; // Clear existing controls
+
+    // Previous page link
+    if (pagination.has_prev) {
+        const prevLink = document.createElement('a');
+        prevLink.href = "#";
+        prevLink.innerHTML = "&lt;";
+        prevLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            changePage(pagination.prev_num);
+        });
+        paginationContainer.appendChild(prevLink);
+    }
+	// calc for page display amount
+	const total_pages = pagination.total_pages;
+    const current_page = pagination.current_page;
+    const rangeStart = Math.max(1, current_page - 1);
+    const rangeEnd = Math.min(total_pages, current_page + 1);
+
+	if (rangeStart > 1) {
+        appendPageLink(1);
+        if (rangeStart > 2) {
+            appendDots();
+        }
+    }
+
+	for (let i = rangeStart; i <= rangeEnd; i++) {
+        appendPageLink(i);
+    }
+
+	if (rangeEnd < total_pages) {
+        if (rangeEnd < total_pages - 1) {
+            appendDots();
+        }
+        appendPageLink(total_pages);
+    }
+
+	// next page link
+	if (pagination.has_next) {
+        const nextLink = document.createElement('a');
+        nextLink.href = "#";
+        nextLink.innerHTML = "&gt;";
+        nextLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            changePage(pagination.next_num);
+        });
+        paginationContainer.appendChild(nextLink);
+    }
+
+    function appendPageLink(page) {
+        const pageLink = document.createElement('a');
+        pageLink.href = "#";
+        pageLink.innerText = page;
+        if (page === current_page) {
+            pageLink.classList.add('active');
+        } else {
+            pageLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                changePage(page);
+            });
+        }
+        paginationContainer.appendChild(pageLink);
+    }
+
+	function appendDots() {
+        const dots = document.createElement('span');
+		dots.className = "dots"
+        dots.innerText = '...';
+        paginationContainer.appendChild(dots);
+    }
+
+
+}
+
+function changePage(pageNum) {
+    filterCustomers(pageNum); // Call filterCustomers with the new page number
+}
+
+// filter end
+
+// sidebar collapse
 document.addEventListener("DOMContentLoaded", function() {
     const sidebarWrapper = document.getElementById('sidebar-wrapper');
     const sidebarToggle = document.getElementById('sidebarToggle');
@@ -398,8 +566,9 @@ document.addEventListener("DOMContentLoaded", function() {
     sidebarToggle.addEventListener('click', toggleSidebar);
 });
 
+//sidebar end
 
-
+//Graph functionality
 function openGraph(customerId) {
     // Fetch data
     fetch(`/graph_transactions/${customerId}?account_types=savings&account_types=checking`)
@@ -475,6 +644,75 @@ if (navToggle) {
         }
     });
 }
+
+// Collapse sidebar when window is too small
+
+document.addEventListener('DOMContentLoaded', function() {
+    var navigation = document.getElementById('sidebar-wrapper');
+
+    if (window.innerWidth < 768) {
+        navigation.classList.add('collapsed');
+    }
+});
+
+// dropdown search functionality.
+
+function searchInformation() {
+    var input = document.getElementById('headerCustomerSearch');
+    var filter = input.value.trim();
+    var dropdown = document.getElementById('searchDropdown');
+
+    if (!filter) {
+        dropdown.style.display = 'none';
+        return;
+    }
+
+    fetch(`/search_customers?search=${encodeURIComponent(filter)}&ajax=1`)
+        .then(response => response.json())
+        .then(data => {
+            dropdown.innerHTML = ''; // Clear previous results
+            
+            if (data.length > 0) {
+                // Limit name matches to the first 5 results for closest name matches
+                const nameMatches = data.slice(0, 5);
+                nameMatches.forEach(customer => appendCustomerToDropdown(customer, dropdown));
+                
+                // Add a divider
+                if (data.length > 5) { // Only add a divider if there are more than 5 results
+                    let divider = document.createElement('div');
+                    divider.className = 'dropdown-divider';
+                    divider.textContent = '---'; // Placeholder divider, adjust as needed
+                    dropdown.appendChild(divider);
+
+                    // Append other category placeholders after the divider
+                    // Placeholder for demonstration, replace with actual data/categories as needed
+                    let placeholder = document.createElement('div');
+                    placeholder.className = 'dropdown-item';
+                    placeholder.textContent = 'Other Categories...';
+                    dropdown.appendChild(placeholder);
+                }
+
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.innerHTML = '<div class="dropdown-item">No results found</div>';
+                dropdown.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+function appendCustomerToDropdown(customer, dropdown) {
+    let customerDiv = document.createElement('div');
+    customerDiv.textContent = customer.name;
+    customerDiv.className = 'dropdown-item';
+    customerDiv.addEventListener('click', function() {
+        window.location.href = `/customer_detail/${customer.id}`;
+    });
+    dropdown.appendChild(customerDiv);
+}
+$('#headerCustomerSearch').on('input', searchInformation);
 
 
 window.openDetailsWithData = openDetailsWithData;

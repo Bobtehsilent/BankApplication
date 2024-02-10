@@ -1,11 +1,16 @@
 <div class="sidebar-flex" id="wrapper">
     <div class="navigation" id="sidebar-wrapper">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='homepage_styling/img/logo.png')}}" alt="">
+        </div>
+        <!-- sidebar -->
         <div class="sidebar-heading">
-            <button id="sidebarToggle" class="btn btn-primary">
+            <button id="sidebarToggle" class="button">
                 <i class="fa fa-bars" aria-hidden="true"></i>
                 <span>User Interface</span>
             </button>
         </div>
+        <!-- sidebar content -->
         <div class="nav-link-group">
             {% if current_user.InformationPermission %}
                 <div class="nav-section">
@@ -43,7 +48,6 @@
             {% endif %}
             {% if current_user.PlaceholderPermission %}
                 <div class="nav-section">
-                    <hr class="nav-section-divider">
                     <a href="#" class="nav-link">
                         <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
                     </a>
@@ -56,7 +60,6 @@
                     <a href="{{ url_for('login.logout') }}" class="nav-link">
                         <i class="fas fa-exclamation-triangle"></i><span>Logout</span>
                     </a>
-                    <hr class="nav-section-divider">
                 </div> 
                 <!-- More Links Here  -->
             {% endif %}         
