@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template, jsonify
 from flask_login import login_required
 from sqlalchemy import func
 from datetime import datetime
@@ -23,23 +23,33 @@ def account_list():
         query = query.filter(Customer.Surname.contains(search_query))
 
     query = query.group_by(Customer.Id)
-    
-    if 'page' not in request.args and 'search' not in request.args:
-        if request.args.get('sort_column') == sort_column:
-            sort_order = 'desc' if sort_order == 'asc' else 'asc'
-    
+
     if sort_order == 'asc':
         query = query.order_by(getattr(Customer, sort_column).asc())
     else:
         query = query.order_by(getattr(Customer, sort_column).desc())
 
-    paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
-    customer_account_data = database_to_dict(paginated_customers.items)
-    print(customer_account_data)
-    
-    return render_template('accounts.html', customer_account_data=customer_account_data,
-                           paginated=paginated_customers, search_query=search_query,
-                           sort_column=sort_column, sort_order=sort_order)
+    if request.args.get('ajax', '0') == '1':
+        paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
+        customer_account_data = database_to_dict(paginated_customers.items)
+        print(customer_account_data)
+        return jsonify({
+            'customers': customer_account_data,
+            'pagination': {
+                'total_pages': paginated_customers.pages,
+                'current_page': paginated_customers.page,
+                'has_prev': paginated_customers.has_prev,
+                'has_next': paginated_customers.has_next,
+                'prev_num': paginated_customers.prev_num if paginated_customers.has_prev else None,
+                'next_num': paginated_customers.next_num if paginated_customers.has_next else None,
+            }
+        })
+    else:    
+        paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
+        customer_account_data = database_to_dict(paginated_customers.items)
+        return render_template('accounts.html', customer_account_data=customer_account_data,
+                            paginated=paginated_customers, search_query=search_query,
+                            sort_column=sort_column, sort_order=sort_order)
 
 
 @account_bp.route('/accounts')

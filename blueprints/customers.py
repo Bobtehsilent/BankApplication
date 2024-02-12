@@ -101,7 +101,7 @@ def customer_to_dict(customer):
         'EmailAddress': customer.EmailAddress,
         'PersonalNumber': customer.PersonalNumber,
         'Accounts': accounts_dict,
-        'GroupedAccounts': grouped_accounts,
+        'GroupedAccounts': dict(grouped_accounts),
         'total_balance': total_balance
     }
 

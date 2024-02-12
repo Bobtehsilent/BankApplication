@@ -369,51 +369,71 @@ $("#menu-toggle").click(function(e) {
     $("#wrapper").toggleClass("toggled");
 });
 
-//function for clear button on searches
-function clearSearch() {
-	document.querySelector('input[name="customerSearch"]').value = '';
-	document.querySelector('form').submit();
-}
-
 // Filter functions
 let currentSortColumn = 'Surname';
 let currentSortOrder = 'asc';
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize customer list on page load
-    filterCustomers(); // Initial fetch with default sort parameters
-
-    // Sorting Event Listeners
-    document.querySelectorAll('.sortable-column').forEach(column => {
-		column.addEventListener('click', () => {
-			const sortColumn = column.getAttribute('data-sort-column');
-			const newSortOrder = column.getAttribute('data-sort-order') === 'asc' ? 'desc' : 'asc';
-			
-			// Remove existing arrows from all sortable columns
-			document.querySelectorAll('.sortable-column').forEach(col => {
-				col.innerHTML = col.innerHTML.replace(' ↑', '').replace(' ↓', ''); // Adjust based on your actual content
-			});
-			
-			// Set the new sort order for the next click and update the UI
-			column.setAttribute('data-sort-order', newSortOrder);
-			currentSortColumn = sortColumn;
-			currentSortOrder = newSortOrder;
-	
-			// Append the correct arrow to the clicked column header
-			column.innerHTML += newSortOrder === 'asc' ? ' ↑' : ' ↓';
-	
-			filterCustomers(1, sortColumn, newSortOrder); // Fetch with new sort parameters
-		});
-	});
-
-    // Search Event Listener
-    const listCustomerSearchInput = document.getElementById('listCustomerSearch');
-    if (listCustomerSearchInput) {
-        listCustomerSearchInput.addEventListener('input', () => {
-            filterCustomers(1, currentSortColumn, currentSortOrder); // Fetch with current sort parameters
-        });
-    }
+    initializeSortingAndFiltering();
 });
+
+function initializeSortingAndFiltering() {
+    const currentPagePath = window.location.pathname;
+    let filterFunction;
+    let searchInputId;
+
+    // Determine which page we're on and set the appropriate filter function and search input ID
+    if (currentPagePath.includes('/customers/customer_list')) {
+        filterFunction = filterCustomers;
+        searchInputId = 'listCustomerSearch';
+    } else if (currentPagePath.includes('/account_list')) {
+        filterFunction = filterAccounts;
+        searchInputId = 'listAccountSearch';
+    }
+
+    // Proceed with setting up sorting and the search event listener if on a recognized page
+    if (filterFunction && searchInputId) {
+        // Sorting Event Listeners
+        setupSorting(filterFunction);
+
+        // Initial fetch with default sort parameters
+        filterFunction();
+
+        // Search Event Listener
+        const searchInput = document.getElementById(searchInputId);
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                filterFunction(1, currentSortColumn, currentSortOrder);
+            });
+        }
+    }
+}
+
+function setupSorting(filterFunction) {
+    document.querySelectorAll('.sortable-column').forEach(column => {
+        column.addEventListener('click', () => {
+            const sortColumn = column.getAttribute('data-sort-column');
+            const newSortOrder = column.getAttribute('data-sort-order') === 'asc' ? 'desc' : 'asc';
+
+            // Update UI for sorting
+            updateSortingUI(column, newSortOrder);
+            // Fetch with new sort parameters
+            filterFunction(1, sortColumn, newSortOrder);
+        });
+    });
+}
+
+function updateSortingUI(column, newSortOrder) {
+    // First, remove existing arrows from all sortable columns
+    document.querySelectorAll('.sortable-column').forEach(col => {
+        col.innerHTML = col.innerHTML.replace(' ↑', '').replace(' ↓', ''); // Adjust based on your actual content
+    });
+
+    // Then, append the correct arrow to the clicked column header based on the new sort order
+    const arrow = newSortOrder === 'asc' ? ' ↑' : ' ↓';
+    column.innerHTML += arrow;
+}
+
 
 function filterCustomers(pageNum = 1) {
     let searchQuery = document.getElementById('listCustomerSearch').value;
@@ -459,6 +479,50 @@ function filterCustomers(pageNum = 1) {
     .catch(error => console.error('Error during fetch:', error));
 }
 
+function filterAccounts(pageNum = 1, sortColumn = 'Surname', sortOrder = 'asc') {
+    let searchQuery = document.getElementById('listAccountSearch').value;
+
+    fetch(`/account_list?ajax=1&search=${encodeURIComponent(searchQuery)}&page=${pageNum}&sort_column=${sortColumn}&sort_order=${sortOrder}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const tbody = document.querySelector('#accountListBody');
+        tbody.innerHTML = '';
+
+        data.customers.forEach(customer => {
+            const row = document.createElement('tr');
+            row.className = 'table-row';
+            let accountsHtml = '<td colspan="2"><table class="inner-table">';
+
+            Object.entries(customer.GroupedAccounts).forEach(([accountType, accountInfo]) => {
+                accountsHtml += `<tr><td>${accountType} x ${accountInfo.count}</td><td>${accountInfo.total_balance} SEK</td></tr>`;
+            });
+            accountsHtml += '</table></td>';
+
+            row.innerHTML = `<td>${customer.Surname}, ${customer.GivenName}</td>${accountsHtml}<td>${customer.total_balance} SEK</td>`;
+            
+			// Attach click event listener for each row
+			row.addEventListener('click', () => {
+				DOM.details.fillCustomerData(customer);
+				DOM.details.open();
+			});
+			
+			tbody.appendChild(row);
+        });
+
+        updatePaginationControls(data.pagination);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+
+// pagination handling
 
 function updatePaginationControls(pagination) {
     const paginationContainer = document.querySelector('.table-row-pagination');
@@ -532,12 +596,15 @@ function updatePaginationControls(pagination) {
         dots.innerText = '...';
         paginationContainer.appendChild(dots);
     }
-
-
 }
 
 function changePage(pageNum) {
-    filterCustomers(pageNum); // Call filterCustomers with the new page number
+    const currentPagePath = window.location.pathname;
+    if (currentPagePath.includes('/customers/customer_list')) {
+        filterCustomers(pageNum, currentSortColumn, currentSortOrder);
+    } else if (currentPagePath.includes('/account_list')) {
+        filterAccounts(pageNum, currentSortColumn, currentSortOrder);
+    }
 }
 
 // filter end
