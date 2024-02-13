@@ -2,7 +2,7 @@
 
 {% block title %}Customers list{% endblock %}
 {% block content %}
-    <!-- {% macro sort_link(column, title, current_sort_order, current_search_query, current_page) %}
+    {% macro sort_link(column, title, current_sort_order, current_search_query, current_page) %}
         {% set new_sort_order = 'asc' if current_sort_order == 'desc' and sort_column == column else 'desc' %}
         <a href="{{ url_for('customer.customer_list', page=current_page, sort_column=column, sort_order=new_sort_order, search=current_search_query) }}">
             {{ title }}
@@ -14,7 +14,7 @@
                 {% endif %}
             {% endif %}
         </a>
-    {% endmacro %} -->
+    {% endmacro %}
     <div class="table-list">
         <table>
             <div class="filter-section" id="filterSection">

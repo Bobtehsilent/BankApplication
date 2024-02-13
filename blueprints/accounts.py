@@ -83,7 +83,7 @@ def delete_account(id):
     account = Account.query.get_or_404(id)
     db.session.delete(account)
     db.session.commit()
-    return 'ACcount deleted successfully'
+    return 'Account deleted successfully'
 
 @account_bp.route('/account/update_balance/<int:id>', methods=['POST'])
 def update_balance(id):

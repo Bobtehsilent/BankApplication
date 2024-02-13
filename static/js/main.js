@@ -192,52 +192,52 @@
 			content += `</ul>`;
 			this.DOM.description.innerHTML = content;
 		}
-		fillCustomerData(customerData) {
-			console.log(customerData); // Check what data is received
-			let content =  `<div class="customer-details-container">`
-
-			//column 1
-			content += `<div class="customer-info">
-							<h2>${customerData.GivenName} ${customerData.Surname}</h2>
-							<p>Birthday:\n ${customerData.Birthday}</p>
-							<p>Personal Number:\n ${customerData.PersonalNumber}</p>
-							<p>Address: ${customerData.Streetaddress}</p>
-							<p>Zipcode:\n ${customerData.Zipcode}, City: ${customerData.City}</p>
-							<p>Country:\n ${customerData.Country}</p>
-							<p>Phone Number:\n ${customerData.Telephone}</p>
-							<p>Email:\n ${customerData.EmailAddress}</p>
-						</div>`;
-
-			content += `<div class="customer-accounts">
-						<h3>Accounts</h3>`;
-			if (customerData.Accounts) {
-				let i = 1;
-				customerData.Accounts.forEach(account => {
-					content += `<p>${account.AccountType} ${i}: ${account.Balance}</p>`;
-					i++
-				});
-			} else {
-				content += `<div class="customer-accounts">
-								<p>No accounts found</p>`;
-			}
-			content += `<p class="total-balance">Total Balance: ${customerData.total_balance}</p>
-						</div>`;
-
-				content += `<div class="customer-transactions">
-                    <canvas id="balanceGraph"></canvas>
-                    <div>
-                        <!-- Buttons to toggle account types in the graph -->
-                        <button onclick="toggleAccountType('savings')">Savings</button>
-                        <button onclick="toggleAccountType('checking')">Checking</button>
-                        <!-- Add more buttons as needed -->
-                    </div>
-                </div>`;
-
-    		content += `</div>`; // Closing the container div
-
-			// Add other fields as needed
-			this.DOM.description.innerHTML = content;
-			this.DOM.details.classList.add('table-details-box');
+        fillCustomerData(customerData) {
+            //console.log(customerData); // Check what data is received
+            let content =  `<div class="customer-details-container">`;
+        
+            // Customer info and accounts are side by side
+            content += `<table class="customer-info-table">
+                    <tr><th colspan="2">${customerData.GivenName} ${customerData.Surname}</th></tr>
+                    <tr><td>Birthday:</td><td>${customerData.Birthday}</td></tr>
+                    <tr><td>Personal Number:</td><td>${customerData.PersonalNumber}</td></tr>
+                    <tr><td>Address:</td><td>${customerData.Streetaddress}</td></tr>
+                    <tr><td>Zipcode:</td><td>${customerData.Zipcode}</td></tr>
+                    <tr><td>City:</td><td>${customerData.City}</td></tr>
+                    <tr><td>Country:</td><td>${customerData.Country}</td></tr>
+                    <tr><td>Phone Number:</td><td>${customerData.Telephone}</td></tr>
+                    <tr><td>Email:</td><td>${customerData.EmailAddress}</td></tr>
+                </table>`;
+        
+                if (customerData.Accounts && customerData.Accounts.length > 0) {
+                    let totalBalance = 0;
+                    content += `<table class="accounts-info-table"><tr><th>Type</th><th>Balance</th></tr>`;
+                    customerData.Accounts.forEach(account => {
+                        totalBalance += account.Balance;
+                        content += `<tr><td>${account.AccountType}</td><td>${account.Balance} SEK</td></tr>`;
+                    });
+                    content += `<tr class="total-balance"><td>Total Balance:</td><td>${totalBalance.toFixed(2)} SEK</td></tr></table>`;
+                } else {
+                    content += `<p>No accounts found</p>`;
+                }
+                content += `</div>`; // Close customer-accounts div
+            
+                // Append the constructed content
+                this.DOM.description.innerHTML = content;
+                this.DOM.details.classList.add('table-details-box');
+        
+            // Buttons and placeholder for future content
+            content += `<div class="details__actions">
+                            <a href="/path/to/customer_detail.html" class="details__button">More Details</a>
+                            <a href="/path/to/manage_customer.html" class="details__button">Manage Customer</a>
+                            <!-- Placeholder for future button -->
+                            <!-- <a href="#" class="details__button">Placeholder Button</a> -->
+                        </div>`;
+        
+            content += `</div>`; // Closing the customer-details-container div
+        
+            this.DOM.description.innerHTML = content;
+            this.DOM.details.classList.add('table-details-box');
 
 			fetch(`/graph_transactions/${customerData.Id}`)
 				.then(response => response.json())
@@ -411,14 +411,23 @@ function initializeSortingAndFiltering() {
 
 function setupSorting(filterFunction) {
     document.querySelectorAll('.sortable-column').forEach(column => {
-        column.addEventListener('click', () => {
-            const sortColumn = column.getAttribute('data-sort-column');
-            const newSortOrder = column.getAttribute('data-sort-order') === 'asc' ? 'desc' : 'asc';
+        column.addEventListener('click', function() {
+            const sortColumn = this.getAttribute('data-sort-column');
+            let newSortOrder = this.getAttribute('data-sort-order') === 'asc' ? 'desc' : 'asc';
+
+            // Update global sorting variables
+            currentSortColumn = sortColumn;
+            currentSortOrder = newSortOrder;
+
+            // Update the sort order attribute immediately for this column
+            this.setAttribute('data-sort-order', newSortOrder);
+
+            console.log(`Sorting by ${currentSortColumn} in ${currentSortOrder} order`);
 
             // Update UI for sorting
-            updateSortingUI(column, newSortOrder);
+            updateSortingUI(this, newSortOrder);
             // Fetch with new sort parameters
-            filterFunction(1, sortColumn, newSortOrder);
+            filterFunction(1, currentSortColumn, currentSortOrder);
         });
     });
 }
@@ -435,10 +444,10 @@ function updateSortingUI(column, newSortOrder) {
 }
 
 
-function filterCustomers(pageNum = 1) {
+function filterCustomers(pageNum = 1, sortColumn = 'Surname', sortOrder = 'asc') {
     let searchQuery = document.getElementById('listCustomerSearch').value;
 
-    fetch(`/customers/customer_list?ajax=1&search=${encodeURIComponent(searchQuery)}&page=${pageNum}&sort_column=${currentSortColumn}&sort_order=${currentSortOrder}`)
+    fetch(`/customers/customer_list?ajax=1&search=${encodeURIComponent(searchQuery)}&page=${pageNum}&sort_column=${sortColumn}&sort_order=${sortOrder}`)
     .then(response => response.json())
     .then(data => {
         const tbody = document.getElementById('customerListBody');
@@ -780,6 +789,20 @@ function appendCustomerToDropdown(customer, dropdown) {
     dropdown.appendChild(customerDiv);
 }
 $('#headerCustomerSearch').on('input', searchInformation);
+// Dark mode, light mode toggle
 
+document.getElementById('toggleDarkMode').addEventListener('click', function() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+  });
+  
+  // Apply the saved theme on page load
+  document.addEventListener('DOMContentLoaded', (event) => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  });
 
 window.openDetailsWithData = openDetailsWithData;
