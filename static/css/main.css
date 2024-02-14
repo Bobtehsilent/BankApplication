@@ -1,20 +1,20 @@
 :root {
-  --background-color: #c8d8e4;
-  --text-color: #2b6777;
+  --background-color: #e7eaf6;
+  --text-color: #113f67;
   --border-color: #f2f2f2;
   --row-odd-bg-color: #e0e0e0;
   --hover-bg-color: #d0e0f0;
   --hover-text-color: #2b6777;
   --active-bg-color: #52ab98;
-  --active-text-color: #ffffff;
+  --active-text-color: #2b6777;
   --active-border-color: #52ab98;
   --link-color: #52ab98;
   --link-hover-color: #2b6777;
-  --sidebar-color: #c8d8e4;
-  --sidebar-text-color: #2b6777;
-  --sidebar-active-color: #52ab98;
-  --header-bg-color: #c8d8e4;
-  --header-text-color: #2b6777;
+  --sidebar-color: #5585b5;
+  --sidebar-text-color: #ececec;
+  --sidebar-active-color: #9fd3c7;
+  /* --header-bg-color: #5585b5;
+  --header-text-color: #2b6777; */
   --search-input-border-color: #52ab98;
   --dropdown-bg-color: #ffffff;
   --dropdown-item-hover-bg-color: #e0e0e0;
@@ -39,7 +39,7 @@
   --active-border-color: #17a2b8;
   --link-color: #17a2b8;
   --link-hover-color: #f8f9fa;
-  --sidebar-color: #343a40;
+  --sidebar-color: #2c3034;
   --sidebar-text-color: #f8f9fa;
   --sidebar-active-color: #17a2b8;
   --header-bg-color: #343a40;
@@ -85,7 +85,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 5px;
-  background-color: var(--header-bg-color);
+  background-color: var(--sidebar-color);
   color: var(--header-text-color);
 }
 
@@ -150,21 +150,19 @@ body {
 /* Sidebar */
 .navigation {
   background-color: var(--sidebar-color);
-  color: var(--sidebar-text-color);
   height: 100%;
   width: 180px; /* Example fixed width for the sidebar */
   overflow-y: auto; /* In case of overflow */
 }
 
 .logo {
-  background-color: var(--sidebar-color);
   display: flex;
   justify-content: center;
 }
 
 .logo img {
   height: 100px;
-  color: var(--sidebar-text-color);
+
 }
 
 .navigation.collapsed .logo img {
@@ -191,7 +189,6 @@ body {
     justify-content: left;
     min-height: 56px;
     padding: 10px 15px;
-    background-color: var(--sidebar-color);
 }
 
 .navigation.collapsed .sidebar-heading {
@@ -438,11 +435,9 @@ body {
 .accounts-info-table {
   background-color: var(--background-color);
   color: var(--text-color);
-  border: 1px solid var(--border-color);
   width: 100%;
   max-width: 100%;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
-  border-radius: 8px;
   overflow: hidden; 
   border-collapse: separate;
   border-spacing: 0;
@@ -456,7 +451,6 @@ table {
 }
 
 thead th {
-  background-color: var(--header-bg-color); 
   color: var(--text-color);
   padding: 10px;
   border-bottom: 2px solid var(--border-color);
@@ -540,9 +534,9 @@ table a:hover {
   padding: 0;
 }
   
-.inner-table tr.account-type-separator:first-child td {
+/* .inner-table tr.account-type-separator:first-child td {
   border-top: none;
-}
+} */
   
 tbody tr {
     transition: background-color 150ms ease-out;

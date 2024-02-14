@@ -114,10 +114,15 @@ def group_accounts_by_type(accounts):
     return grouped_accounts
 
 #Get customer details
-@customer_bp.route('/customer_detail/<int:id>', methods=['GET'], endpoint='get_customer_details')
-def get_customer(id):
-    customer = customer.query.get_or_404(id)
+@customer_bp.route('/customer/<int:user_id>')
+def customer_detail(user_id):
+    customer = Customer.query.get_or_404(user_id)
     return render_template('customer_detail.html', customer=customer)
+
+@customer_bp.route('/manage/<int:user_id>')
+def manage_customer(user_id):
+    customer = Customer.query.get_or_404(user_id)
+    return render_template('manage_customer.html', customer=customer)
 
 #adding customers
 @customer_bp.route('/add_customer', methods=['POST'])

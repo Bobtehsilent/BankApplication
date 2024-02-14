@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
 
 {% block title %}Customers list{% endblock %}
+{% block searchbar %}
+    <div class="filter-content">
+        <form id="filterForm" onsubmit="event.preventDefault(); filterCustomers();">
+            <input type="text" id="listCustomerSearch" name="name" placeholder="Search Customers..." oninput="filterCustomers()">
+        </form>
+    </div>
+{% endblock %}
 {% block content %}
     {% macro sort_link(column, title, current_sort_order, current_search_query, current_page) %}
         {% set new_sort_order = 'asc' if current_sort_order == 'desc' and sort_column == column else 'desc' %}
@@ -15,21 +22,16 @@
             {% endif %}
         </a>
     {% endmacro %}
+    
     <div class="table-list">
         <table>
-            <div class="filter-section" id="filterSection">
-                <div class="filter-header">
-                    <button id="filterToggle" class="filter-toggle">Filters</button>
-                </div>
+            <!-- <div class="filter-section" id="filterSection">
                 <div class="filter-content">
-                    <!-- Filter form or filter options go here -->
                     <form id="filterForm" onsubmit="event.preventDefault(); filterCustomers();">
                         <input type="text" id="listCustomerSearch" name="name" placeholder="Name..." oninput="filterCustomers()">
-                        <!-- You can remove the filter button or keep it for manual refresh -->
-                        <button type="button" onclick="filterCustomers()">Filter</button>
                     </form>
                 </div>
-            </div>            
+            </div>             -->
             <thead>
                 <tr>
                     <th data-sort-column="Surname" data-sort-order="asc" class="sortable-column">Customer name</th>
@@ -60,7 +62,12 @@
                 <button class="details__close"><i class="fas fa-2x fa-times icon--cross tm-fa-close"></i></button>
                 <div class="details__description table-detail-description">
                 </div>
+                <div id="urlTemplates" style="display:none;">
+                    <a id="detailUrlTemplate" data-url="{{ url_for('customer.customer_detail', user_id=0) }}"></a>
+                    <a id="manageUrlTemplate" data-url="{{ url_for('customer.manage_customer', user_id=0) }}"></a>
+                </div>
             </div>
         </div>
     </div>
+    
 {% endblock %}

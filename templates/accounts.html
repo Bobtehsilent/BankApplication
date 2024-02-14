@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
 
 {% block title %}Account list{% endblock %}
+
+{% block searchbar %}
+    <div class="filter-content">
+        <form id="filterForm" onsubmit="event.preventDefault(); filterAccounts();">
+            <input type="text" id="listAccountSearch" name="name" placeholder="Search Accounts..." oninput="filterAccounts()">
+        </form>
+    </div>
+{% endblock %}
 {% block content %}
     {% macro sort_link(column, title) %}
         {% set new_sort_order = 'asc' if sort_order == 'desc' and sort_column == column else 'desc' %}
@@ -17,19 +25,13 @@
     {% endmacro %}
     <div class="table-list">
         <table>
-            <div class="filter-section" id="filterSection">
-                <div class="filter-header">
-                    <button id="filterToggle" class="filter-toggle">Filters</button>
-                </div>
+            <!-- <div class="filter-section" id="filterSection">
                 <div class="filter-content">
-                    <!-- Filter form or filter options go here -->
                     <form id="filterForm" onsubmit="event.preventDefault(); filterAccounts();">
                         <input type="text" id="listAccountSearch" name="name" placeholder="Name..." oninput="filterAccounts()">
-                        <!-- You can remove the filter button or keep it for manual refresh -->
-                        <button type="button" onclick="filterAccounts()">Filter</button>
                     </form>
                 </div>
-            </div> 
+            </div>  -->
             <thead>
                 <tr>
                     <th data-sort-column="Surname" data-sort-order="asc" class="sortable-column">Customer name</th>

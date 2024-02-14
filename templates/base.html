@@ -30,11 +30,14 @@
                 <div class="page-content-wrapper">
                     <div class="page-header">
                         <div class="search-container">
-                            <input type="text" id="headerCustomerSearch" placeholder="Search Customers..." oninput="searchInformation()">
+                            {% block searchbar %}
+                                <!-- Default search bar; can be empty if you always want to override it -->
+                                <input type="text" id="headerSearch" placeholder="Search..." oninput="searchInformation()">
+                            {% endblock %}
                             <div id="searchDropdown" class="search-dropdown">
                                 <!-- Search results -->
                             </div>
-                        </div>
+                        </div>                        
                         <div class="user-info">
                             <span>{{ current_user.FirstName }} {{ current_user.LastName }}<button id="toggleDarkMode"><i class="far fa-copyright"></i></button></span>
                             

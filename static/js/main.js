@@ -227,9 +227,18 @@
                 this.DOM.details.classList.add('table-details-box');
         
             // Buttons and placeholder for future content
+            let detailUrl = document.getElementById('detailUrlTemplate').getAttribute('data-url');
+            let manageUrl = document.getElementById('manageUrlTemplate').getAttribute('data-url');
+
+            detailUrl = detailUrl.replace('/customer/0', `/customer/${customerData.Id}`);
+            manageUrl = manageUrl.replace('/manage_customer/0', `/manage_customer/${customerData.Id}`);
+
+            document.getElementById('moreDetailsButton').href = detailUrl;
+            document.getElementById('manageCustomerButton').href = manageUrl;
+            
             content += `<div class="details__actions">
-                            <a href="/path/to/customer_detail.html" class="details__button">More Details</a>
-                            <a href="/path/to/manage_customer.html" class="details__button">Manage Customer</a>
+                            <a href="${detailsUrl}" class="details__button">More Details</a>
+                            <a href="#" class="details__button">Manage Customer</a>
                             <!-- Placeholder for future button -->
                             <!-- <a href="#" class="details__button">Placeholder Button</a> -->
                         </div>`;
@@ -239,11 +248,11 @@
             this.DOM.description.innerHTML = content;
             this.DOM.details.classList.add('table-details-box');
 
-			fetch(`/graph_transactions/${customerData.Id}`)
-				.then(response => response.json())
-				.then(transactionData => {
-					renderGraph(transactionData);
-			});
+			// fetch(`/graph_transactions/${customerData.Id}`)
+			// 	.then(response => response.json())
+			// 	.then(transactionData => {
+			// 		renderGraph(transactionData);
+			// });
 		}
 	}; // class Details
 
@@ -734,7 +743,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // dropdown search functionality.
 
 function searchInformation() {
-    var input = document.getElementById('headerCustomerSearch');
+    var input = document.getElementById('headerSearch');
     var filter = input.value.trim();
     var dropdown = document.getElementById('searchDropdown');
 
