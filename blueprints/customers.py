@@ -114,9 +114,11 @@ def group_accounts_by_type(accounts):
     return grouped_accounts
 
 #Get customer details
-@customer_bp.route('/customer/<int:user_id>')
+@customer_bp.route('/customer_detail/<int:user_id>')
 def customer_detail(user_id):
-    customer = Customer.query.get_or_404(user_id)
+    customerobj = Customer.query.get_or_404(user_id)
+
+    customer = customer_to_dict(customerobj)
     return render_template('customer_detail.html', customer=customer)
 
 @customer_bp.route('/manage/<int:user_id>')

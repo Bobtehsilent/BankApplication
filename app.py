@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from flask_migrate import Migrate, upgrade
 from flask_login import LoginManager
+from sqlalchemy import text
 from models import db, seedData, Customer, read_european_countries, User
 from config import Config, TestConfig
 from blueprints.login import create_initial_users
@@ -39,7 +40,7 @@ def create_app(config_class=Config):
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        return User.query.get_or_404(user_id)
 
     app.jinja_env.globals.update(is_admin=User.is_admin)
     app.jinja_env.globals.update(is_cashier=User.is_cashier)
@@ -53,6 +54,7 @@ def create_app(config_class=Config):
 
 config_class = TestConfig if os.getenv('FLASK_ENV') == 'testing' else Config
 app = create_app(config_class=TestConfig)
+
 
 if __name__  == "__main__":
     with app.app_context():

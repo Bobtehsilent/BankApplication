@@ -369,7 +369,7 @@ body {
     top: 5px;
     right: 0;
     border: 0;
-    background: none;
+    background: var(--background-color);
     margin: 1em;
     cursor: pointer;
     font-size: 0.85em;
@@ -460,6 +460,10 @@ td,
 th {
   padding: 12px;
   border-bottom: 1px solid var(--border-color);
+}
+
+.details__description td {
+  padding: 8px;
 }
 /* 
 th {
@@ -647,7 +651,7 @@ tbody tr {
     
   }
   
-  .flash-message {
+.flash-message {
     position: fixed;
     top: 20px;
     left: 20px;
@@ -764,4 +768,112 @@ tbody tr {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     display: none;
   }
-  
+
+
+
+/* customer_details styling */
+
+/* Aligning content to the center */
+.customer-details-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Flex container for buttons to make them inline */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Space between buttons */
+  margin-bottom: 20px; /* Space before the next section */
+}
+
+.actions button {
+  background-color: var(--details-button-bg-color);
+  color: var(--text-color);
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.actions button:hover {
+  background-color: var(--details-button-hover-bg-color);
+}
+
+/* Flex container for customer details and account data */
+.customer-container {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+  margin-bottom: 20px; /* Space before the graph */
+}
+
+.customer-details, .account-data {
+  flex: 1; /* Each takes equal width */
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+}
+
+/* Styling for the graph container */
+.transaction-graph {
+  margin-bottom: 20px; /* Space before the transaction list */
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  text-align: center; /* Centering the title or any inline content */
+}
+
+/* Initial state for transaction list: collapsed */
+.transaction-list {
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  display: none; /* Start fully collapsed */
+}
+
+.transaction-list.expanded {
+  display: block; /* Show when expanded */
+}
+
+.transaction-list h3 {
+  cursor: pointer; /* Indicates the section can be expanded */
+}
+
+.transaction-list ul {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.transaction-list li {
+  border-bottom: 1px solid var(--border-color);
+  padding: 10px 0;
+}
+
+#loadMoreTransactions {
+  background-color: var(--details-button-bg-color);
+  color: var(--text-color);
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  display: block;
+  margin: 20px auto;
+  transition: background-color 0.3s;
+}
+
+#loadMoreTransactions:hover {
+  background-color: var(--details-button-hover-bg-color);
+}
+
+#transactionList {
+  border: 2px solid #000; /* Example styling, adjust as needed */
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#loadMoreTransactions {
+  margin-top: 10px;
+}

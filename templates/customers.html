@@ -62,12 +62,11 @@
                 <button class="details__close"><i class="fas fa-2x fa-times icon--cross tm-fa-close"></i></button>
                 <div class="details__description table-detail-description">
                 </div>
-                <div id="urlTemplates" style="display:none;">
-                    <a id="detailUrlTemplate" data-url="{{ url_for('customer.customer_detail', user_id=0) }}"></a>
-                    <a id="manageUrlTemplate" data-url="{{ url_for('customer.manage_customer', user_id=0) }}"></a>
-                </div>
             </div>
         </div>
     </div>
-    
+<script>
+    var baseCustomerDetailUrl = "{{ url_for('customer.customer_detail', user_id=0, _external=True) }}";
+    var baseManageCustomerUrl = "{{ url_for('customer.manage_customer', user_id=0, _external=True) }}";
+</script>
 {% endblock %}

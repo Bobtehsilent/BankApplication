@@ -106,4 +106,8 @@
             </div>
         </div>
     </div>
+    <script>
+        var baseCustomerDetailUrl = "{{ url_for('customer.customer_detail', user_id=0, _external=True) }}";
+        var baseManageCustomerUrl = "{{ url_for('customer.manage_customer', user_id=0, _external=True) }}";
+    </script>
 {% endblock %}

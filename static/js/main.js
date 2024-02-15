@@ -193,7 +193,7 @@
 			this.DOM.description.innerHTML = content;
 		}
         fillCustomerData(customerData) {
-            //console.log(customerData); // Check what data is received
+            console.log(customerData); // Check what data is received
             let content =  `<div class="customer-details-container">`;
         
             // Customer info and accounts are side by side
@@ -209,50 +209,39 @@
                     <tr><td>Email:</td><td>${customerData.EmailAddress}</td></tr>
                 </table>`;
         
-                if (customerData.Accounts && customerData.Accounts.length > 0) {
-                    let totalBalance = 0;
-                    content += `<table class="accounts-info-table"><tr><th>Type</th><th>Balance</th></tr>`;
-                    customerData.Accounts.forEach(account => {
-                        totalBalance += account.Balance;
-                        content += `<tr><td>${account.AccountType}</td><td>${account.Balance} SEK</td></tr>`;
-                    });
-                    content += `<tr class="total-balance"><td>Total Balance:</td><td>${totalBalance.toFixed(2)} SEK</td></tr></table>`;
-                } else {
-                    content += `<p>No accounts found</p>`;
-                }
-                content += `</div>`; // Close customer-accounts div
-            
-                // Append the constructed content
-                this.DOM.description.innerHTML = content;
-                this.DOM.details.classList.add('table-details-box');
-        
-            // Buttons and placeholder for future content
-            let detailUrl = document.getElementById('detailUrlTemplate').getAttribute('data-url');
-            let manageUrl = document.getElementById('manageUrlTemplate').getAttribute('data-url');
+            if (customerData.Accounts && customerData.Accounts.length > 0) {
+                let totalBalance = 0;
+                content += `<table class="accounts-info-table"><tr><th>Type</th><th>Balance</th></tr>`;
+                customerData.Accounts.forEach(account => {
+                    totalBalance += account.Balance;
+                    content += `<tr><td>${account.AccountType}</td><td>${account.Balance} SEK</td></tr>`;
+                });
+                content += `<tr class="total-balance"><td>Total Balance:</td><td>${totalBalance.toFixed(2)} SEK</td></tr></table>`;
+            } else {
+                content += `<p>No accounts found</p>`;
+            }
+            content += `</div>`; // Close customer-accounts div
 
-            detailUrl = detailUrl.replace('/customer/0', `/customer/${customerData.Id}`);
-            manageUrl = manageUrl.replace('/manage_customer/0', `/manage_customer/${customerData.Id}`);
 
-            document.getElementById('moreDetailsButton').href = detailUrl;
-            document.getElementById('manageCustomerButton').href = manageUrl;
-            
+            // button
+            const customerDetailUrl = baseCustomerDetailUrl.replace('/0', '/' + customerData.Id);
+            const manageCustomerUrl = baseManageCustomerUrl.replace('/0', '/' + customerData.Id);
             content += `<div class="details__actions">
-                            <a href="${detailsUrl}" class="details__button">More Details</a>
-                            <a href="#" class="details__button">Manage Customer</a>
-                            <!-- Placeholder for future button -->
-                            <!-- <a href="#" class="details__button">Placeholder Button</a> -->
-                        </div>`;
+                                <a href="${customerDetailUrl}" class="details__button">More Details</a>
+                                <a href="${manageCustomerUrl}" class="details__button">Manage Customer</a>
+                                <!-- Placeholder for future button -->
+                                <!-- <a href="#" class="details__button">Placeholder Button</a> -->
+                            </div>`;
+        
+            // Append the constructed content
+            this.DOM.description.innerHTML = content;
+            this.DOM.details.classList.add('table-details-box');
+            
         
             content += `</div>`; // Closing the customer-details-container div
         
             this.DOM.description.innerHTML = content;
             this.DOM.details.classList.add('table-details-box');
-
-			// fetch(`/graph_transactions/${customerData.Id}`)
-			// 	.then(response => response.json())
-			// 	.then(transactionData => {
-			// 		renderGraph(transactionData);
-			// });
 		}
 	}; // class Details
 
@@ -541,7 +530,6 @@ function filterAccounts(pageNum = 1, sortColumn = 'Surname', sortOrder = 'asc') 
 
 
 // pagination handling
-
 function updatePaginationControls(pagination) {
     const paginationContainer = document.querySelector('.table-row-pagination');
     paginationContainer.innerHTML = ''; // Clear existing controls
@@ -653,34 +641,36 @@ document.addEventListener("DOMContentLoaded", function() {
 
 //sidebar end
 
+
 //Graph functionality
 function openGraph(customerId) {
     // Fetch data
-    fetch(`/graph_transactions/${customerId}?account_types=savings&account_types=checking`)
+    fetch(`/graph_transactions/${customerId}`)
         .then(response => response.json())
         .then(data => {
-            // Process data and render graph
+            console.log(data); // Check the structure of the data
             renderGraph(data);
         });
 }
 
 function renderGraph(data) {
-    // Example data processing (modify according to your data structure)
-    const labels = data.map(item => item.date); // Array of dates
-    const dataPoints = data.map(item => item.balance); // Array of balances
+    const ctx = document.getElementById('transactionGraph').getContext('2d');
+    
+    const datasets = Object.keys(data).map(accountType => ({
+        label: `${accountType} Account Balance`,
+        data: data[accountType].map(item => item.cumulative_balance),
+        fill: false,
+        borderColor: getRandomColor(), // Implement this function to assign unique colors
+        tension: 0.1
+    }));
+    
+    const labels = data[Object.keys(data)[0]].map(item => item.date);
 
-    const ctx = document.getElementById('balanceGraph').getContext('2d');
     const chart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
-            datasets: [{
-                label: 'Account Balance',
-                data: dataPoints,
-                fill: false,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }]
+            datasets: datasets
         },
         options: {
             scales: {
@@ -690,10 +680,17 @@ function renderGraph(data) {
             }
         }
     });
-
-    // Show the graph container
-    document.getElementById('graph-container').style.display = 'block';
 }
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
 
 function toggleAccountType(accountType) {
     // Get all transaction elements
@@ -815,3 +812,40 @@ document.getElementById('toggleDarkMode').addEventListener('click', function() {
   });
 
 window.openDetailsWithData = openDetailsWithData;
+
+
+
+//transaction load
+
+let offset = 0;
+const limit = 20;
+
+function loadTransactions(customerId) {
+    fetch(`/transactions/${customerId}?limit=${limit}&offset=${offset}`)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(transaction => {
+                const li = document.createElement('li');
+                li.textContent = `Date: ${transaction.date}, Amount: ${transaction.amount}, Type: ${transaction.type}, Operation: ${transaction.operation}`;
+                document.querySelector('#transactionList ul').appendChild(li);
+            });
+
+            // Prepare for the next set of transactions
+            offset += limit;
+        })
+        .catch(error => console.error('Error loading transactions:', error));
+}
+
+function toggleTransactionList() {
+    const transactionListDiv = document.getElementById('transactionList');
+    const loadMoreButton = document.getElementById('loadMoreTransactions');
+
+    if (transactionListDiv.style.display === 'none') {
+        transactionListDiv.style.display = 'block'; // Show the list
+        loadMoreButton.innerText = 'Close Transactions';
+        loadTransactions(1); // Example customer ID, replace with the actual ID
+    } else {
+        transactionListDiv.style.display = 'none'; // Hide the list
+        loadMoreButton.innerText = 'Load Transactions';
+    }
+}
