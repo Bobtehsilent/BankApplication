@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Edit Customer</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.csrf_token }}
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.label(class="form-label") }}
+                {{ field(class="form-control") }}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

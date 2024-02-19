@@ -1,48 +1,48 @@
-1 	BE 	Belgium
-2 	FR 	France
-3 	BG 	Bulgaria
-4 	DK 	Denmark
-5 	HR 	Croatia
-6 	DE 	Germany
-7 	BA 	Bosnia and Herz.
-8 	HU 	Hungary
-9 	JE 	Jersey
-10 	FI 	Finland
-11 	BY 	Belarus
-12 	GR 	Greece
-13 	RU 	Russia
-14 	NL 	Netherlands
-15 	PT 	Portugal
-16 	NO 	Norway
-17 	LI 	Liechtenstein
-18 	LV 	Latvia
-19 	LT 	Lithuania
-20 	LU 	Luxembourg
-21 	FO 	Faeroe Is.
-22 	PL 	Poland
-23 	XK 	Kosovo
-24 	CH 	Switzerland
-25 	AD 	Andorra
-26 	EE 	Estonia
-27 	IS 	Iceland
-28 	AL 	Albania
-29 	IT 	Italy
-30 	GG 	Guernsey
-31 	CZ 	Czech Rep.
-32 	IM 	Isle of Man
-33 	GB 	United Kingdom
-34 	AX 	Aland
-35 	IE 	Ireland
-36 	ES 	Spain
-37 	ME 	Montenegro
-38 	MD 	Moldova
-39 	RO 	Romania
-40 	RS 	Serbia
-41 	MK 	Macedonia
-42 	SK 	Slovakia
-43 	MT 	Malta
-44 	SI 	Slovenia
-45 	SM 	San Marino
-46 	UA 	Ukraine
-47 	SE 	Sweden
-48 	AT 	Austria
+BE,Belgium,+32
+FR,France,+33
+BG,Bulgaria,+359
+DK,Denmark,+45
+HR,Croatia,+385
+DE,Germany,+49
+BA,Bosnia and Herz.,+387
+HU,Hungary,+36
+JE,Jersey,+44
+FI,Finland,+358
+BY,Belarus,+375
+GR,Greece,+30
+RU,Russia,+7
+NL,Netherlands,+31
+PT,Portugal,+351
+NO,Norway,+47
+LI,Liechtenstein,+423
+LV,Latvia,+371
+LT,Lithuania,+370
+LU,Luxembourg,+352
+FO,Faeroe Is.,+298
+PL,Poland,+48
+XK,Kosovo,+383
+CH,Switzerland,+41
+AD,Andorra,+376
+EE,Estonia,+372
+IS,Iceland,+354
+AL,Albania,+355
+IT,Italy,+39
+GG,Guernsey,+44
+CZ,Czech Rep.,+420
+IM,Isle of Man,+44
+GB,United Kingdom,+44
+AX,Aland,+358
+IE,Ireland,+353
+ES,Spain,+34
+ME,Montenegro,+382
+MD,Moldova,+373
+RO,Romania,+40
+RS,Serbia,+381
+MK,Macedonia,+389
+SK,Slovakia,+421
+MT,Malta,+356
+SI,Slovenia,+386
+SM,San Marino,+378
+UA,Ukraine,+380
+SE,Sweden,+46
+AT,Austria,+43

@@ -31,8 +31,8 @@
             {% endif %}
             {% if current_user.ManagementPermission %}
                 <div class="nav-section">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
+                    <a href="{{ url_for('customer.add_customer') }}" class="nav-link">
+                        <i class="fas fa-wrench"></i><span>Add customer</span>
                     </a>
                     <a href="#" class="nav-link">
                         <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>

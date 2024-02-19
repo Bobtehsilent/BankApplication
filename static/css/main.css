@@ -454,6 +454,7 @@ thead th {
   color: var(--text-color);
   padding: 10px;
   border-bottom: 2px solid var(--border-color);
+  text-align: left;
 }
 
 td,
@@ -465,22 +466,20 @@ th {
 .details__description td {
   padding: 8px;
 }
-/* 
-th {
-  position: sticky;
-  top: 0; 
-  z-index: 10;
-  background-color: var(--background-color);
-}
-  
-th a {
-  color: var(--text-color);
-  text-decoration: none; 
-} */
+
 
 tbody tr:nth-child(odd) {
   background-color: var(--row-odd-bg-color);
+} 
+
+.inner-table tbody tr {
+  background-color: transparent;
 }
+
+.inner-table tbody tr:hover {
+  border: none;
+}
+
 
 tbody tr:hover {
   background-color: var(--hover-bg-color);
@@ -493,10 +492,6 @@ tbody tr:hover {
   color: var(--active-text-color);
 }
 
-tbody tr.active td,
-tbody tr:hover td {
-  border-bottom: 1px solid var(--active-border-color);
-}
 
 
 tr.total-balance {
@@ -514,10 +509,6 @@ table a:hover {
 }
   
   
-/* td {
-  background-color: #ffffff;
-  color: #333; 
-} */
   
 .inner-table {
   width: 100%;
@@ -529,7 +520,7 @@ table a:hover {
   border: none;
 }
   
-  .inner-table.rowspan {
+.inner-table.rowspan {
     text-align: center;
   }
   
@@ -538,11 +529,7 @@ table a:hover {
   padding: 0;
 }
   
-/* .inner-table tr.account-type-separator:first-child td {
-  border-top: none;
-} */
-  
-tbody tr {
+.table-row tr {
     transition: background-color 150ms ease-out;
     &:nth-child(2n) {
       background-color: darken(var(--background-color), 8%);
@@ -551,6 +538,18 @@ tbody tr {
       background-color: darken(var(--background-color), 4%);
     }
   }
+
+
+/* account tables */
+
+.inner-table tr {
+  background-color: var(--background-color); /* Reset or specify the desired color */
+}
+
+.inner-table tr:hover {
+  background-color: var(--inner-hover-bg-color); /* If you want a hover effect for inner rows */
+  color: var(--inner-hover-text-color);
+}
 
 .sort-arrow {
     margin-left: 5px;
@@ -670,7 +669,7 @@ tbody tr {
     cursor: pointer;
   }
   
-  .table-row.active {
+.table-row.active {
     background: var(--background-color);
   }
   
@@ -779,27 +778,6 @@ tbody tr {
   margin: 0 auto;
 }
 
-/* Flex container for buttons to make them inline */
-.actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px; /* Space between buttons */
-  margin-bottom: 20px; /* Space before the next section */
-}
-
-.actions button {
-  background-color: var(--details-button-bg-color);
-  color: var(--text-color);
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.actions button:hover {
-  background-color: var(--details-button-hover-bg-color);
-}
-
 /* Flex container for customer details and account data */
 .customer-container {
   display: flex;
@@ -808,11 +786,52 @@ tbody tr {
   margin-bottom: 20px; /* Space before the graph */
 }
 
-.customer-details, .account-data {
-  flex: 1; /* Each takes equal width */
-  padding: 20px;
-  border: 1px solid var(--border-color);
-  border-radius: 5px;
+.customer-container, .customer-details-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* This will push children to top and bottom */
+  height: 100%; /* Make sure the container has a defined height */
+}
+
+.customer-details-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Pushes children to the top and bottom */
+  height: 100vh; /* Example height, adjust as needed */
+}
+
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.info-table th, .info-table td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid var(--details-border-color);
+}
+
+.info-table .total-balance th {
+  text-align: right;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.actions button {
+  background-color: var(--details-button-bg-color);
+  color: var(--details-text-color);
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.actions button:hover {
+  background-color: var(--details-button-hover-bg-color);
 }
 
 /* Styling for the graph container */

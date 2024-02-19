@@ -93,8 +93,13 @@
                     countryName: code,
                     customers: countryData.map(customer => {
                         return {
+                            id: customer.id,
                             name: customer.name,
-                            email: customer.email
+                            lastname: customer.lastname,
+                            personalnumber: customer.personalnumber,
+                            address: customer.address,
+                            city: customer.city,
+                            total_balance: customer.total_balance
                         };
                     })
                 };

@@ -1,10 +1,9 @@
 from flask import Flask, render_template
 from flask_migrate import Migrate, upgrade
 from flask_login import LoginManager
-from sqlalchemy import text
-from models import db, seedData, Customer, read_european_countries, User
+from models import db, seedData, Customer, load_country_codes, User
 from config import Config, TestConfig
-from blueprints.login import create_initial_users
+from blueprints.login.login import create_initial_users
 import os
 
 login_manager = LoginManager()
@@ -19,21 +18,18 @@ def create_app(config_class=Config):
 
     #Registering blueprints
     from blueprints.main import main_bp
-    from blueprints.contact_form import contact_form_bp
-    from blueprints.accounts import account_bp
-    from blueprints.customers import customer_bp
-    from blueprints.transactions import transactions_bp
-    from blueprints.login import login_bp
-    from blueprints.user_interface import interface_bp
-    from blueprints.user_dashboard import user_bp
-
+    from blueprints.contactform.contact_form import contact_form_bp
+    from blueprints.accounts.accounts import account_bp
+    from blueprints.customers.customers import customer_bp
+    from blueprints.transactions.transactions import transactions_bp
+    from blueprints.login.login import login_bp
+    from blueprints.interface.user_interface import interface_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(contact_form_bp)
     app.register_blueprint(customer_bp)
     app.register_blueprint(account_bp)
     app.register_blueprint(transactions_bp)
     app.register_blueprint(interface_bp)
-    app.register_blueprint(user_bp)
     app.register_blueprint(login_bp)
 
     login_manager.login_view = 'main.homepage'
@@ -60,5 +56,5 @@ if __name__  == "__main__":
     with app.app_context():
         upgrade()
         create_initial_users()
-        seedData(db, read_european_countries('static/countrycodes/country_codes.txt'))
+        seedData(db, load_country_codes('static/countrycodes/country_codes.txt'))
     app.run()

@@ -8,7 +8,7 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route("/")
 def homepage():
-    return render_template("homepage.html")
+    return render_template("/homepage/homepage.html")
 
 
 @main_bp.route('/search_customers', methods=['GET'])

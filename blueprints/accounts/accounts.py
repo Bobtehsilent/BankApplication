@@ -3,7 +3,7 @@ from flask_login import login_required
 from sqlalchemy import func
 from datetime import datetime
 from models import Account, db, Customer
-from .customers import database_to_dict
+from ..customers.customers import database_to_dict
 
 account_bp = Blueprint('account', __name__)
 
@@ -47,15 +47,23 @@ def account_list():
     else:    
         paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
         customer_account_data = database_to_dict(paginated_customers.items)
-        return render_template('accounts.html', customer_account_data=customer_account_data,
+        return render_template('accounts/accounts.html', customer_account_data=customer_account_data,
                             paginated=paginated_customers, search_query=search_query,
                             sort_column=sort_column, sort_order=sort_order)
 
 
-@account_bp.route('/accounts')
-def account_dashboard():
-    # Logic ro fetch account data
-    return render_template('account_dashboard.html')
+# @account_bp.route('/accounts')
+# def account_dashboard():
+#     # Logic ro fetch account data
+#     return render_template('account_dashboard.html')
+
+@account_bp.route('/manage_accounts/<int:customer_id>')
+@login_required
+def manage_accounts(customer_id):
+    # Fetch the customer and their accounts, display management options
+    customer = Customer.query.get_or_404(customer_id)
+    accounts = Account.query.filter_by(CustomerId=customer_id).all()
+    return render_template('manage_accounts.html', customer=customer, accounts=accounts)
 
 @account_bp.route('/add_account', methods=['POST'])
 def add_account():

@@ -70,6 +70,8 @@
 			this.DOM.bgDown.style.transform = `translateX(${rect.productBgRect.left-rect.detailsBgRect.left}px) translateY(${rect.productBgRect.top-rect.detailsBgRect.top}px) scaleX(${rect.productBgRect.width/rect.detailsBgRect.width}) scaleY(${rect.productBgRect.height/rect.detailsBgRect.height})`;
             this.DOM.bgDown.style.opacity = 1;
 
+            console.log("Details box should now be open.");
+
             // animate background
             anime({
                 targets: [this.DOM.bgDown],
@@ -184,14 +186,37 @@
 		     	}	
 	        }          
         }
-		fillCountryData(countryData) {
-			let content = `<h2>Customers in ${countryData.countryName}</h2><ul>`;
-			countryData.customers.forEach(customer => {
-				content += `<li>${customer.name} - ${customer.email}</li>`;
-			});
-			content += `</ul>`;
-			this.DOM.description.innerHTML = content;
-		}
+
+        fillCountryData(countryData) {
+            let content = `<h2>Top 5 Customers in ${countryData.countryName}</h2>`;
+        
+            // Sort customers by total balance in descending order
+            let sortedCustomers = countryData.customers.sort((a, b) => b.total_balance - a.total_balance).slice(0, 10);
+        
+            // Start table
+            content += `<table><thead><tr><th>Rank</th><th>Id</th><th>Name</th><th>Personalnumber</th><th>Address</th><th>City</th><th>Total Balance</th></tr></thead><tbody>`;
+        
+            // Add customers to the table with ranks
+            sortedCustomers.forEach((customer, index) => {
+                content += `<tr>
+                                <td>${index + 1}</td>
+                                <td>${customer.id}</td>
+                                <td>${customer.name} ${customer.lastname}</td>
+                                <td>${customer.personalnumber}</td>
+                                <td>${customer.address}</td>
+                                <td>${customer.city}
+                                <td>${customer.total_balance}</td>
+                            </tr>`;
+            });
+        
+            // Close table
+            content += `</tbody></table>`;
+        
+            // Update the DOM
+            console.log(content)
+            this.DOM.description.innerHTML = content;
+        }
+        
         fillCustomerData(customerData) {
             console.log(customerData); // Check what data is received
             let content =  `<div class="customer-details-container">`;
@@ -325,7 +350,10 @@
 		}
 	}
 
+
 	const DOM = {};
+
+    DOM.details = new Details();
 
 	DOM.grid = document.querySelector('.grid');
 	if (DOM.grid) {
@@ -333,20 +361,17 @@
 		DOM.gridItems = Array.from(DOM.grid.querySelectorAll('.grid__item')).filter(item => item.querySelector('.product'));
 		let items = [];
 		DOM.gridItems.forEach(item => items.push(new Item(item)));
-		DOM.details = new Details();
 	}
 
 	DOM.adminItems = document.querySelectorAll('.user-stat-item');
     if (DOM.adminItems.length) {
         let adminItems = [];
         DOM.adminItems.forEach(item => adminItems.push(new AdminItem(item)));
-        DOM.details = new Details();
     }
 
 	if (document.querySelector('.table-list')) {
 		DOM.customerRows = document.querySelectorAll('.table-row');
 		DOM.customerRows.forEach(row => new CustomerItem(row));
-		DOM.details = new Details();
 	}
 
 	window.DOM = DOM;
@@ -354,10 +379,8 @@
 
 	function openDetailsWithData(data) {
 		console.log("Data received:", data); // Debugging line 
-		//if (!data.productBg) {
-		//	data.productBg = someDefaultElement;
-		//}
 		DOM.details.fillCountryData(data);
+        console.log('It should')
 		DOM.details.open(data);
 	}
 };
@@ -790,7 +813,7 @@ function appendCustomerToDropdown(customer, dropdown) {
     customerDiv.textContent = customer.name;
     customerDiv.className = 'dropdown-item';
     customerDiv.addEventListener('click', function() {
-        window.location.href = `/customer_detail/${customer.id}`;
+        window.location.href = `customers/customer_detail/${customer.id}`;
     });
     dropdown.appendChild(customerDiv);
 }

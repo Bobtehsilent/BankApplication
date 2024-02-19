@@ -56,15 +56,10 @@ def add_transaction(account_id, transaction_type, amount):
         return str(e), 400
 
 
-@transactions_bp.route('/transactions/<int:customer_id>', methods=['GET'])
-def get_transactions(customer_id):
-    transactions = Transaction.query\
-        .join(Account)\
-        .filter(Account.CustomerId == customer_id)\
-        .all()  # Assuming you have defined relationships appropriately
-    # Convert transactions to a suitable format (e.g., list of dicts) to return as JSON
-    transactions_data = [{'Id': t.Id, 'Amount': t.Amount, 'Date': t.Date} for t in transactions]
-    return jsonify(transactions_data)
+@transactions_bp.route('/transactions/<int:id>', methods=['GET'])
+def get_transaction(id):
+    transaction = Transaction.query.get_or_404(id)
+    return render_template('transaction_detail.html', transaction=transaction)
 
 @transactions_bp.route('/update_transaction/<int:id>', methods=['POST'])
 def update_transaction(id):
@@ -96,35 +91,28 @@ def get_total_balance(customer_id):
 def transactions_graph(customer_id):
     transactions = Transaction.query.join(Account).filter(
         Account.CustomerId == customer_id
-    ).order_by(Transaction.Date.asc()).all()
-
-    # Prepare data structure to hold cumulative balance for each unique account
-    balances_by_account = defaultdict(list)
-    running_balances = {}  # Keyed by account ID
+    ).order_by(Transaction.Date.asc()).all()  # Note: Removed limit here to process all transactions
+    
+    # Prepare data structure to hold cumulative balance by account type
+    balances_by_type = defaultdict(list)
+    
+    # Track running balances for each account type
+    running_balances = defaultdict(int)
 
     for transaction in transactions:
-        # Unique key for each account (e.g., "Savings_1")
-        account_key = f"{transaction.Account.AccountType}_{transaction.Account.Id}"
-
-        # Initialize running balance for this account if it's the first transaction
-        if account_key not in running_balances:
-            running_balances[account_key] = 0
-
-        # Update running balance based on the transaction
-        if transaction.Type == "Credit":
-            running_balances[account_key] -= transaction.Amount
+        # Assuming each transaction affects the balance according to its type
+        if transaction.Type == "Debit":
+            running_balances[transaction.Account.AccountType] += transaction.Amount
         else:  # Debit
-            running_balances[account_key] += transaction.Amount
-
-        # Append the current running balance for this unique account
-        balances_by_account[account_key].append({
+            running_balances[transaction.Account.AccountType] -= transaction.Amount
+        
+        # Append the current running balance for this account type
+        balances_by_type[transaction.Account.AccountType].append({
             "date": transaction.Date.strftime("%Y-%m-%d"),
-            "cumulative_balance": running_balances[account_key]
+            "cumulative_balance": running_balances[transaction.Account.AccountType]
         })
 
-    # Now `balances_by_account` contains separate entries for each account, even if they are of the same type
-
-    return jsonify(balances_by_account)
+    return jsonify(balances_by_type)
 
 
 

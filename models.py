@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import event
 import barnum
 import random
 from datetime import datetime  
@@ -66,25 +67,38 @@ class Customer(db.Model):
 
 
 class Account(db.Model):
-    __tablename__= "Accounts"
+    __tablename__ = "Accounts"
     Id = db.Column(db.Integer, primary_key=True)
-    AccountType = db.Column(db.String(10), unique=False, nullable=False)
-    Created = db.Column(db.DateTime, unique=False, nullable=False)
-    Balance = db.Column(db.Integer, unique=False, nullable=False)
-    Transactions = db.relationship('Transaction', backref='Account',
-     lazy=True)
+    AccountType = db.Column(db.String(10), nullable=False)
+    Created = db.Column(db.DateTime, nullable=False)
+    Balance = db.Column(db.Integer, nullable=False)
+    Transactions = db.relationship('Transaction', backref='Account', lazy=True)
     CustomerId = db.Column(db.Integer, db.ForeignKey('Customers.Id'), nullable=False)
 
-
 class Transaction(db.Model):
-    __tablename__= "Transactions"
+    __tablename__ = "Transactions"
     Id = db.Column(db.Integer, primary_key=True)
-    Type = db.Column(db.String(20), unique=False, nullable=False)
-    Operation = db.Column(db.String(50), unique=False, nullable=False)
-    Date = db.Column(db.DateTime, unique=False, nullable=False)
-    Amount = db.Column(db.Integer, unique=False, nullable=False)
+    Type = db.Column(db.String(20), nullable=False)
+    Operation = db.Column(db.String(50), nullable=False)
+    Date = db.Column(db.DateTime, nullable=False)
+    Amount = db.Column(db.Integer, nullable=False)
     NewBalance = db.Column(db.Integer, unique=False, nullable=False)
     AccountId = db.Column(db.Integer, db.ForeignKey('Accounts.Id'), nullable=False)
+
+@event.listens_for(Transaction, 'after_insert')
+@event.listens_for(Transaction, 'after_update')
+def update_account_balance(mapper, connection, target):
+    account = db.session.query(Account).get(target.AccountId)
+    
+    if account:
+        if target.Type == 'credit':
+            account.Balance += target.Amount
+        elif target.Type == 'debit':
+            account.Balance -= target.Amount
+        
+        # Save the updated account
+        db.session.add(account)
+        db.session.commit()
 
 class User(db.Model):
     __tablename__= "User"
@@ -143,42 +157,55 @@ class CustomerContact(db.Model):
 
     customer = db.relationship('Customer', backref='contacts', lazy=True)
 
-def read_european_countries(file_path):
-    countries = []
-    with open(file_path, 'r') as file:
-        for line in file:
-            _, code, name = line.strip().split('\t')
-            countries.append((code, name))
-        return countries
-
-def add_overdraft_to_debt_account(customer, overdraft_amount):
-    debt_account = Account.query.filter_by(CustomerId=customer.Id, AccountType="Debt").first()
-    if not debt_account:
-        debt_account = Account(
-            CustomerId=customer.Id,
-            AccountType="Debt",
-            Created=datetime.now(),
-            Balance=0  # Start with a zero balance
-        )
-        db.session.add(debt_account)
+# def read_european_countries(file_path):
+#     countries = []
+#     with open(file_path, 'r') as file:
+#         for line in file:
+#             _, code, name = line.strip().split('\t')
+#             countries.append((code, name))
+#         return countries
     
-    # Add the overdraft amount to the Debt account's balance
-    debt_account.Balance += overdraft_amount
-    db.session.commit()
+def load_country_codes(filename='country_codes.txt'):
+    country_codes = []
+    with open(filename, 'r') as f:
+        for line in f.readlines():
+            parts = line.strip().split(',')
+            if len(parts) == 3:
+                country_codes.append({
+                    'code': parts[0].strip(),
+                    'name': parts[1].strip(),
+                    'tel_code': parts[2].strip()
+                })
+    return country_codes
 
-def add_overdraft_to_debt_account(customer_id, overdraft_amount):
-    # Find or create a "Debt" account for the customer
-    debt_account = Account.query.filter_by(CustomerId=customer_id, AccountType="Debt").first()
-    if not debt_account:
-        debt_account = Account(
-            CustomerId=customer_id,
-            AccountType="Debt",
-            Created=datetime.now(),
-            Balance=0
-        )
-        db.session.add(debt_account)
-    # Update the debt account's balance
-    debt_account.Balance += overdraft_amount
+# def add_overdraft_to_debt_account(customer, overdraft_amount):
+#     debt_account = Account.query.filter_by(CustomerId=customer.Id, AccountType="Debt").first()
+#     if not debt_account:
+#         debt_account = Account(
+#             CustomerId=customer.Id,
+#             AccountType="Debt",
+#             Created=datetime.now(),
+#             Balance=0  # Start with a zero balance
+#         )
+#         db.session.add(debt_account)
+    
+#     # Add the overdraft amount to the Debt account's balance
+#     debt_account.Balance += overdraft_amount
+#     db.session.commit()
+
+# def add_overdraft_to_debt_account(customer_id, overdraft_amount):
+#     # Find or create a "Debt" account for the customer
+#     debt_account = Account.query.filter_by(CustomerId=customer_id, AccountType="Debt").first()
+#     if not debt_account:
+#         debt_account = Account(
+#             CustomerId=customer_id,
+#             AccountType="Debt",
+#             Created=datetime.now(),
+#             Balance=0
+#         )
+#         db.session.add(debt_account)
+#     # Update the debt account's balance
+#     debt_account.Balance += overdraft_amount
 
 def seedData(db, european_countries):
     try:

@@ -1,10 +1,9 @@
-from flask import Blueprint, request, render_template, jsonify
+from flask import Blueprint, request, render_template, jsonify, flash, redirect, url_for
 from flask_login import login_required
 from sqlalchemy import or_
-from datetime import datetime
-from models import Customer, db, Account
-from sqlalchemy.orm import joinedload
+from models import Customer, db, Account, load_country_codes
 from collections import defaultdict
+from .customerforms import AddCustomerForm
 
 customer_bp = Blueprint('customer', __name__, url_prefix='/customers')
 
@@ -58,7 +57,7 @@ def customer_list():
     else:
         paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
         customers_dict = database_to_dict(paginated_customers)
-        return render_template('customers.html', customers=customers_dict, 
+        return render_template('/customers/customers.html', customers=customers_dict, 
                            paginated=paginated_customers, 
                            sort_column=sort_column, sort_order=sort_order)
 
@@ -119,42 +118,55 @@ def customer_detail(user_id):
     customerobj = Customer.query.get_or_404(user_id)
 
     customer = customer_to_dict(customerobj)
-    return render_template('customer_detail.html', customer=customer)
+    return render_template('/customers/customer_detail.html', customer=customer)
 
 @customer_bp.route('/manage/<int:user_id>')
 def manage_customer(user_id):
     customer = Customer.query.get_or_404(user_id)
-    return render_template('manage_customer.html', customer=customer)
+    return render_template('/customers/manage_customer.html', customer=customer)
 
-#adding customers
-@customer_bp.route('/add_customer', methods=['POST'])
+@customer_bp.route('/add/customer', methods=['GET', 'POST'])
 def add_customer():
-    GivenName = request.form['first_name']
-    Surname = request.form['last_name']
-    Streetaddress = request.form['street_address']
-    City = request.form['city']
-    Zipcode = request.form['zip_code']
-    Country = request.form['country']
-    CountryCode = request.form['country_code']
-    Birthday = request.form['irthday']
-    NationalId = request.form['national_id']
-    TelephoneCountryCode = request.form['telephone_country_code']
-    Telephone = request.form['phone_number']
-    EmailAddress = request.form['email_address']
+    form = AddCustomerForm()
+    country_codes = load_country_codes('static/countrycodes/country_codes.txt')
+    form.country.choices = [(c['name'], c['name']) for c in country_codes]
+    if form.validate_on_submit():
+        selected_country = form.country.data
+        selected_country_code = next((c['code'] for c in country_codes if c['name'] == selected_country), None)
+        selected_tel_code = next((c['tel_code'] for c in country_codes if c['name'] == selected_country), None)
+        birthday_str = form.birthday.data.strftime('%Y%m%d')
+        personal_number = f"{birthday_str}-{form.personalnumber_last4.data}"
+        raw_telephone = form.telephone.data
+        processed_telephone = f"({selected_tel_code}){raw_telephone.lstrip('0')}"
+        
+        # Create and add the new customer
+        new_customer = Customer(
+            GivenName=form.givenname.data.capitalize(),
+            Surname=form.surname.data.capitalize(),
+            EmailAddress=form.email.data,
+            Birthday=form.birthday.data,
+            Telephone=processed_telephone,
+            Streetaddress=form.address.data,
+            City=form.city.data,
+            Zipcode=form.zipcode.data,
+            Country=form.country.data,
+            CountryCode=selected_country_code,
+            TelephoneCountryCode=selected_tel_code,
+            PersonalNumber=personal_number
+        )
+        db.session.add(new_customer)
+        db.session.commit()
+        flash('Customer added successfully!', 'success')
+        return redirect(url_for('customer.customer_detail', user_id=new_customer.Id))
+    return render_template('/customers/add_customer.html', form=form)
 
-    new_customer = Customer(
-        GivenName=GivenName, Surname=Surname, Streetaddress=Streetaddress,
-        City=City, Zipcode=Zipcode, Country=Country, CountryCode=CountryCode,
-        Birthday=Birthday, NationalId=NationalId, TelephoneCountryCode=TelephoneCountryCode,
-        Telephone=Telephone, EmailAddress=EmailAddress
-    )
+@customer_bp.route('/edit_customer/<int:customer_id>')
+@login_required
+def edit_customer(customer_id):
+    # Fetch the customer, display form for editing
+    customer = Customer.query.get_or_404(customer_id)
+    return render_template('edit_customer.html', customer=customer)
 
-    db.session.add(new_customer)
-    db.session.commit()
-
-    return 'customer added successfully'
-
-# updating customer
 @customer_bp.route('/customers/update/<int:id>', methods=['POST'])
 def update_customer(id):
     customer = Customer.query.get_or_404(id)
