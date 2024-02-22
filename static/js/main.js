@@ -245,7 +245,7 @@
             } else {
                 content += `<p>No accounts found</p>`;
             }
-            content += `</div>`; // Close customer-accounts div
+            content += `</div>`;
 
 
             // button
@@ -465,18 +465,23 @@ function updateSortingUI(column, newSortOrder) {
 }
 
 
-function filterCustomers(pageNum = 1, sortColumn = 'Surname', sortOrder = 'asc') {
-    let searchQuery = document.getElementById('listCustomerSearch').value;
+function filterCustomers(pageNum = 1, sortColumn = 'Surname', sortOrder = 'asc', searchQueryFromURL = '') {
+    let searchQuery = searchQueryFromURL || document.getElementById('listCustomerSearch').value;
 
-    fetch(`/customers/customer_list?ajax=1&search=${encodeURIComponent(searchQuery)}&page=${pageNum}&sort_column=${sortColumn}&sort_order=${sortOrder}`)
-    .then(response => response.json())
+    // Adjust the fetch URL to match the new API endpoint
+    fetch(`/api/customer_lists?search=${encodeURIComponent(searchQuery)}&page=${pageNum}&sort_column=${sortColumn}&sort_order=${sortOrder}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Server responded with status ${response.status}`);
+        }
+        return response.json(); 
+    })
     .then(data => {
         const tbody = document.getElementById('customerListBody');
         if (!tbody) {
             console.error('Tbody element not found');
             return;
         }
-
         tbody.innerHTML = '';
 
         if (data.customers && data.customers.length) {
@@ -485,12 +490,12 @@ function filterCustomers(pageNum = 1, sortColumn = 'Surname', sortOrder = 'asc')
                 row.className = 'table-row';
                 row.setAttribute('data-customer', JSON.stringify(customer));
                 row.innerHTML = `
-                    <td>${customer.Surname}, ${customer.GivenName}</td>
-                    <td>${customer.Country}</td>
-                    <td>${customer.Telephone}</td>
-                    <td>${customer.EmailAddress}</td>
+                    <td>${customer.Id}</td>
                     <td>${customer.PersonalNumber}</td>
-                    <td class="details-link">Details</td>
+                    <td>${customer.Surname}, ${customer.GivenName}</td>
+                    <td>${customer.Streetaddress}</td>
+                    <td>${customer.City}</td>
+                    <td>${customer.Country}</td>
                 `;
 
                 // Attach click event listener for each row
@@ -668,7 +673,7 @@ document.addEventListener("DOMContentLoaded", function() {
 //Graph functionality
 function openGraph(customerId) {
     // Fetch data
-    fetch(`/graph_transactions/${customerId}`)
+    fetch(`/api/graph_transactions/${customerId}`)
         .then(response => response.json())
         .then(data => {
             console.log(data); // Check the structure of the data
@@ -679,15 +684,16 @@ function openGraph(customerId) {
 function renderGraph(data) {
     const ctx = document.getElementById('transactionGraph').getContext('2d');
     
-    const datasets = Object.keys(data).map(accountType => ({
-        label: `${accountType} Account Balance`,
-        data: data[accountType].map(item => item.cumulative_balance),
+    const datasets = data.map(account => ({
+        label: `${account.account_type} (ID: ${account.account_id})`,
+        data: account.balances.map(item => item.cumulative_balance),
         fill: false,
-        borderColor: getRandomColor(), // Implement this function to assign unique colors
+        borderColor: getRandomColor(),
         tension: 0.1
     }));
     
-    const labels = data[Object.keys(data)[0]].map(item => item.date);
+    // Assuming all accounts cover the same date range, use the first account's dates as labels
+    const labels = data[0].balances.map(item => item.date);
 
     const chart = new Chart(ctx, {
         type: 'line',
@@ -766,58 +772,66 @@ function searchInformation() {
     var input = document.getElementById('headerSearch');
     var filter = input.value.trim();
     var dropdown = document.getElementById('searchDropdown');
+    dropdown.innerHTML = ''; // Clear previous results
 
     if (!filter) {
         dropdown.style.display = 'none';
         return;
     }
 
-    fetch(`/search_customers?search=${encodeURIComponent(filter)}&ajax=1`)
-        .then(response => response.json())
-        .then(data => {
-            dropdown.innerHTML = ''; // Clear previous results
-            
-            if (data.length > 0) {
-                // Limit name matches to the first 5 results for closest name matches
-                const nameMatches = data.slice(0, 5);
-                nameMatches.forEach(customer => appendCustomerToDropdown(customer, dropdown));
-                
-                // Add a divider
-                if (data.length > 5) { // Only add a divider if there are more than 5 results
-                    let divider = document.createElement('div');
-                    divider.className = 'dropdown-divider';
-                    divider.textContent = '---'; // Placeholder divider, adjust as needed
-                    dropdown.appendChild(divider);
+    // Add a general search option to the dropdown
+    const filterOption = document.createElement('div');
+    filterOption.className = 'dropdown-item filter-option';
+    filterOption.textContent = `Filter customer list with "${filter}"`;
+    filterOption.addEventListener('click', function() {
+        window.location.href = `/customers/customer_list?search=${encodeURIComponent(filter)}`;
+    });
+    dropdown.appendChild(filterOption);
 
-                    // Append other category placeholders after the divider
-                    // Placeholder for demonstration, replace with actual data/categories as needed
-                    let placeholder = document.createElement('div');
-                    placeholder.className = 'dropdown-item';
-                    placeholder.textContent = 'Other Categories...';
-                    dropdown.appendChild(placeholder);
-                }
+    // Add a separator
+    const separator = document.createElement('div');
+    separator.className = 'dropdown-divider';
+    dropdown.appendChild(separator);
 
-                dropdown.style.display = 'block';
-            } else {
-                dropdown.innerHTML = '<div class="dropdown-item">No results found</div>';
-                dropdown.style.display = 'block';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+    // Fetch specific customer matches
+    fetch(`/api/customer_lists?search=${encodeURIComponent(filter)}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.customers && data.customers.length > 0) {
+            data.customers.forEach(customer => appendCustomerToDropdown(customer, dropdown));
+            dropdown.style.display = 'block';
+        } else {
+            const noResults = document.createElement('div');
+            noResults.className = 'dropdown-item';
+            noResults.textContent = 'No matching customers found';
+            dropdown.appendChild(noResults);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        dropdown.style.display = 'none';
+    });
 }
 
 function appendCustomerToDropdown(customer, dropdown) {
     let customerDiv = document.createElement('div');
-    customerDiv.textContent = customer.name;
     customerDiv.className = 'dropdown-item';
+    customerDiv.textContent = `${customer.Id} ${customer.PersonalNumber} ${customer.Surname},${customer.GivenName} ${customer.Streetaddress} ${customer.City}`;
     customerDiv.addEventListener('click', function() {
-        window.location.href = `customers/customer_detail/${customer.id}`;
+        window.location.href = `/customers/customer_detail/${customer.Id}`;
     });
     dropdown.appendChild(customerDiv);
 }
-$('#headerCustomerSearch').on('input', searchInformation);
+
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('search'); 
+    if (searchQuery) {
+        filterCustomers(1, 'Surname', 'asc', searchQuery);
+    }
+});
+
+// $('#headerCustomerSearch').on('input', searchInformation);
 // Dark mode, light mode toggle
 
 document.getElementById('toggleDarkMode').addEventListener('click', function() {
@@ -838,37 +852,34 @@ window.openDetailsWithData = openDetailsWithData;
 
 
 
-//transaction load
+// //transaction load
+// document.addEventListener('DOMContentLoaded', function() {
+//     const loadMoreTransactionsButton = document.getElementById('loadMoreTransactions');
+//     let offset = 0; // Initialize offset
+//     const limit = 20; // You can adjust this if needed
 
-let offset = 0;
-const limit = 20;
+//     loadMoreTransactionsButton.addEventListener('click', function() {
+//         const customerId = this.getAttribute('data-customer-id'); // Assuming the button has the correct data-customer-id attribute
+//         const url = `/more_transactions/${customerId}?limit=${limit}&offset=${offset}`;
 
-function loadTransactions(customerId) {
-    fetch(`/transactions/${customerId}?limit=${limit}&offset=${offset}`)
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(transaction => {
-                const li = document.createElement('li');
-                li.textContent = `Date: ${transaction.date}, Amount: ${transaction.amount}, Type: ${transaction.type}, Operation: ${transaction.operation}`;
-                document.querySelector('#transactionList ul').appendChild(li);
-            });
+//         fetch(url)
+//             .then(response => response.json())
+//             .then(data => {
+//                 // Assuming your data is an array of transaction objects
+//                 if(data.length > 0) {
+//                     const transactionsTable = document.getElementById('transactionsTable');
+//                     transactionsTable.style.display = ''; // Make sure the table is visible
+//                     const tbody = transactionsTable.getElementsByTagName('tbody')[0];
 
-            // Prepare for the next set of transactions
-            offset += limit;
-        })
-        .catch(error => console.error('Error loading transactions:', error));
-}
+//                     data.forEach(transaction => {
+//                         const row = document.createElement('tr');
+//                         row.innerHTML = `<td>${transaction.date}</td><td>${transaction.amount}</td><td>${transaction.type}</td><td>${transaction.operation}</td>`;
+//                         tbody.appendChild(row);
+//                     });
 
-function toggleTransactionList() {
-    const transactionListDiv = document.getElementById('transactionList');
-    const loadMoreButton = document.getElementById('loadMoreTransactions');
-
-    if (transactionListDiv.style.display === 'none') {
-        transactionListDiv.style.display = 'block'; // Show the list
-        loadMoreButton.innerText = 'Close Transactions';
-        loadTransactions(1); // Example customer ID, replace with the actual ID
-    } else {
-        transactionListDiv.style.display = 'none'; // Hide the list
-        loadMoreButton.innerText = 'Load Transactions';
-    }
-}
+//                     offset += data.length; // Update the offset for the next call
+//                 }
+//             })
+//             .catch(error => console.error('Error loading transactions:', error));
+//     });
+// });

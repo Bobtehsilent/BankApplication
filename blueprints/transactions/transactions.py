@@ -1,60 +1,127 @@
-from flask import Blueprint, request, render_template, jsonify
+from flask import Blueprint, request, render_template, jsonify, flash, redirect, url_for
+from flask_login import login_required, current_user
 from models import db, Transaction, Account
 from collections import defaultdict
+from sqlalchemy.exc import IntegrityError
 from datetime import datetime
+from .transactionform import AddTransactionForm, TransferForm
 
 transactions_bp = Blueprint('transaction', __name__)
 
-def add_transaction(account_id, transaction_type, amount):
-    try:
-        # Fetch the account
-        account = Account.query.get(account_id)
-        if not account:
-            raise ValueError("Account not found")
+@transactions_bp.route('/add_transaction/<int:account_id>', methods=['GET', 'POST'])
+@login_required
+def add_transaction(account_id):
+    account = Account.query.get_or_404(account_id)
+    form = AddTransactionForm()
 
-        # Prepare to calculate the new balance
-        new_balance = account.Balance + amount if transaction_type == "Credit" else account.Balance - amount
+    set_operation_choices(form, form.transaction_type.data)
 
-        # Check for overdraft scenario and handle accordingly
-        if transaction_type == "Debit" and new_balance < 0:
-            # Calculate overdraft amount
-            overdraft_amount = abs(new_balance)
-            
-            # Find or create a debt account for the customer
-            debt_account = Account.query.filter_by(CustomerId=account.CustomerId, AccountType="Debt").first()
-            if not debt_account:
-                debt_account = Account(
-                    AccountType="Debt",
-                    Balance=0,
-                    Created=datetime.now(),
-                    CustomerId=account.CustomerId
-                )
-                db.session.add(debt_account)
-            
-            # Add the overdraft amount to the debt account
-            debt_account.Balance += overdraft_amount
-            new_balance = 0  # Optionally reset the original account's balance to 0 if overdraft is fully transferred
+    if form.validate_on_submit():
+        # Validate the transaction
+        is_valid, error_message = validate_transaction(account_id, transaction_amount=form.amount.data, transaction_type=form.transaction_type.data)
+        if not is_valid:
+            flash(error_message, 'danger')
+            return render_template('transactions/add_transaction.html', form=form, account_id=account_id)
+        
+        # Process the transaction
+        process_transaction(account_id, form.transaction_type.data, form.amount.data, form.operation.data)
+        flash('Transaction made successfully!', 'success')
+        return redirect(url_for('customer.customer_detail', user_id=account.CustomerId))
+    
+    return render_template('transactions/add_transaction.html', form=form, account_id=account_id)
 
-        # Update the account's balance
-        account.Balance = new_balance
+def process_transaction(account_id, transaction_type, amount, operation):
+    account = Account.query.get_or_404(account_id)
+    new_balance = account.Balance + amount if transaction_type == 'Credit' else account.Balance - amount
+    
+    transaction = Transaction(
+        AccountId=account_id,
+        Type=transaction_type,
+        Operation=operation,
+        Amount=amount,
+        NewBalance=new_balance,
+        Date=datetime.utcnow()
+    )
+    
+    account.Balance = new_balance
+    db.session.add(transaction)
+    db.session.commit()
 
-        # Create the transaction
-        transaction = Transaction(
-            AccountId=account_id,
-            Type=transaction_type,
-            Amount=amount,
-            NewBalance=account.Balance,  # Use the updated account balance
-            Date=datetime.now()
-        )
+def set_operation_choices(form, transaction_type):
+    if transaction_type == 'Credit':
+        form.operation.choices = [
+            ('Deposit cash', 'Deposit cash'),
+            ('Salary', 'Salary'),
+            ('Transfer', 'Transfer')
+        ]
+    else:
+        form.operation.choices = [
+            ('ATM withdrawal', 'ATM withdrawal'),
+            ('Payment', 'Payment'),
+            ('Bank withdrawal', 'Bank withdrawal'),
+            ('Transfer', 'Transfer')
+        ]
 
-        # Save the transaction and account updates
-        db.session.add(transaction)
-        db.session.commit()
 
-    except Exception as e:
-        db.session.rollback()  # Ensure to roll back on error
-        return str(e), 400
+@transactions_bp.route('/transfer_transaction/<int:from_account_id>', methods=['GET', 'POST'])
+@login_required
+def transfer_transaction(from_account_id):
+    form = TransferForm()
+    from_account = Account.query.get_or_404(from_account_id)  # Fetch the from account to get the CustomerId
+    customer_id = from_account.CustomerId  # Retrieve CustomerId from the from account
 
+    # Filter accounts belonging to the same customer excluding the from_account
+    form.to_account.choices = [
+        (account.Id, f'{account.AccountType} - {account.Id}') 
+        for account in Account.query.filter(Account.CustomerId == customer_id, Account.Id != from_account_id).all()
+    ]
+    if form.validate_on_submit():
+        amount = form.amount.data
+        to_account_id = form.to_account.data
+        transfer_funds(from_account_id, to_account_id, amount)
+        flash('Transfer completed successfully.', 'success')
+        return redirect(url_for('account.manage_accounts', customer_id=customer_id))
+    print(form.errors)
+    return render_template('transactions/transfer_transaction.html', form=form, from_account_id=from_account_id)
+
+def transfer_funds(from_account_id, to_account_id, amount):
+    from_account = Account.query.get_or_404(from_account_id)
+    to_account = Account.query.get_or_404(to_account_id)
+    
+    if from_account.Balance < amount:
+        flash('Insufficient funds.', 'error')
+        return False
+    
+    from_account.Balance -= amount
+    to_account.Balance += amount
+    
+    db.session.add(Transaction(Type='Debit', Operation=f'Transfer from {from_account.Id} to {to_account.Id}', Date=datetime.utcnow(), Amount=-amount, NewBalance=from_account.Balance, AccountId=from_account_id))
+    db.session.add(Transaction(Type='Credit', Operation=f'Transfer to {to_account.Id} from {from_account.Id}', Date=datetime.utcnow(), Amount=amount, NewBalance=to_account.Balance, AccountId=to_account_id))
+    
+    db.session.commit()
+    return True
+
+
+def validate_transaction(from_account_id, to_account_id=None, transaction_amount=None, transaction_type=None):
+    from_account = Account.query.get(from_account_id)
+    if not from_account:
+        return False, "Source account not found."
+    
+    if to_account_id:
+        to_account = Account.query.get(to_account_id)
+        if not to_account:
+            return False, "Destination account not found."
+    
+    if transaction_amount <= 0:
+        return False, "Transaction amount must be positive."
+    
+    if transaction_type in ['Debit', 'TransferFrom'] and transaction_amount > from_account.Balance:
+        return False, "Insufficient balance in source account."
+
+    return True, ""
+
+
+    
 
 @transactions_bp.route('/transactions/<int:id>', methods=['GET'])
 def get_transaction(id):
@@ -87,32 +154,32 @@ def get_total_balance(customer_id):
     total_balance = sum(account.Balance for account in accounts)
     return total_balance
 
-@transactions_bp.route('/graph_transactions/<int:customer_id>', methods=['GET'])
-def transactions_graph(customer_id):
-    transactions = Transaction.query.join(Account).filter(
-        Account.CustomerId == customer_id
-    ).order_by(Transaction.Date.asc()).all()  # Note: Removed limit here to process all transactions
+# @transactions_bp.route('/graph_transactions/<int:customer_id>', methods=['GET'])
+# def transactions_graph(customer_id):
+#     transactions = Transaction.query.join(Account).filter(
+#         Account.CustomerId == customer_id
+#     ).order_by(Transaction.Date.asc()).all()  # Note: Removed limit here to process all transactions
     
-    # Prepare data structure to hold cumulative balance by account type
-    balances_by_type = defaultdict(list)
+#     # Prepare data structure to hold cumulative balance by account type
+#     balances_by_type = defaultdict(list)
     
-    # Track running balances for each account type
-    running_balances = defaultdict(int)
+#     # Track running balances for each account type
+#     running_balances = defaultdict(int)
 
-    for transaction in transactions:
-        # Assuming each transaction affects the balance according to its type
-        if transaction.Type == "Debit":
-            running_balances[transaction.Account.AccountType] += transaction.Amount
-        else:  # Debit
-            running_balances[transaction.Account.AccountType] -= transaction.Amount
+#     for transaction in transactions:
+#         # Assuming each transaction affects the balance according to its type
+#         if transaction.Type == "Debit":
+#             running_balances[transaction.Account.AccountType] += transaction.Amount
+#         else:  # Debit
+#             running_balances[transaction.Account.AccountType] -= transaction.Amount
         
-        # Append the current running balance for this account type
-        balances_by_type[transaction.Account.AccountType].append({
-            "date": transaction.Date.strftime("%Y-%m-%d"),
-            "cumulative_balance": running_balances[transaction.Account.AccountType]
-        })
+#         # Append the current running balance for this account type
+#         balances_by_type[transaction.Account.AccountType].append({
+#             "date": transaction.Date.strftime("%Y-%m-%d"),
+#             "cumulative_balance": running_balances[transaction.Account.AccountType]
+#         })
 
-    return jsonify(balances_by_type)
+#     return jsonify(balances_by_type)
 
 
 

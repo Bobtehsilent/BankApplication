@@ -797,7 +797,6 @@ table a:hover {
   display: flex;
   flex-direction: column;
   justify-content: space-between; /* Pushes children to the top and bottom */
-  height: 100vh; /* Example height, adjust as needed */
 }
 
 .info-table {
@@ -846,9 +845,15 @@ table a:hover {
 /* Initial state for transaction list: collapsed */
 .transaction-list {
   padding: 20px;
-  border: 1px solid var(--border-color);
   border-radius: 5px;
-  display: none; /* Start fully collapsed */
+  display: block; 
+}
+#transactionsTable {
+  display: none;
+}
+
+.transaction-list.expanded #transactionsTable {
+  display: table;
 }
 
 .transaction-list.expanded {
@@ -859,15 +864,8 @@ table a:hover {
   cursor: pointer; /* Indicates the section can be expanded */
 }
 
-.transaction-list ul {
-  list-style-type: none;
-  padding: 0;
-  margin-top: 10px;
-}
-
-.transaction-list li {
-  border-bottom: 1px solid var(--border-color);
-  padding: 10px 0;
+.back a {
+  color: var(--text-color);
 }
 
 #loadMoreTransactions {
@@ -886,13 +884,9 @@ table a:hover {
 }
 
 #transactionList {
-  border: 2px solid #000; /* Example styling, adjust as needed */
+  border: 2px solid #000;
   padding: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-#loadMoreTransactions {
-  margin-top: 10px;
 }

@@ -85,20 +85,6 @@ class Transaction(db.Model):
     NewBalance = db.Column(db.Integer, unique=False, nullable=False)
     AccountId = db.Column(db.Integer, db.ForeignKey('Accounts.Id'), nullable=False)
 
-@event.listens_for(Transaction, 'after_insert')
-@event.listens_for(Transaction, 'after_update')
-def update_account_balance(mapper, connection, target):
-    account = db.session.query(Account).get(target.AccountId)
-    
-    if account:
-        if target.Type == 'credit':
-            account.Balance += target.Amount
-        elif target.Type == 'debit':
-            account.Balance -= target.Amount
-        
-        # Save the updated account
-        db.session.add(account)
-        db.session.commit()
 
 class User(db.Model):
     __tablename__= "User"

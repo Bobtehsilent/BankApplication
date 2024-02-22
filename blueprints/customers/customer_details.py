@@ -4,10 +4,10 @@ from models import Customer
 
 customer_detail_bp = Blueprint('customer_detail', __name__, url_prefix='/details')
 
-@customer_detail_bp.route('/customer_detail/<int:user_id>')
-def details(user_id):
-    customer = Customer.query.get_or_404(user_id)
-    return render_template('/customer/customer_detail.html', customer=customer)
+# @customer_detail_bp.route('/customer_detail/<int:user_id>')
+# def details(user_id):
+#     customer = Customer.query.get_or_404(user_id)
+#     return render_template('/customer/customer_detail.html', customer=customer)
 
 
 # @customer_detail_bp.route('/anchor_links')

@@ -34,12 +34,13 @@
             </div>             -->
             <thead>
                 <tr>
-                    <th data-sort-column="Surname" data-sort-order="asc" class="sortable-column">Customer name</th>
-                    <th data-sort-column="Country" data-sort-order="asc" class="sortable-column">Country</th>
-                    <th data-sort-column="Telephone" data-sort-order="asc" class="sortable-column">Telephone</th>
-                    <th data-sort-column="EmailAddress" data-sort-order="asc" class="sortable-column">Email Address</th>
+                    <th data-sort-column="Id" data-sort-order="asc" class="sortable-column">Id</th>
                     <th data-sort-column="PersonalNumber" data-sort-order="asc" class="sortable-column">Personal Number</th>
-                    <th>Placeholder</th>
+                    <th data-sort-column="Surname" data-sort-order="asc" class="sortable-column">Name</th>
+                    <th data-sort-column="Streetaddress" data-sort-order="asc" class="sortable-column">Address</th>
+                    <th data-sort-column="City" data-sort-order="asc" class="sortable-column">City</th>
+                    <th data-sort-column="Country" data-sort-order="asc" class="sortable-column">Country</th>
+
                     
                         <!-- <a href="{{ url_for('customer.customer_list', sort_column = 'placeholder', sort_order = 'asc') }}">
                             <i class='bx bxs-up-arrow'></i>
@@ -68,5 +69,23 @@
 <script>
     var baseCustomerDetailUrl = "{{ url_for('customer.customer_detail', user_id=0, _external=True) }}";
     var baseManageCustomerUrl = "{{ url_for('customer.manage_customer', user_id=0, _external=True) }}";
+    document.addEventListener('DOMContentLoaded', () => {
+        // Parse the URL query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchQuery = urlParams.get('search');
+        
+        // Check if there's a search query
+        if (searchQuery) {
+            const searchInput = document.getElementById('listCustomerSearch');
+            if (searchInput) {
+                // Set the input's value to the search query
+                searchInput.value = decodeURIComponent(searchQuery);
+                
+                // Optionally, trigger the search/filter function immediately
+                // Assuming filterCustomers is already defined and handles fetching and displaying the filtered list
+                filterCustomers();
+            }
+        }
+    });
 </script>
 {% endblock %}

@@ -4,11 +4,11 @@
 
 {% block content %}
 <div class="customer-details-page">
-    <div class="actions">
-        <!-- <button onclick="manageCustomer()">Manage Customer</button>
-        <button onclick="manageAccount()">Manage Account</button> -->
+    <!-- <div class="actions">
+        <button onclick="manageCustomer()">Manage Customer</button>
+        <button onclick="manageAccount()">Manage Account</button>
         <button id="manageTransactionBtn">New transaction</button>
-    </div>
+    </div> -->
 
     <div class="customer-container">
         <div class="customer-details">
@@ -47,6 +47,7 @@
                 <table class="info-table">
                     <thead>
                         <tr>
+                            <th>Account Id</th>
                             <th>Account Type</th>
                             <th>Balance</th>
                         </tr>
@@ -54,11 +55,13 @@
                     <tbody>
                         {% for account in customer.Accounts %}
                             <tr>
+                                <td>{{ account.Id }}</td>
                                 <td>{{ account.AccountType }}</td>
                                 <td>{{ account.Balance }}</td>
                             </tr>
                         {% endfor %}
                         <tr>
+                            <td> </td>
                             <th>Total Balance:</th>
                             <td>{{ customer.total_balance }}</td>
                         </tr>
@@ -71,29 +74,108 @@
                 <button id="manageAccountBtn">Manage Account</button>
             </div>
         </div>
-    </div>
-
-    <div class="transaction-graph">
-        <h3>Last 50 Transactions</h3>
-        <canvas id="transactionGraph"></canvas>
-        <script>
-            // Assuming your template correctly renders the customer ID here
-            document.addEventListener('DOMContentLoaded', function() {
-                openGraph({{ customer.Id }});
-            });
-            document.getElementById('manageCustomerBtn').addEventListener('click', function() {
-                window.location.href = "{{ url_for('customer.edit_customer', customer_id=customer.Id) }}";
-            });
-        
-            document.getElementById('manageAccountBtn').addEventListener('click', function() {
-                window.location.href = "{{ url_for('account.manage_accounts', customer_id=customer.Id) }}";
-            });
-            document.getElementById('manageTransactionBtn').addEventListener('click', function() {
-                window.location.href = "{{ url_for('transaction.new_transaction', customer_id=customer.Id) }}";
-            });
-        </script>
+        <div class="transaction-list">
+            <div class="actions">
+                <button id="loadMoreTransactions" data-customer-id="{{ customer.Id }}">Load Transactions</button>
+            </div>
+            <table id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>New Balance</th>
+                        <th>Type</th>
+                        <th>Operation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Transactions will be dynamically inserted here -->
+                </tbody>
+            </table>
+            <div class="actions">
+                <button id="loadMore" style="display:none;">Load More</button>
+                <button id="closeTransactions" style="display:none;">Close</button>
+            </div>
+            <p id="no-more" style="display:none;">No more transactions to show</p>
+        </div>
+        <div class="transaction-graph">
+            <h3>Last 50 Transactions</h3>
+            <canvas id="transactionGraph"></canvas>
+        </div>  
     </div>
 </div>
+<script>
+    // Assuming your template correctly renders the customer ID here
+    document.addEventListener('DOMContentLoaded', function() {
+        openGraph({{ customer.Id }});
+    });
 
+
+    document.getElementById('manageCustomerBtn').addEventListener('click', function() {
+        window.location.href = "{{ url_for('customer.edit_customer', customer_id=customer.Id) }}";
+    });
+
+    document.getElementById('manageAccountBtn').addEventListener('click', function() {
+        window.location.href = "{{ url_for('account.manage_accounts', customer_id=customer.Id) }}";
+    });
+    let loadIterationCount = 1;  // Start from the first page
+    let hasMore = true;
+
+    document.getElementById("loadMoreTransactions").addEventListener("click", function () {
+        this.style.display = "none"; // Hide the initial button
+        document.getElementById("transactionsTable").style.display = "table"; // Show the table
+        document.getElementById("loadMore").style.display = "inline-block"; // Show "Load More" button
+        document.getElementById("closeTransactions").style.display = "inline-block"; // Show "Close" button
+        fetchMore({{ customer.Id }});
+    });
+
+    document.getElementById("loadMore").addEventListener("click", function () {
+        fetchMore({{ customer.Id }});
+    });
+
+    document.getElementById("closeTransactions").addEventListener("click", function () {
+        document.querySelector(".transaction-list").classList.remove("expanded");
+        document.getElementById("transactionsTable").style.display = "none"; // Hide the table
+        document.getElementById("loadMore").style.display = "none"; // Hide "Load More" button
+        this.style.display = "none"; // Hide "Close" button
+        document.getElementById("loadMoreTransactions").style.display = "inline-block"; // Show the initial button again
+    });
+
+    function fetchMore(customer_id) {
+        const url = `/api/customers/${customer_id}/transactions?page=${loadIterationCount}`;
+    
+        fetch(url)
+        .then(response => response.json())
+        .then(([transactions, hasMoreData]) => {
+            console.log(transactions, hasMoreData);  // Corrected logging
+            document.getElementById("transactionsTable").style.display = "table"; // Optionally make the table visible directly
+            document.querySelector(".transaction-list").classList.add("expanded");
+            hasMore = hasMoreData;
+            loadIterationCount += 1;
+            transactions.forEach(transaction => {
+                tableElement(transaction);
+            });
+    
+            if (!hasMore) {
+                document.getElementById("loadMoreTransactions").style.visibility = "hidden";
+                document.getElementById("no-more").style.display = "block";
+            }
+        })
+        .catch(error => console.error('Error during fetch:', error));
+    }
+
+    function tableElement(element) {
+        document.querySelector("#transactionsTable tbody").innerHTML += `<tr>
+            <td>${element.account_id}
+            <td>${element.date}</td>
+            <td>${element.amount}</td>
+            <td>${element.new_balance}</td>
+            <td>${element.type}</td>
+            <td>${element.operation}</td>
+        </tr>`;
+    }
+    
+</script>
     
 {% endblock %}

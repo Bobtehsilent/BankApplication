@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Accounts{% endblock %}
+
+{% block content %}
+
+<div class="back"><a href="{{ url_for('customer.customer_detail', user_id=customer.Id)}}"><- Back</a></div>
+
+<div class="container">
+    <h2>Manage accounts for {{ customer.GivenName }} {{ customer.Surname }}</h2>
+        <div class="account-container">
+            <table class="table-list">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Account type</th>
+                        <th>Created</th>
+                        <th>Balances</th>
+                        <th>Transaction</th>
+                        <th>Transfer</th>
+                        <th>Edit</th>
+                        {% if current_user.is_admin %}
+                        <th>Delete</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+            {% for account in customer.Accounts %}
+                <tbody>
+                    <tr class="table-row">
+                        <td>{{ account.Id }}</td>
+                        <td>{{ account.AccountType }}</td>
+                        <td>{{ account.Created }}</td>
+                        <td>{{ account.Balance }}</td>
+                        <td><a href="{{ url_for('transaction.add_transaction', account_id=account.Id) }}"><i class="fas fa-plus"></i></a></td>
+                        <td><a href="{{ url_for('transaction.transfer_transaction', from_account_id=account.Id) }}"><i class="fas fa-exchange-alt"></i></a></td>
+                        <td><a href="#"><i class="fas fa-edit"></i></a></td>
+                        {% if current_user.is_admin %}
+                        <td><a href="#" onclick="return confirm('Are you sure?')"><i class="fas fa-trash-alt"></i></a></td>
+                        {% endif %}
+                    </tr>
+                </tbody>
+            {% endfor %}
+            </table>
+        </div>
+</div>
+
+{% endblock %}

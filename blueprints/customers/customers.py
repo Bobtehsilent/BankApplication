@@ -1,7 +1,7 @@
 from flask import Blueprint, request, render_template, jsonify, flash, redirect, url_for
 from flask_login import login_required
 from sqlalchemy import or_
-from models import Customer, db, Account, load_country_codes
+from models import Customer, db, Transaction, Account, load_country_codes
 from collections import defaultdict
 from .customerforms import AddCustomerForm
 
@@ -12,54 +12,56 @@ customer_bp = Blueprint('customer', __name__, url_prefix='/customers')
 @customer_bp.route('/customer_list', methods=['GET'])
 @login_required
 def customer_list():
-    page = request.args.get('page', 1, type=int)
-    per_page = 50
-    sort_column = request.args.get('sort_column', 'Surname')
-    sort_order = request.args.get('sort_order', 'asc')
-    search_query = request.args.get('search', '').strip()
+    return render_template('customers/customers.html')
+# def customer_list():
+#     page = request.args.get('page', 1, type=int)
+#     per_page = 50
+#     sort_column = request.args.get('sort_column', 'Surname')
+#     sort_order = request.args.get('sort_order', 'asc')
+#     search_query = request.args.get('search', '').strip()
 
-    query = Customer.query
+#     query = Customer.query
 
-    if search_query:
-        query = query.filter(
-            or_(
-                Customer.GivenName.contains(search_query),
-                Customer.Surname.contains(search_query),
-                Customer.EmailAddress.contains(search_query),
-                Customer.Country.contains(search_query),
-                Customer.PersonalNumber.contains(search_query)
-            ))
+#     if search_query:
+#         query = query.filter(
+#             or_(
+#                 Customer.GivenName.contains(search_query),
+#                 Customer.Surname.contains(search_query),
+#                 Customer.EmailAddress.contains(search_query),
+#                 Customer.Country.contains(search_query),
+#                 Customer.PersonalNumber.contains(search_query)
+#             ))
         
-    if sort_order == 'asc':
-        query = query.order_by(getattr(Customer, sort_column).asc())
-    else:
-        query = query.order_by(getattr(Customer, sort_column).desc())
+#     if sort_order == 'asc':
+#         query = query.order_by(getattr(Customer, sort_column).asc())
+#     else:
+#         query = query.order_by(getattr(Customer, sort_column).desc())
         
-    # if 'page' not in request.args and 'search' not in request.args:
-    #     if request.args.get('sort_column') == sort_column:
-    #         sort_order = 'desc' if sort_order == 'asc' else 'asc'
+#     # if 'page' not in request.args and 'search' not in request.args:
+#     #     if request.args.get('sort_column') == sort_column:
+#     #         sort_order = 'desc' if sort_order == 'asc' else 'asc'
     
-    if request.args.get('ajax', '0') == '1':
-        paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
-        customers = [customer_to_dict(customer) for customer in paginated_customers]
+#     if request.args.get('ajax', '0') == '1':
+#         paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
+#         customers = [customer_to_dict(customer) for customer in paginated_customers]
 
-        return jsonify({
-            'customers': customers,
-            'pagination': {
-                'total_pages': paginated_customers.pages,
-                'current_page': paginated_customers.page,
-                'has_prev': paginated_customers.has_prev,
-                'has_next': paginated_customers.has_next,
-                'prev_num': paginated_customers.prev_num if paginated_customers.has_prev else None,
-                'next_num': paginated_customers.next_num if paginated_customers.has_next else None,
-            }
-        })
-    else:
-        paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
-        customers_dict = database_to_dict(paginated_customers)
-        return render_template('/customers/customers.html', customers=customers_dict, 
-                           paginated=paginated_customers, 
-                           sort_column=sort_column, sort_order=sort_order)
+#         return jsonify({
+#             'customers': customers,
+#             'pagination': {
+#                 'total_pages': paginated_customers.pages,
+#                 'current_page': paginated_customers.page,
+#                 'has_prev': paginated_customers.has_prev,
+#                 'has_next': paginated_customers.has_next,
+#                 'prev_num': paginated_customers.prev_num if paginated_customers.has_prev else None,
+#                 'next_num': paginated_customers.next_num if paginated_customers.has_next else None,
+#             }
+#         })
+#     else:
+#         paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
+#         customers_dict = database_to_dict(paginated_customers)
+#         return render_template('/customers/customers.html', customers=customers_dict, 
+#                            paginated=paginated_customers, 
+#                            sort_column=sort_column, sort_order=sort_order)
 
 #Important for the customer list page. makes the detail page work
 def database_to_dict(customers):
@@ -116,9 +118,23 @@ def group_accounts_by_type(accounts):
 @customer_bp.route('/customer_detail/<int:user_id>')
 def customer_detail(user_id):
     customerobj = Customer.query.get_or_404(user_id)
+    initial_transactions = Transaction.query.join(Account, Transaction.AccountId == Account.Id)\
+                                    .join(Customer, Account.CustomerId == Customer.Id)\
+                                    .filter(Customer.Id == user_id)\
+                                    .order_by(Transaction.Date.desc())\
+                                    .limit(20).all()
+        # Convert transactions to a more template-friendly format
+    transactions = [{
+        'account_id': transaction.AccountId,
+        'date': transaction.Date.strftime('%Y-%m-%d'),
+        'amount': transaction.Amount,
+        'type': transaction.Type,
+        'operation': transaction.Operation
+    } for transaction in initial_transactions]
 
     customer = customer_to_dict(customerobj)
-    return render_template('/customers/customer_detail.html', customer=customer)
+    return render_template('/customers/customer_detail.html', customer=customer, transactions=transactions)
+
 
 @customer_bp.route('/manage/<int:user_id>')
 def manage_customer(user_id):

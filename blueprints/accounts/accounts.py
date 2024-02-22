@@ -1,5 +1,5 @@
-from flask import Blueprint, request, render_template, jsonify
-from flask_login import login_required
+from flask import Blueprint, request, render_template, jsonify,flash,redirect,url_for
+from flask_login import login_required, current_user
 from sqlalchemy import func
 from datetime import datetime
 from models import Account, db, Customer
@@ -52,18 +52,12 @@ def account_list():
                             sort_column=sort_column, sort_order=sort_order)
 
 
-# @account_bp.route('/accounts')
-# def account_dashboard():
-#     # Logic ro fetch account data
-#     return render_template('account_dashboard.html')
-
 @account_bp.route('/manage_accounts/<int:customer_id>')
 @login_required
 def manage_accounts(customer_id):
-    # Fetch the customer and their accounts, display management options
+    accounts = Account.query.get_or_404(customer_id)
     customer = Customer.query.get_or_404(customer_id)
-    accounts = Account.query.filter_by(CustomerId=customer_id).all()
-    return render_template('manage_accounts.html', customer=customer, accounts=accounts)
+    return render_template('accounts/manage_accounts.html', accounts=accounts,customer=customer, current_user=current_user)
 
 @account_bp.route('/add_account', methods=['POST'])
 def add_account():
@@ -86,12 +80,14 @@ def update_account(id):
     db.session.commit()
     return 'Account updated successfully'
 
-@account_bp.route('/accounts/delete/<int:id>', methods=['POST'])
-def delete_account(id):
-    account = Account.query.get_or_404(id)
+@account_bp.route('/accounts/delete/<int:account_id>/<int:customer_id>', methods=['POST'])
+@login_required
+def delete_account(account_id, customer_id):
+    account = Account.query.get_or_404(account_id)
     db.session.delete(account)
     db.session.commit()
-    return 'Account deleted successfully'
+    flash('Account deleted successfully', 'success')
+    return redirect(url_for('account.manage_accounts', customer_id=customer_id))
 
 @account_bp.route('/account/update_balance/<int:id>', methods=['POST'])
 def update_balance(id):
