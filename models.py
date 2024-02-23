@@ -98,8 +98,7 @@ class User(db.Model):
     # Permissions
     InformationPermission = db.Column(db.Boolean, default=True)
     ManagementPermission = db.Column(db.Boolean, default=False)
-    #to be added later i guess
-    PlaceholderPermission = db.Column(db.Boolean, default=False)
+    AdminPermission = db.Column(db.Boolean, default=False)
 
 
     def is_admin(self):

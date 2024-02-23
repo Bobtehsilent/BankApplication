@@ -173,28 +173,3 @@ def get_customer_contact(contact_id):
         'Email': contact.Email,
         # Include other fields as necessary
     })
-
-
-#Search bar api call
-
-# @api_bp.route('/search', methods=['GET'])
-# def api_search():
-#     search_query = request.args.get('search', '').strip()
-
-#     # Assuming a more complex logic to determine if it's a general search or specific
-#     # For simplicity, if the query is not directly hitting a special keyword, treat it as a general search
-#     if search_query and not any(keyword in search_query.lower() for keyword in ['customer', 'manage']):
-#         # General search logic
-#         # Instead of returning JSON, you might redirect or instruct the frontend to do so
-#         # This is just to demonstrate the concept
-#         results = {'redirect': url_for('customer.customer_list', search=search_query)}
-#         return jsonify(results)
-
-#     # Specific customer search logic
-#     query = Customer.query.filter(Customer.GivenName.contains(search_query) |
-#                                   Customer.Surname.contains(search_query) |
-#                                   Customer.EmailAddress.contains(search_query) |
-#                                   Customer.City.contains(search_query)).limit(15)
-#     customers = [{'id': customer.Id, 'name': f"{customer.GivenName} {customer.Surname}", 'redirect': url_for('customer.customer_detail', customer_id=customer.Id)} for customer in query.all()]
-    
-#     return jsonify(customers)

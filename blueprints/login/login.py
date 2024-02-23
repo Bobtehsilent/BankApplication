@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from models import Customer, db, User
 from flask_login import login_user, logout_user
-from werkzeug.security import check_password_hash, generate_password_hash
+from forms.login_form import LoginForm
 
 #Logging in blueprint and functionality
 login_bp = Blueprint('login', __name__)
@@ -10,25 +10,21 @@ login_bp = Blueprint('login', __name__)
 #route for logging in
 @login_bp.route('/login', methods=['POST'])
 def login():
-    try:
-        #login form
-        username = request.form['username']
-        password = request.form['password']
-        print(password)
-        user = User.query.filter_by(Username=username).first()
-        print(user.Username)
-        print(user.Password)
-        #check if the user is admin or customer
-        if user and user.check_password(password):
+    form = LoginForm(request.form)
+    if form.validate_on_submit():
+        user = User.query.filter_by(Username=form.username.data).first()
+        if user and user.check_password(form.password.data):  # Adjust this check based on your model
             login_user(user)
-            print('logging in!')
+            # Redirect to the next page or dashboard after successful login
             return redirect(url_for('user_interface.dashboard'))
         else:
-            flash("Login failure, try again")
-            return redirect(url_for('main.homepage'))
-    except:
-        flash("Login failure, try again")
-        return redirect(url_for('main.homepage'))
+            flash('Login unsuccessful. Please check your username and password', 'danger')
+    else:
+        for fieldName, errorMessages in form.errors.items():
+            for err in errorMessages:
+                flash(f"{fieldName}: {err}", 'danger')
+    # Redirect back to the home page (or wherever your popup is) if login fails
+    return redirect(url_for('main.homepage')) 
     
 @login_bp.route('/logout')
 def logout():
@@ -48,8 +44,7 @@ def create_initial_users():
             CompanyEmail = 'keso.oboy@test.com',
             InformationPermission = True,
             ManagementPermission = True,
-            #to be added later i guess
-            PlaceholderPermission = False
+            AdminPermission = False
         )
         cashier.set_password('password')
         db.session.add(cashier)
@@ -68,8 +63,7 @@ def create_initial_users():
             # Permissions
             InformationPermission = True,
             ManagementPermission = True,
-            #to be added later i guess
-            PlaceholderPermission = True
+            AdminPermission = True
         )
         #using functions to hash password and generate a personal number
         admin.set_password('password')

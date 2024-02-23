@@ -3,7 +3,7 @@ from flask_login import login_required
 from sqlalchemy import or_
 from models import Customer, db, Transaction, Account, load_country_codes
 from collections import defaultdict
-from .customerforms import AddCustomerForm
+from forms.customer_forms import AddCustomerForm
 
 customer_bp = Blueprint('customer', __name__, url_prefix='/customers')
 

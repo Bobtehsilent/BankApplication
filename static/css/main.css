@@ -130,8 +130,6 @@ body {
   justify-content: right;
   border-radius: 4px;
   color: var(--header-text-color);
-  background-color: var(--user-info-bg-color);
-  margin-right: 50px;
 }
 
 .user-info span {
@@ -485,13 +483,6 @@ tbody tr:hover {
   background-color: var(--hover-bg-color);
   color: var(--hover-text-color);
 }
-
-tr.active,
-tbody tr:hover {
-  background-color: var(--active-bg-color);
-  color: var(--active-text-color);
-}
-
 
 
 tr.total-balance {
@@ -889,4 +880,100 @@ table a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Manage user */
+
+.manage-user-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.form-control {
+  background-color: var(--details-button-bg-color); /* Match the input background to your buttons */
+  border: 1px solid var(--border-color); /* Consistent border */
+  padding: 0.375rem 0.75rem; /* Adjust padding to match */
+  font-size: 1rem; /* Consistent font size */
+  line-height: 1.5; /* Consistent line height */
+  color: var(--text-color); /* Text color to match the theme */
+  border-radius: 0.25rem; /* Border radius to match buttons */
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; /* Smooth transition for focus */
+}
+
+.form-control:focus {
+  border-color: var(--details-button-hover-bg-color); /* Highlight focus */
+  outline: 0; /* Remove default focus outline */
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Optional: Add a box-shadow or change to match your theme */
+}
+
+.form-submit-button {
+  background-color: var(--details-button-bg-color); /* Adjust to match your color scheme */
+  color: var(--text-color);
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 16px; /* Match your form font size */
+  width: 100%; /* Optional: make the button full-width of the cell */
+  box-sizing: border-box; /* Ensures padding doesn't expand the button beyond the cell width */
+}
+
+.form-submit-button:hover {
+  background-color: var(--details-button-hover-bg-color); /* Adjust for hover state */
+}
+
+.table-list {
+  margin-bottom: 0;
+}
+
+.card {
+  flex-basis: calc(33.333% - 20px); /* Adjust based on the gap and number of cards per row */
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  cursor: pointer;
+  text-align: center;
+  background-color: var(--sidebar-color);
+  border: 1px solid var(--details-border-color);
+}
+.card-header:hover {
+  background-color: var(--sidebar-active-color);
+}
+
+.card-body {
+  flex-grow: 1;
+}
+
+.collapse {
+  display: none;
+}
+
+.collapsed {
+  display: column;
+}
+
+.permissions-container {
+  display: flex;
+  justify-content: start;
+  gap: 20px; /* Adjust the space between checkboxes as needed */
+}
+
+.permission {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-check-input {
+  margin-top: 0.3rem;
+  cursor: pointer;
+}
+
+.permission label {
+  margin-bottom: 0.5rem; /* Space above the checkbox */
+  cursor: pointer;
 }

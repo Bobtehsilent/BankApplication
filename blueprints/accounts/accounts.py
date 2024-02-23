@@ -4,7 +4,6 @@ from sqlalchemy import func
 from datetime import datetime
 from models import Account, db, Customer
 from ..customers.customers import database_to_dict
-
 account_bp = Blueprint('account', __name__)
 
 

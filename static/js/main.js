@@ -253,7 +253,6 @@
             const manageCustomerUrl = baseManageCustomerUrl.replace('/0', '/' + customerData.Id);
             content += `<div class="details__actions">
                                 <a href="${customerDetailUrl}" class="details__button">More Details</a>
-                                <a href="${manageCustomerUrl}" class="details__button">Manage Customer</a>
                                 <!-- Placeholder for future button -->
                                 <!-- <a href="#" class="details__button">Placeholder Button</a> -->
                             </div>`;

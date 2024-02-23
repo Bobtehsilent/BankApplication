@@ -4,7 +4,7 @@ from models import db, Transaction, Account
 from collections import defaultdict
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
-from .transactionform import AddTransactionForm, TransferForm
+from forms.transaction_form import AddTransactionForm, TransferForm
 
 transactions_bp = Blueprint('transaction', __name__)
 

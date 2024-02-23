@@ -23,9 +23,6 @@
                     <a href="{{ url_for('account.account_list') }}" class="nav-link {{ 'active' if request.endpoint == 'account.account_list' else '' }}">
                         <i class="fa fa-table" aria-hidden="true"></i><span> Accounts</span>
                     </a>
-                    <a href="{{ url_for('login.logout') }}" class="nav-link">
-                        <i class="fas fa-sign-out-alt"></i><span>Logout</span>
-                    </a>
                     <hr class="nav-section-divider">
                 </div>
             {% endif %}
@@ -40,25 +37,13 @@
                     <a href="#" class="nav-link">
                         <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
                     </a>
-                    <a href="{{ url_for('login.logout') }}" class="nav-link">
-                        <i class="fas fa-exclamation-triangle"></i><span>Logout</span>
-                    </a>
                     <hr class="nav-section-divider">
                 </div>
             {% endif %}
-            {% if current_user.PlaceholderPermission %}
+            {% if current_user.AdminPermission %}
                 <div class="nav-section">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
-                    </a>
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
-                    </a>
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
-                    </a>
-                    <a href="{{ url_for('login.logout') }}" class="nav-link">
-                        <i class="fas fa-exclamation-triangle"></i><span>Logout</span>
+                    <a href="{{ url_for('admin_tools.manage_user')}}" class="nav-link">
+                        <i class="fas fa-exclamation-triangle"></i><span>Manage user</span>
                     </a>
                 </div> 
                 <!-- More Links Here  -->

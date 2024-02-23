@@ -24,7 +24,9 @@ def create_app(config_class=Config):
     from blueprints.transactions.transactions import transactions_bp
     from blueprints.login.login import login_bp
     from blueprints.interface.user_interface import interface_bp
+    from blueprints.admin.admin_tools import admin_tools_bp
     from api.api import api_bp
+    app.register_blueprint(admin_tools_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(contact_form_bp)

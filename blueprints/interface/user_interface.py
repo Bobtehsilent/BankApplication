@@ -18,7 +18,6 @@ def dashboard():
     customer_data = {country_code: count for country_code, count in country_counts}
 
     country_customer_data = get_top_customers_by_country()
-    print(country_customer_data)
 
     return render_template('/interface/user_interface.html', 
                            customer_data=customer_data, 

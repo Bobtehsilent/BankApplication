@@ -26,6 +26,13 @@ https://www.tooplate.com/view/2097-pop
 </head>
 
 <body>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 <div id="tm-bg"></div>
     <div id="tm-wrap">
         <div class="tm-main-content">
@@ -87,16 +94,18 @@ https://www.tooplate.com/view/2097-pop
                                                 </div>
                                                 <div class="col-12">
                                                     <form action="{{ url_for('login.login') }}" method="post">
+                                                        {{ form.hidden_tag() }}
                                                         <div class="form-group">
-                                                            <label for="username">Username</label> 
-                                                            <input type="text" id="username" name="username" class="form-control" placeholder="Enter Username" required>
+                                                            {{ form.username.label }}
+                                                            {{ form.username(class="form-control") }}
                                                         </div>
                                                         <div class="form-group">
-                                                            <label for="password">Password</label>
-                                                            <input type="password" id="password" name="password" class="form-control" placeholder="Enter Password" required>
+                                                            {{ form.password.label }}
+                                                            {{ form.password(class="form-control") }}
                                                         </div>
-                                                        <button type="submit" class="btn btn-primary tm-btn-submit">Log in</button>
+                                                        <button type="submit" class="btn btn-primary">Log in</button>
                                                     </form>
+                                                    
                                                 </div>
                                             </div>
                                         </div>
