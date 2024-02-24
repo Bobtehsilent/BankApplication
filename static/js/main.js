@@ -822,6 +822,177 @@ function appendCustomerToDropdown(customer, dropdown) {
     dropdown.appendChild(customerDiv);
 }
 
+// user edit search.
+let currentSection = '';
+
+function searchEditUser(section) {
+    console.log(section);
+    const input = document.getElementById(section); // Use the passed section ID to get the input
+    const filter = input.value.trim();
+    console.log(filter);
+    
+    // Determine which dropdown to use based on the section
+    let dropdownId = '';
+    if (section === 'editUserSearch') {
+        dropdownId = 'editUserResultsDropdown';
+    } else if (section === 'changePasswordSearch') {
+        dropdownId = 'changePasswordResultsDropdown';
+    } else if (section === 'deleteUserSearch') {
+        dropdownId = 'deleteUserResultsDropdown';
+    }
+    const dropdown = document.getElementById(dropdownId);
+    
+    dropdown.innerHTML = ''; // Clear previous results
+
+    if (!filter) {
+        dropdown.style.display = 'none';
+        return;
+    }
+
+    fetch(`/api/search_users?search=${encodeURIComponent(filter)}`)
+    .then(response => response.json())
+    .then(users => {
+        if (users.length > 0) {
+            users.forEach(user => appendUserToDropdown(user, dropdown, section));
+        } else {
+            const noResults = document.createElement('div');
+            noResults.className = 'user-dropdown-item';
+            noResults.textContent = 'No matching users found';
+            dropdown.appendChild(noResults);
+        }
+        dropdown.style.display = 'block';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        dropdown.style.display = 'none';
+    });
+}
+
+function appendUserToDropdown(user, dropdown, section) {
+    let userDiv = document.createElement('div');
+    userDiv.className = 'dropdown-item';
+    userDiv.textContent = `${user.id} - ${user.username} - ${user.email}`;
+    userDiv.addEventListener('click', () => {
+        switch (section) {
+            case 'editUserSearch':
+                fillEditForm(user);
+                break;
+            case 'changePasswordSearch':
+                prepareChangePassword(user);
+                break;
+            case 'deleteUserSearch':
+                prepareDeleteUser(user);
+                break;
+        }
+        clearOnClick(section);
+    });
+    dropdown.appendChild(userDiv);
+}
+
+function fillEditForm(user) {
+    document.getElementById('userEditForm').user_id.value = user.id;
+    document.querySelector("#userEditForm [name='username']").value = user.username;
+    document.querySelector("#userEditForm [name='email']").value = user.email;
+    document.querySelector("#userEditForm [name='first_name']").value = user.first_name;
+    document.querySelector("#userEditForm [name='last_name']").value = user.last_name;
+    document.querySelector("#userEditForm [name='information_permission']").checked = user.information_permission;
+    document.querySelector("#userEditForm [name='management_permission']").checked = user.management_permission;
+    document.querySelector("#userEditForm [name='admin_permission']").checked = user.admin_permission;
+    
+}
+
+function showChangePasswordForm(user) {
+    const formContainer = document.getElementById('changePasswordForm');
+    formContainer.innerHTML = `
+        <p>Changing password for ${user.username}</p>
+        <input type="hidden" name="user_id" value="${user.id}" />
+        <input type="password" placeholder="New Password" name="newPassword" required />
+        <input type="password" placeholder="Confirm New Password" name="confirmPassword" required />
+        <button type="submit">Change Password</button>
+    `;
+    // Make the form visible
+    formContainer.classList.remove('collapse');
+}
+
+function showDeleteUserConfirmation(user) {
+    const confirmationContainer = document.getElementById('deleteUserSection');
+    confirmationContainer.innerHTML = `
+        <p>Are you sure you want to delete ${user.username}?</p>
+        <button onclick="confirmDelete(${user.id})">Delete User</button>
+    `;
+}
+
+// clear searchinput
+
+function clearOnClick(section) {
+    let inputId, dropdownId;
+    switch (section) {
+        case 'editUserSearch':
+            inputId = 'editUserSearch';
+            dropdownId = 'editUserResultsDropdown';
+            break;
+        case 'changePasswordSearch':
+            inputId = 'changePasswordSearch';
+            dropdownId = 'changePasswordResultsDropdown';
+            break;
+        case 'deleteUserSearch':
+            inputId = 'deleteUserSearch';
+            dropdownId = 'deleteUserResultsDropdown';
+            break;
+    }
+    // Clear the input field
+    if (inputId) {
+        document.getElementById(inputId).value = '';
+    }
+    // Hide the dropdown
+    if (dropdownId) {
+        document.getElementById(dropdownId).style.display = 'none';
+    }
+}
+
+function clearSearchInput(section, search, dropdown) {
+    // Hide the clear button immediately
+    document.getElementById(section);
+    if (search) {
+        document.getElementById(search).value = '';
+    }
+    if (dropdown) {
+        document.getElementById(dropdown).style.display = 'none';
+    }
+
+    // Switch case to handle section-specific clearing
+    switch (section) {
+        case 'clearEditUser':
+            resetEditUserForm();
+            break;
+        case 'clearChangePassword':
+            resetChangePasswordForm();
+            break;
+        case 'clearDeleteSection':
+            resetDeleteUserSection();
+            break;
+        default:
+            console.error('Unknown section for clearing:', section);
+    }
+}
+
+function resetEditUserForm() {
+    const form = document.getElementById('userEditForm');
+    if (form) {
+        form.reset();
+    }
+}
+
+// Add similar reset functions for change password and delete user sections
+function resetChangePasswordForm() {
+    // Implement reset logic for change password form
+}
+
+function resetDeleteUserSection() {
+    // Implement reset logic for delete user section, e.g., clearing displayed user information
+}
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const searchQuery = urlParams.get('search'); 
@@ -849,36 +1020,3 @@ document.getElementById('toggleDarkMode').addEventListener('click', function() {
 
 window.openDetailsWithData = openDetailsWithData;
 
-
-
-// //transaction load
-// document.addEventListener('DOMContentLoaded', function() {
-//     const loadMoreTransactionsButton = document.getElementById('loadMoreTransactions');
-//     let offset = 0; // Initialize offset
-//     const limit = 20; // You can adjust this if needed
-
-//     loadMoreTransactionsButton.addEventListener('click', function() {
-//         const customerId = this.getAttribute('data-customer-id'); // Assuming the button has the correct data-customer-id attribute
-//         const url = `/more_transactions/${customerId}?limit=${limit}&offset=${offset}`;
-
-//         fetch(url)
-//             .then(response => response.json())
-//             .then(data => {
-//                 // Assuming your data is an array of transaction objects
-//                 if(data.length > 0) {
-//                     const transactionsTable = document.getElementById('transactionsTable');
-//                     transactionsTable.style.display = ''; // Make sure the table is visible
-//                     const tbody = transactionsTable.getElementsByTagName('tbody')[0];
-
-//                     data.forEach(transaction => {
-//                         const row = document.createElement('tr');
-//                         row.innerHTML = `<td>${transaction.date}</td><td>${transaction.amount}</td><td>${transaction.type}</td><td>${transaction.operation}</td>`;
-//                         tbody.appendChild(row);
-//                     });
-
-//                     offset += data.length; // Update the offset for the next call
-//                 }
-//             })
-//             .catch(error => console.error('Error loading transactions:', error));
-//     });
-// });

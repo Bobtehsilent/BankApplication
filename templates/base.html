@@ -32,7 +32,8 @@
                         <div class="search-container">
                             {% block searchbar %}
                                 <!-- Default search bar; can be empty if you always want to override it -->
-                                <input type="text" id="headerSearch" placeholder="Search..." oninput="searchInformation()">
+                                <input type="text" id="headerSearch" placeholder="Search..." oninput="searchInformation(); toggleClearButtonHeader();">
+                                <button id="clearSearchHeader" onclick="clearSearchInputHeader()" style="display: none;">Clear</button>
                             {% endblock %}
                             <div id="searchDropdown" class="search-dropdown">
                                 <!-- Search results -->
@@ -91,6 +92,22 @@
                 $('.flash-message').slideDown(300).delay(3000).slideUp(300);
             }
         });
+        function clearSearchInputHeader() {
+            document.getElementById('headerSearch').value = '';
+            toggleClearButtonHeader();
+            // Optionally, clear the search results or reset the state here
+            document.getElementById('searchDropdown').style.display = 'none';
+        }
+        
+        function toggleClearButtonHeader() {
+            const searchInput = document.getElementById('headerSearch');
+            const clearButton = document.getElementById('clearSearchHeader');
+            if (searchInput.value) {
+                clearButton.style.display = 'inline-block'; // Show clear button
+            } else {
+                clearButton.style.display = 'none'; // Hide clear button
+            }
+        }
     </script>
 
     {% block scripts %}{% endblock %}

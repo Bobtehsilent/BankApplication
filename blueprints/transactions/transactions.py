@@ -121,8 +121,6 @@ def validate_transaction(from_account_id, to_account_id=None, transaction_amount
     return True, ""
 
 
-    
-
 @transactions_bp.route('/transactions/<int:id>', methods=['GET'])
 def get_transaction(id):
     transaction = Transaction.query.get_or_404(id)
@@ -154,32 +152,6 @@ def get_total_balance(customer_id):
     total_balance = sum(account.Balance for account in accounts)
     return total_balance
 
-# @transactions_bp.route('/graph_transactions/<int:customer_id>', methods=['GET'])
-# def transactions_graph(customer_id):
-#     transactions = Transaction.query.join(Account).filter(
-#         Account.CustomerId == customer_id
-#     ).order_by(Transaction.Date.asc()).all()  # Note: Removed limit here to process all transactions
-    
-#     # Prepare data structure to hold cumulative balance by account type
-#     balances_by_type = defaultdict(list)
-    
-#     # Track running balances for each account type
-#     running_balances = defaultdict(int)
-
-#     for transaction in transactions:
-#         # Assuming each transaction affects the balance according to its type
-#         if transaction.Type == "Debit":
-#             running_balances[transaction.Account.AccountType] += transaction.Amount
-#         else:  # Debit
-#             running_balances[transaction.Account.AccountType] -= transaction.Amount
-        
-#         # Append the current running balance for this account type
-#         balances_by_type[transaction.Account.AccountType].append({
-#             "date": transaction.Date.strftime("%Y-%m-%d"),
-#             "cumulative_balance": running_balances[transaction.Account.AccountType]
-#         })
-
-#     return jsonify(balances_by_type)
 
 
 

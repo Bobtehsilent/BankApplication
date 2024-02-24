@@ -106,7 +106,6 @@ body {
 .search-dropdown {
   position: absolute;
   background-color: var(--dropdown-bg-color);
-  width: calc(100% - 20px);
   border: 1px solid var(--search-input-border-color);
   border-radius: 5px;
   display: none;
@@ -115,8 +114,9 @@ body {
   z-index: 1000;
 }
 
+
 .dropdown-item {
-  color: black;
+  color: var(--text-color);
   padding: 10px;
   cursor: pointer;
   border-bottom: 1px solid var(--search-input-border-color);
@@ -125,6 +125,7 @@ body {
 .dropdown-item:hover {
   background-color: var(--dropdown-item-hover-bg-color);
 }
+
 
 .user-info {
   justify-content: right;
@@ -945,7 +946,8 @@ table a:hover {
 }
 
 .card-body {
-  flex-grow: 1;
+  display: flex; /* Helps in aligning items vertically */
+  flex-direction: column; /* Stack children vertically */
 }
 
 .collapse {
@@ -976,4 +978,25 @@ table a:hover {
 .permission label {
   margin-bottom: 0.5rem; /* Space above the checkbox */
   cursor: pointer;
+}
+
+.user-search-container input {
+  flex-grow: 1;
+  padding: 5px;
+  border: 1px solid var(--search-input-border-color);
+  border-radius: 5px;
+}
+
+.clearSearch, #clearSearchHeader {
+  margin-left: 10px;
+  cursor: pointer;
+  background-color: #f44336; /* Red color for the clear button */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+
+.clearSearch:hover, #clearSearchHeader {
+  background-color: #d32f2f; /* Darker shade of red on hover */
 }

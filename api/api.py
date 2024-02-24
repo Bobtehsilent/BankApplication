@@ -173,3 +173,32 @@ def get_customer_contact(contact_id):
         'Email': contact.Email,
         # Include other fields as necessary
     })
+
+
+# search to edit
+
+@api_bp.route('/search_users', methods=['GET'])
+def search_users():
+    query = request.args.get('search', '')
+    users = User.query.filter(
+        or_(
+            User.Username.ilike(f'%{query}%'),
+            User.CompanyEmail.ilike(f'%{query}%'),  # Assuming this is the correct field name for email
+            User.FirstName.ilike(f'%{query}%'),
+            User.LastName.ilike(f'%{query}%')
+        )
+    ).all()
+
+    users_data = [{
+        'id': user.Id,
+        'username': user.Username,
+        'email': user.CompanyEmail,  # Assuming this is the correct field name for email
+        'first_name': user.FirstName,
+        'last_name': user.LastName,
+        'role': user.Role,
+        'information_permission': user.InformationPermission,
+        'management_permmission': user.ManagementPermission,
+        'admin_permission': user.AdminPermission
+    } for user in users]
+
+    return jsonify(users_data)
