@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, Blueprint, request
+from flask import render_template, redirect, url_for, flash, Blueprint, request, jsonify
 from forms.login_form import RegisterForm, EditUserForm, EditUserPasswordForm
 from models import User, db
 from flask_login import current_user
@@ -30,6 +30,33 @@ def manage_user():
         flash('New user has been successfully registered.', 'success')
         return redirect(url_for('admin_tools.manage_user'))
     return render_template('/admin/manage_user.html', form=form)
+
+@admin_tools_bp.route('/get_users')
+def get_users():
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+    users_pagination = User.query.paginate(page=page, per_page=per_page, error_out=False)
+    users = users_pagination.items
+
+    users_data = [{
+        'id': user.Id,
+        'username': user.Username,
+        'email': user.CompanyEmail,
+        'first_name': user.FirstName,
+        'last_name': user.LastName,
+        'role': user.Role,
+        # Add other fields as necessary
+    } for user in users]
+
+    return jsonify({
+        'users': users_data,
+        'has_next': users_pagination.has_next,
+        'has_prev': users_pagination.has_prev,
+        'next_num': users_pagination.next_num,
+        'prev_num': users_pagination.prev_num,
+        'page': users_pagination.page,
+        'total_pages': users_pagination.pages,
+    })
 
 @admin_tools_bp.route('/edit_user', methods=['GET', 'POST'])
 def edit_user():
@@ -76,16 +103,16 @@ def change_password():
 
 @admin_tools_bp.route('/delete_user', methods=['POST'])
 def delete_user():
-    user_id = request.form.get('user_id')
-    confirm_text = request.form.get('confirm_text')
+    data = request.get_json()
+    user_id = data.get('user_id')
+    confirm_text = data.get('confirm_text')
     if confirm_text == "CONFIRM":
         user = User.query.get(user_id)
         if user:
             db.session.delete(user)
             db.session.commit()
-            flash('User deleted successfully', 'success')
+            return jsonify({'message': 'User deleted successfully'}), 200
         else:
-            flash('User not found', 'danger')
+            return jsonify({'message': 'User not found'}), 404
     else:
-        flash('Confirmation failed. User not deleted.', 'danger')
-    return redirect(url_for('admin_tools.manage_user'))
+        return jsonify({'message': 'Confirmation failed. User not deleted.'}), 400

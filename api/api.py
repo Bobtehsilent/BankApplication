@@ -92,28 +92,24 @@ def transactions_graph(customer_id):
         Account.CustomerId == customer_id
     ).order_by(Transaction.Date.asc()).all()
     
-    # Use account ID as the key to differentiate between accounts of the same type
     balances_by_account = defaultdict(lambda: {"type": "", "balances": []})
     
     for transaction in transactions:
         account_id = transaction.AccountId
         account_type = transaction.Account.AccountType
-        # Initialize account type if not already set
+        
         if not balances_by_account[account_id]["type"]:
             balances_by_account[account_id]["type"] = account_type
         
-        # Adjust balance based on the transaction type
         previous_balance = balances_by_account[account_id]["balances"][-1]["cumulative_balance"] if balances_by_account[account_id]["balances"] else 0
-        new_balance = previous_balance + transaction.Amount if transaction.Type == "Debit" else previous_balance - transaction.Amount
-        
-        # Prevent balance from going below zero, if required by your system's logic
+        # Since type is determined by the amount, just add the amount directly
+        new_balance = previous_balance + transaction.Amount
         
         balances_by_account[account_id]["balances"].append({
             "date": transaction.Date.strftime("%Y-%m-%d"),
             "cumulative_balance": new_balance
         })
 
-    # Prepare the result for JSON serialization
     result = [{
         "account_id": account_id,
         "account_type": data["type"],
@@ -143,6 +139,31 @@ def more_transactions(customer_id):
         'date': transaction.Date.strftime('%Y-%m-%d'),
         'amount': transaction.Amount,
         'new_balance': transaction.NewBalance,
+        'type': transaction.Type,
+        'operation': transaction.Operation
+    } for transaction in transactions]
+    
+    return jsonify([transactions_data, has_more_data])
+
+@api_bp.route('/accounts/<int:account_id>/transactions', methods=['GET'])
+def account_transactions(account_id):
+    page = request.args.get('page', 1, type=int)
+    limit = 20
+    offset = (page - 1) * limit
+
+    transactions_query = Transaction.query \
+                                    .filter(Transaction.AccountId == account_id) \
+                                    .order_by(Transaction.Date.desc())
+
+    transactions = transactions_query.offset(offset).limit(limit).all()
+    total_transactions = transactions_query.count()
+    has_more_data = (page * limit) < total_transactions
+
+    transactions_data = [{
+        'account_id': transaction.AccountId,
+        'date': transaction.Date.strftime('%Y-%m-%d'),
+        'amount': str(transaction.Amount),  # Ensure amount is JSON serializable
+        'new_balance': str(transaction.NewBalance),  # Ensure new_balance is JSON serializable
         'type': transaction.Type,
         'operation': transaction.Operation
     } for transaction in transactions]

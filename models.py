@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import event
+from sqlalchemy import Numeric
 import barnum
 import random
 from datetime import datetime  
@@ -71,7 +71,7 @@ class Account(db.Model):
     Id = db.Column(db.Integer, primary_key=True)
     AccountType = db.Column(db.String(10), nullable=False)
     Created = db.Column(db.DateTime, nullable=False)
-    Balance = db.Column(db.Integer, nullable=False)
+    Balance = db.Column(Numeric(10, 2), nullable=False)
     Transactions = db.relationship('Transaction', backref='Account', lazy=True)
     CustomerId = db.Column(db.Integer, db.ForeignKey('Customers.Id'), nullable=False)
 
@@ -81,8 +81,8 @@ class Transaction(db.Model):
     Type = db.Column(db.String(20), nullable=False)
     Operation = db.Column(db.String(50), nullable=False)
     Date = db.Column(db.DateTime, nullable=False)
-    Amount = db.Column(db.Integer, nullable=False)
-    NewBalance = db.Column(db.Integer, unique=False, nullable=False)
+    Amount = db.Column(Numeric(10, 2), nullable=False)
+    NewBalance = db.Column(Numeric(10, 2), unique=False, nullable=False)
     AccountId = db.Column(db.Integer, db.ForeignKey('Accounts.Id'), nullable=False)
 
 

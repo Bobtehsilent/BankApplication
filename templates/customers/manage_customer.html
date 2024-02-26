@@ -1,15 +1,158 @@
 {% extends 'base.html' %}
 
 {% block title %}Customer Details{% endblock %}
-
+{% block searchbar %}
+    <div class="filter-content">
+        <form id="filterForm" onsubmit="event.preventDefault(); filterCustomers();">
+            <input type="text" id="listCustomerSearch" name="name" placeholder="Search Customers..." oninput="filterCustomers()">
+        </form>
+    </div>
+{% endblock %}
 {% block content %}
-    <div class="customer-details">
-        <h2>Customer Details: {{ customer.GivenName }} {{ customer.Surname }}</h2>
-        <p><strong>Email:</strong> {{ customer.EmailAddress }}</p>
-        <p><strong>Phone:</strong> {{ customer.Telephone }}</p>
-        <p><strong>Address:</strong> {{ customer.Streetaddress }}, {{ customer.City }}, {{ customer.Zipcode }}, {{ customer.Country }}</p>
-        <p><strong>Personal Number:</strong> {{ customer.PersonalNumber }}</p>
-        <!-- Add more fields as needed -->
+<div class="manage-container">
+    {% macro sort_link(column, title, current_sort_order, current_search_query, current_page) %}
+    {% set new_sort_order = 'asc' if current_sort_order == 'desc' and sort_column == column else 'desc' %}
+        <a href="{{ url_for('customer.manage_customer', page=current_page, sort_column=column, sort_order=new_sort_order, search=current_search_query) }}">
+            {{ title }}
+            {% if sort_column == column %}
+                {% if current_sort_order == 'asc' %}
+                    <span class="sort-arrow">&#9650;</span> 
+                {% else %}
+                    <span class="sort-arrow">&#9660;</span> 
+                {% endif %}
+            {% endif %}
+        </a>
+    {% endmacro %}
+    <!-- Customer List Card -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCollapse('readCustomerBody')">
+            <h2>Customer List</h2>
+        </div>
+        <div class="table-list collapse" id="readCustomerBody">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-sort-column="Id" data-sort-order="asc" class="sortable-column">Id</th>
+                        <th data-sort-column="PersonalNumber" data-sort-order="asc" class="sortable-column">Personal Number</th>
+                        <th data-sort-column="Surname" data-sort-order="asc" class="sortable-column">Name</th>
+                        <th data-sort-column="Streetaddress" data-sort-order="asc" class="sortable-column">Address</th>
+                        <th data-sort-column="City" data-sort-order="asc" class="sortable-column">City</th>
+                        <th data-sort-column="Country" data-sort-order="asc" class="sortable-column">Country</th>
+                    </tr>
+                </thead>
+                <tbody id="customerListBody">
+                    <!-- Customers will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+            <div class="table-row-pagination">
+                <!-- Pagination controls will be inserted here -->
+            </div>        
+        </div>
     </div>
     
+    <!-- Add Customer Card -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCollapse('addCustomerForm')">
+            <h2>Add Customer</h2>
+        </div>
+        <div class="card-body collapse" id="addCustomerForm">
+            <div class="container">
+                <h2>Add New Customer</h2>
+                <form action="{{ url_for('customer.add_customer') }}" method="post">
+                    {{ add_customer_form.hidden_tag() }}
+                    <table class="table-list">
+                        <tbody>
+                            <tr>
+                                <td>{{ add_customer_form.givenname.label }}</td>
+                                <td>{{ add_customer_form.givenname(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ add_customer_form.surname.label }}</td>
+                                <td>{{ add_customer_form.surname(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ add_customer_form.email.label }}</td>
+                                <td>{{ add_customer_form.email(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ add_customer_form.telephone.label }}</td>
+                                <td>{{ add_customer_form.telephone(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ add_customer_form.address.label }}</td>
+                                <td>{{ add_customer_form.address(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ add_customer_form.city.label }}</td>
+                                <td>{{ add_customer_form.city(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ add_customer_form.zipcode.label }}</td>
+                                <td>{{ add_customer_form.zipcode(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ add_customer_form.country.label }}</td>
+                                <td>{{ add_customer_form.country(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ add_customer_form.birthday.label }}</td>
+                                <td>{{ add_customer_form.birthday(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ add_customer_form.personalnumber_last4.label }}</td>
+                                <td>{{ add_customer_form.personalnumber_last4(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="text-align: center;">
+                                    {{ add_customer_form.submit(class_='form-submit-button') }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit and Delete Customer -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCollapse('customerManagementOptions')">
+            <h2>Manage Customers</h2>
+        </div>
+        <div class="card-body collapse" id="customerManagementOptions">
+            <!-- Search, Edit, and Delete functionality here -->
+        </div>
+    </div>
+</div>
+<script>
+    var baseCustomerDetailUrl = "{{ url_for('customer.customer_detail', user_id=0, _external=True) }}";
+    var baseManageCustomerUrl = "{{ url_for('customer.manage_customer', user_id=0, _external=True) }}";
+    
+    function toggleCollapse(elementId) {
+        var element = document.getElementById(elementId);
+        if (element.classList.contains('collapse')) {
+            element.classList.remove('collapse');
+            element.classList.add('collapsed');
+        } else {
+            element.classList.remove('collapsed');
+            element.classList.add('collapse');
+        }
+    }
+    function setupPagination(paginationData) {
+        const container = document.querySelector('.table-row-pagination');
+        container.innerHTML = ''; // Clear existing controls
+    
+        // Create and append pagination controls based on paginationData
+        // Example: Previous Page Button
+        if (paginationData.has_prev) {
+            const prevButton = document.createElement('button');
+            prevButton.textContent = 'Previous';
+            prevButton.onclick = () => filterCustomers(paginationData.prev_num);
+            container.appendChild(prevButton);
+        }
+    
+        // Similarly, create Next Page button, page numbers, etc.
+    }
+    
+</script>
 {% endblock %}

@@ -241,7 +241,7 @@
                     totalBalance += account.Balance;
                     content += `<tr><td>${account.AccountType}</td><td>${account.Balance} SEK</td></tr>`;
                 });
-                content += `<tr class="total-balance"><td>Total Balance:</td><td>${totalBalance.toFixed(2)} SEK</td></tr></table>`;
+                content += `<tr class="total-balance"><td>Total Balance:</td><td>${totalBalance} SEK</td></tr></table>`;
             } else {
                 content += `<p>No accounts found</p>`;
             }
@@ -409,8 +409,10 @@ function initializeSortingAndFiltering() {
     } else if (currentPagePath.includes('/account_list')) {
         filterFunction = filterAccounts;
         searchInputId = 'listAccountSearch';
+    } else if (currentPagePath.includes('/customers/manage_customer')) {
+        filterFunction = filterCustomers;
+        searchInputId = 'listCustomerSearch'
     }
-
     // Proceed with setting up sorting and the search event listener if on a recognized page
     if (filterFunction && searchInputId) {
         // Sorting Event Listeners
@@ -558,6 +560,7 @@ function filterAccounts(pageNum = 1, sortColumn = 'Surname', sortOrder = 'asc') 
 
 // pagination handling
 function updatePaginationControls(pagination) {
+    console.log(pagination)
     const paginationContainer = document.querySelector('.table-row-pagination');
     paginationContainer.innerHTML = ''; // Clear existing controls
 
@@ -637,6 +640,8 @@ function changePage(pageNum) {
         filterCustomers(pageNum, currentSortColumn, currentSortOrder);
     } else if (currentPagePath.includes('/account_list')) {
         filterAccounts(pageNum, currentSortColumn, currentSortOrder);
+    } else if (currentPagePath.includes('/customers/manage_customer')) {
+        filterCustomers(pageNum, currentSortColumn, currentSortOrder);
     }
 }
 
@@ -822,16 +827,52 @@ function appendCustomerToDropdown(customer, dropdown) {
     dropdown.appendChild(customerDiv);
 }
 
-// user edit search.
+// User management section
+
+function fetchUsers(page=1) {
+    fetch(`/get_users?page=${page}`)
+    .then(response => response.json())
+    .then(data => {
+        const userList = document.getElementById('userList');
+        const paginationControls = document.getElementById('paginationControls');
+
+        userList.innerHTML = data.users.map(user => 
+            `<tr>
+                <td>${user.id}</td>
+                <td>${user.username}</td>
+                <td>${user.first_name}</td>
+                <td>${user.last_name}
+                <td>${user.email}</td>
+                <td>${user.role}</td>
+            </tr>`
+        ).join('');
+
+        paginationControls.innerHTML = '';
+        if (data.has_prev) {
+            const prevButton = document.createElement('button');
+            prevButton.textContent = 'Previous';
+            prevButton.onclick = () => fetchUsers(data.prev_num);
+            paginationControls.appendChild(prevButton);
+        }
+        if (data.has_next) {
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Next';
+            nextButton.onclick = () => fetchUsers(data.next_num);
+            paginationControls.appendChild(nextButton);
+        }
+    });
+}
+
+
+
 let currentSection = '';
 
 function searchEditUser(section) {
     console.log(section);
-    const input = document.getElementById(section); // Use the passed section ID to get the input
+    const input = document.getElementById(section);
     const filter = input.value.trim();
     console.log(filter);
     
-    // Determine which dropdown to use based on the section
     let dropdownId = '';
     if (section === 'editUserSearch') {
         dropdownId = 'editUserResultsDropdown';
@@ -842,7 +883,7 @@ function searchEditUser(section) {
     }
     const dropdown = document.getElementById(dropdownId);
     
-    dropdown.innerHTML = ''; // Clear previous results
+    dropdown.innerHTML = '';
 
     if (!filter) {
         dropdown.style.display = 'none';
@@ -878,10 +919,10 @@ function appendUserToDropdown(user, dropdown, section) {
                 fillEditForm(user);
                 break;
             case 'changePasswordSearch':
-                prepareChangePassword(user);
+                fillChangePasswordInfo(user);
                 break;
             case 'deleteUserSearch':
-                prepareDeleteUser(user);
+                fillDeleteInfo(user);
                 break;
         }
         clearOnClick(section);
@@ -900,18 +941,34 @@ function fillEditForm(user) {
     document.querySelector("#userEditForm [name='admin_permission']").checked = user.admin_permission;
     
 }
+function fillDeleteInfo(user) {
+    // Fill in the user data
+    document.getElementById('deleteUserInfoId').textContent = user.id;
+    document.getElementById('deleteUserInfoUsername').textContent = user.username;
+    document.getElementById('deleteUserInfoEmail').textContent = user.email;
+    document.getElementById('deleteUserInfoFirstName').textContent = user.first_name;
+    document.getElementById('deleteUserInfoLastName').textContent = user.last_name;
+    document.getElementById('deleteUserInfoRole').textContent = user.role;
 
-function showChangePasswordForm(user) {
-    const formContainer = document.getElementById('changePasswordForm');
-    formContainer.innerHTML = `
-        <p>Changing password for ${user.username}</p>
-        <input type="hidden" name="user_id" value="${user.id}" />
-        <input type="password" placeholder="New Password" name="newPassword" required />
-        <input type="password" placeholder="Confirm New Password" name="confirmPassword" required />
-        <button type="submit">Change Password</button>
-    `;
-    // Make the form visible
-    formContainer.classList.remove('collapse');
+    // Show the form section if it was previously hidden
+    document.getElementById('deleteUserSection').classList.remove('collapse');
+}
+
+
+function fillChangePasswordInfo(user) {
+    // Update the hidden user_id input's value
+    document.querySelector("#changePasswordForm [name='user_id']").value = user.id;
+
+    // Fill in the user data
+    document.getElementById('userInfoId').textContent = user.id;
+    document.getElementById('userInfoUsername').textContent = user.username;
+    document.getElementById('userInfoEmail').textContent = user.email;
+    document.getElementById('userInfoFirstName').textContent = user.first_name;
+    document.getElementById('userInfoLastName').textContent = user.last_name;
+    document.getElementById('userInfoRole').textContent = user.role;
+
+    // Show the form section if it was previously hidden
+    document.getElementById('changePasswordSection').classList.remove('collapse');
 }
 
 function showDeleteUserConfirmation(user) {
@@ -985,11 +1042,26 @@ function resetEditUserForm() {
 
 // Add similar reset functions for change password and delete user sections
 function resetChangePasswordForm() {
-    // Implement reset logic for change password form
+    const form = document.getElementById('changePasswordForm')
+    // Clear user information
+    document.getElementById('userInfoId').textContent = '';
+    document.getElementById('userInfoUsername').textContent = '';
+    document.getElementById('userInfoEmail').textContent = '';
+    // Clear form fields
+    if (form) {
+        form.reset();
+    }
+    // Optionally, hide the form section or reset any other visual cues
 }
-
 function resetDeleteUserSection() {
-    // Implement reset logic for delete user section, e.g., clearing displayed user information
+    // Clear displayed user information
+    document.getElementById('deleteUserInfoId').textContent = '';
+    document.getElementById('deleteUserInfoUsername').textContent = '';
+    document.getElementById('deleteUserInfoEmail').textContent = '';
+    document.getElementById('deleteUserInfoFirstName').textContent = '';
+    document.getElementById('deleteUserInfoLastName').textContent = '';
+    document.getElementById('deleteUserInfoRole').textContent = '';
+    // Hide the delete section or any additional cleanup as needed
 }
 
 

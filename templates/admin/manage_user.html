@@ -1,8 +1,32 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="manage-user-container">
+<div class="manage-container">
     <!-- Add User Card -->
+    <div class="card" id="readUsercard">
+        <div class="card-header" onclick="toggleCollapse('readUserSection')">
+            <h3>User List</h3>
+        </div>
+        <div class="card-body collapsed" id="readUserSection">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <!-- Add other headers as necessary -->
+                    </tr>
+                </thead>
+                <tbody id="userList">
+                    <!-- Users will be dynamically inserted here -->
+                </tbody>
+            </table>
+            <div id="paginationControls"></div>
+        </div>
+    </div>       
     <div class="card" id="addUserCard">
         <div class="card-header" onclick="toggleCollapse('addUserForm')">
             <h2>Add User</h2>
@@ -163,6 +187,26 @@
                         <!-- Search results will be appended here dynamically -->
                         </div>
                 </div>
+                    <table class="table-list" id="userInfoTable">
+                        <thead>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>FirstName</th>
+                            <th>LastName</th>
+                            <th>Role</th>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td id="userInfoId"></td>
+                                <td id="userInfoUsername"></td>
+                                <td id="userInfoEmail"></td>
+                                <td id="userInfoFirstName"></td>
+                                <td id="userInfoLastName"></td>
+                                <td id="userInfoRole"></td>
+                            </tr>
+                        </tbody>
+                    </table>              
                 <form id="changePasswordForm" action="{{ url_for('admin_tools.change_password') }}" method="post">
                     {{ form.hidden_tag() }}
                     <input type="hidden" name="user_id" value="{{ user_id }}" />
@@ -196,24 +240,34 @@
                         <!-- Search results will be appended here dynamically -->
                         </div>
                 </div>
-                <button onclick="confirmDelete()">Delete User</button>
-                <!-- Potentially a confirmation modal instead of immediate action -->
+                <table class="table-list" id="userInfoTable">
+                    <thead>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>FirstName</th>
+                        <th>LastName</th>
+                        <th>Role</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="deleteUserInfoId"></td>
+                            <td id="deleteUserInfoUsername"></td>
+                            <td id="deleteUserInfoEmail"></td>
+                            <td id="deleteUserInfoFirstName"></td>
+                            <td id="deleteUserInfoLastName"></td>
+                            <td id="deleteUserInfoRole"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="form-submit-button" onclick="confirmDelete(document.getElementById('deleteUserInfoId').textContent)">Delete User</button>               
             </div>
         </div>
     </div>
-
-    <!-- Placeholder Card 2 -->
-    <div class="card" id="placeholderCard2">
-        <div class="card-header" onclick="toggleCollapse('placeholderContent2')">
-            <h2>Placeholder 2</h2>
-        </div>
-        <div class="card-body collapse" id="placeholderContent2">
-            <p>Placeholder content here.</p>
-        </div>
-    </div>
-</div>
-
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchUsers();
+    });
     function toggleCollapse(elementId) {
         var element = document.getElementById(elementId);
         if (element.classList.contains('collapse')) {
@@ -225,6 +279,29 @@
         }
     }
 
-    
+    function confirmDelete(userId) {
+        const confirmationText = prompt('Type CONFIRM to delete the user');
+        if (confirmationText === 'CONFIRM') {
+            fetch('/delete_user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                },
+                body: JSON.stringify({ user_id: userId, confirm_text: confirmationText })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('User deleted successfully');
+                    resetDeleteUserSection();
+                } else {
+                    alert('Error deleting user');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        } else {
+            alert('Deletion cancelled');
+        }
+    }
 </script>
 {% endblock %}

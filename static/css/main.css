@@ -453,13 +453,14 @@ thead th {
   color: var(--text-color);
   padding: 10px;
   border-bottom: 2px solid var(--border-color);
-  text-align: left;
+  text-align: center;
 }
 
 td,
 th {
-  padding: 12px;
+  padding: 5px;
   border-bottom: 1px solid var(--border-color);
+  text-align: center;
 }
 
 .details__description td {
@@ -807,9 +808,7 @@ table a:hover {
 }
 
 .actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
+  text-align: center;
 }
 
 .actions button {
@@ -856,9 +855,6 @@ table a:hover {
   cursor: pointer; /* Indicates the section can be expanded */
 }
 
-.back a {
-  color: var(--text-color);
-}
 
 #loadMoreTransactions {
   background-color: var(--details-button-bg-color);
@@ -885,11 +881,10 @@ table a:hover {
 
 /* Manage user */
 
-.manage-user-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: stretch;
+.manage-container {
+  text-align: center;
+  background-color: var(--sidebar-color);
+  border: 1px solid var(--details-border-color);
 }
 
 .form-control {
@@ -999,4 +994,40 @@ table a:hover {
 
 .clearSearch:hover, #clearSearchHeader {
   background-color: #d32f2f; /* Darker shade of red on hover */
+}
+
+.breadcrumb-section {
+  align-items: center;
+  padding: 10px;
+  background-color: var(--background-color); 
+  border-bottom: 1px solid var(--border-color); 
+}
+
+.breadcrumb {
+  font-size: 16px; 
+}
+
+.breadcrumb a {
+  color: var(--text-color); 
+  text-decoration: none; 
+  padding: 0 5px; /
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline; 
+}
+
+/* Styling for the back button */
+.back {
+  display: inline-block;
+  color: var(--sidebar-text-color); 
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-decoration: none; 
+  font-size: 16px; 
+}
+
+.back:hover {
+  background-color: var(--details-button-bg-color); 
+  color: var(--details-text-color); 
 }

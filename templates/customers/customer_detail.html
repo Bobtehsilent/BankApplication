@@ -3,13 +3,21 @@
 {% block title %}Customer Details{% endblock %}
 
 {% block content %}
+<div class="breadcrumb-section">
+    <div class="breadcrumb">
+        {% if 'breadcrumb' in session %}
+            {% for crumb in session['breadcrumb'] %}
+                <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                {% if not loop.last %}
+                    &gt;
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+    <!-- Back Button -->
+    <a href="{{ url_for('customer.customer_list') }}" class="back">← Back</a>
+</div>
 <div class="customer-details-page">
-    <!-- <div class="actions">
-        <button onclick="manageCustomer()">Manage Customer</button>
-        <button onclick="manageAccount()">Manage Account</button>
-        <button id="manageTransactionBtn">New transaction</button>
-    </div> -->
-
     <div class="customer-container">
         <div class="customer-details">
             <h2>Customer Details</h2>
@@ -75,6 +83,29 @@
             {% if current_user.ManagementPermission %}
             <div class="actions">
                 <button id="manageAccountBtn">Manage Account</button>
+                <button id="addAccountBtn" onclick="toggleCollapse('addAccountForm')">Add Account</button>
+            </div>
+            <div class="card-body collapse" id="addAccountForm">
+                <form action="{{ url_for('account.add_account', customer_id=customer.Id) }}" method="post">
+                    {{ form.hidden_tag() }}
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>{{ form.account_type.label }}</td>
+                                <td>{{ form.account_type(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ form.balance.label }}</td>
+                                <td>{{ form.balance(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="text-align: center;">
+                                    {{ form.submit(class_='form-submit-button', value="Add Customer") }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
             </div>
         </div>
         <div class="transaction-list">
@@ -115,6 +146,18 @@
         openGraph({{ customer.Id }});
     });
 
+    function toggleCollapse(elementId) {
+        var element = document.getElementById(elementId);
+        if (element.style.display === "none" || element.classList.contains('collapse')) {
+            element.style.display = "";
+            element.classList.remove('collapse');
+            element.classList.add('expanded');
+        } else {
+            element.style.display = "none";
+            element.classList.remove('expanded');
+            element.classList.add('collapse');
+        }
+    }
 
     document.getElementById('manageCustomerBtn').addEventListener('click', function() {
         window.location.href = "{{ url_for('customer.edit_customer', customer_id=customer.Id) }}";
@@ -173,8 +216,8 @@
         document.querySelector("#transactionsTable tbody").innerHTML += `<tr>
             <td>${element.account_id}
             <td>${element.date}</td>
-            <td>${element.amount}</td>
-            <td>${element.new_balance}</td>
+            <td>${element.amount}$</td>
+            <td>${element.new_balance}$</td>
             <td>${element.type}</td>
             <td>${element.operation}</td>
         </tr>`;

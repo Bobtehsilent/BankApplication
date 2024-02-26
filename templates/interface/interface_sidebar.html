@@ -28,7 +28,7 @@
             {% endif %}
             {% if current_user.ManagementPermission %}
                 <div class="nav-section">
-                    <a href="{{ url_for('customer.add_customer') }}" class="nav-link">
+                    <a href="{{ url_for('customer.manage_customer') }}" class="nav-link">
                         <i class="fas fa-wrench"></i><span>Add customer</span>
                     </a>
                     <a href="#" class="nav-link">

@@ -1,15 +1,14 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, DecimalField, SubmitField, IntegerField
+from wtforms import SelectField, DecimalField, SubmitField, RadioField
 from wtforms.validators import DataRequired, NumberRange
 
 
 class AddTransactionForm(FlaskForm):
-    transaction_type = SelectField('Transaction Type', choices=[('Credit', 'Credit'), ('Debit', 'Debit')])
-    operation = SelectField('Operation', choices=[]) 
-    amount = DecimalField('Amount', validators=[DataRequired(), NumberRange(min=0.01)], places=2)
+    operation_choices = [
+        ('Deposit cash', 'Deposit cash'), ('Salary', 'Salary'), ('Transfer to', 'Transfer to'),
+        ('ATM withdrawal', 'ATM withdrawal'), ('Payment', 'Payment'), ('Bank withdrawal', 'Bank withdrawal'), ('Transfer from', 'Transfer from')
+    ]
+    operation = SelectField('Operation', choices=operation_choices)
+    amount = DecimalField('Amount', validators=[DataRequired(), NumberRange(min=-999999, max=999999)], places=2)
+    # Add transaction_type as a RadioField or SelectField as per your requirement
     submit = SubmitField('Submit')
-
-class TransferForm(FlaskForm):
-    to_account = SelectField('To Account', coerce=int, validators=[DataRequired()])
-    amount = IntegerField('Amount', validators=[DataRequired(), NumberRange(min=1)])
-    submit = SubmitField('Transfer')

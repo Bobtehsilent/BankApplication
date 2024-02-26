@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="breadcrumb-section">
+    <div class="breadcrumb">
+        {% if 'breadcrumb' in session %}
+            {% for crumb in session['breadcrumb'] %}
+                <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                {% if not loop.last %}
+                    &gt;
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+    <!-- Back Button -->
+    <a href="javascript:history.back()" class="back">← Back</a>
+</div>
+<div class="container">
+    <div class="manage-container">
+        <h2>Account Management - Account ID: {{ account.Id }}</h2>
+    </div>
+    <div class="card">
+        <div class="manage-container" onclick="toggleCollapse('accountInfo')">
+            <h4>Account Info</h4>
+        </div>
+        <div id="accountInfo" class="collapsed">
+            <table>
+                <thead>
+                    <th>ID</th>
+                    <th>Account Type</th>
+                    <th>Created</th>
+                    <th>Balance</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ account.Id }}</td>
+                        <td>{{ account.AccountType }}</td>
+                        <td>{{ account.Created }}</td>
+                        <td>{{ account.Balance }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Transfer Funds Section -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCollapse('transferFunds')">
+            <h4>Transfer Funds</h4>
+        </div>
+        <div id="transferFunds" class="collapse">
+            <!-- Transfer Form -->
+            <form action="{{ url_for('transaction.transfer_transaction', from_account_id=account.Id) }}" method="POST">
+                {{ transfer_form.hidden_tag() }}
+                <table class="table-list">
+                    <tbody>
+                        <!-- To Account Field -->
+                        <tr>
+                            <td>{{ transfer_form.to_account.label }}</td>
+                            <td>{{ transfer_form.to_account(class='form-control') }}</td>
+                        </tr>
+                        <!-- Amount Field -->
+                        <tr>
+                            <td>{{ transfer_form.amount.label }}</td>
+                            <td>{{ transfer_form.amount(class='form-control') }}</td>
+                        </tr>
+                        <!-- Submit Button -->
+                        <tr>
+                            <td colspan="4" style="text-align: center;">
+                                {{ transfer_form.submit(class_='form-submit-button') }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+            
+        </div>
+    </div>
+
+    <!-- Edit Account Section -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCollapse('editAccount')">
+            <h4>Edit Account</h4>
+        </div>
+        <div id="editAccount" class="collapse">
+            <!-- Edit Account Form -->
+            <form action="{{ url_for('account.edit_account', account_id=account.Id) }}" method="POST">
+                {{ edit_account_form.hidden_tag() }}
+                <table class="table-list">
+                    <tbody>
+                        <!-- Account Type Field -->
+                        <tr>
+                            <td>{{ edit_account_form.account_type.label }}</td>
+                            <td>{{ edit_account_form.account_type(class='form-control') }}</td>
+                        </tr>
+                        <!-- Submit Button -->
+                        <tr>
+                            <td colspan="2" style="text-align: center;">
+                                {{ edit_account_form.submit(class='form-submit-button') }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Account Section -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCollapse('deleteAccount')">
+            <h4>Delete Account</h4>
+        </div>
+        <div id="deleteAccount" class="collapse">
+            <!-- Delete Account Action -->
+            <button onclick="confirmDeleteAccount({{ account.Id }})" class="form-submit-button" style="background-color: red;">Delete Account</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleCollapse(elementId) {
+        var element = document.getElementById(elementId);
+        if (element.classList.contains('collapse')) {
+            element.classList.remove('collapse');
+            element.classList.add('collapsed');
+        } else {
+            element.classList.remove('collapsed');
+            element.classList.add('collapse');
+        }
+    }
+
+    function confirmDeleteAccount(accountId) {
+        const confirmationText = prompt('Type CONFIRM to delete the account');
+        if (confirmationText === 'CONFIRM') {
+            fetch('/delete_account', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                },
+                body: JSON.stringify({ account_id: accountId, confirm_text: confirmationText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.message === 'Account deleted successfully') {
+                    // Assuming you have a customer ID to redirect to manage_accounts
+                    window.location.href = `/manage_accounts/${customer.Id}`;
+                    // Replace `YOUR_CUSTOMER_ID_HERE` with actual logic to retrieve customer ID
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        } else {
+            alert('Deletion cancelled');
+        }
+    }
+</script>
+{% endblock %}

@@ -4,6 +4,9 @@ from sqlalchemy import or_
 from models import Customer, db, Transaction, Account, load_country_codes
 from collections import defaultdict
 from forms.customer_forms import AddCustomerForm
+from forms.account_forms import AddAccountForm
+from blueprints.breadcrumbs import update_breadcrumb, pop_breadcrumb, clear_breadcrumb
+from datetime import datetime
 
 customer_bp = Blueprint('customer', __name__, url_prefix='/customers')
 
@@ -117,13 +120,16 @@ def group_accounts_by_type(accounts):
 #Get customer details
 @customer_bp.route('/customer_detail/<int:user_id>')
 def customer_detail(user_id):
+    clear_breadcrumb()
+    update_breadcrumb('Customer detail', url_for('customer.customer_detail', user_id=user_id))
+
+    form = AddAccountForm()
     customerobj = Customer.query.get_or_404(user_id)
     initial_transactions = Transaction.query.join(Account, Transaction.AccountId == Account.Id)\
                                     .join(Customer, Account.CustomerId == Customer.Id)\
                                     .filter(Customer.Id == user_id)\
                                     .order_by(Transaction.Date.desc())\
                                     .limit(20).all()
-        # Convert transactions to a more template-friendly format
     transactions = [{
         'account_id': transaction.AccountId,
         'date': transaction.Date.strftime('%Y-%m-%d'),
@@ -133,13 +139,27 @@ def customer_detail(user_id):
     } for transaction in initial_transactions]
 
     customer = customer_to_dict(customerobj)
-    return render_template('/customers/customer_detail.html', customer=customer, transactions=transactions)
+    return render_template('/customers/customer_detail.html', form=form, customer=customer, transactions=transactions)
 
 
-@customer_bp.route('/manage/<int:user_id>')
-def manage_customer(user_id):
-    customer = Customer.query.get_or_404(user_id)
-    return render_template('/customers/manage_customer.html', customer=customer)
+@customer_bp.route('/manage_customer')
+def manage_customer():
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # Or any other number that fits your design
+
+    # Your existing setup for form and country codes
+    add_customer_form = AddCustomerForm()
+    country_codes = load_country_codes('static/countrycodes/country_codes.txt')
+    add_customer_form.country.choices = [(c['name'], c['name']) for c in country_codes]
+
+    # Fetch paginated customers instead of all customers
+    paginated_customers = Customer.query.paginate(page=page, per_page=per_page)
+
+    # Pass paginated customers and pagination info to the template
+    return render_template('/customers/manage_customer.html', 
+                           customers=paginated_customers.items, 
+                           add_customer_form=add_customer_form,
+                           pagination=paginated_customers)
 
 @customer_bp.route('/add/customer', methods=['GET', 'POST'])
 def add_customer():
@@ -163,7 +183,7 @@ def add_customer():
             Birthday=form.birthday.data,
             Telephone=processed_telephone,
             Streetaddress=form.address.data,
-            City=form.city.data,
+            City=form.city.data.capitalize(),
             Zipcode=form.zipcode.data,
             Country=form.country.data,
             CountryCode=selected_country_code,
@@ -171,10 +191,32 @@ def add_customer():
             PersonalNumber=personal_number
         )
         db.session.add(new_customer)
+        db.session.flush()
+        base_account = Account(
+            CustomerId=new_customer.Id,
+            AccountType='Checking',  # Assuming you have an AccountType field
+            Created=datetime.utcnow(),
+            Balance=0,
+            # Include any other necessary fields
+        )
+        db.session.add(base_account)
+        db.session.flush()
+
+        base_transaction = Transaction(
+            AccountId=base_account.Id,
+            Amount=0,
+            NewBalance=0,
+            Date=datetime.utcnow(),
+            Type='Initial',  # Assuming you have a Type field to describe the transaction type
+            Operation='Account Opening',
+            # Include any other necessary fields
+        )
+        
+        db.session.add(base_transaction)
         db.session.commit()
         flash('Customer added successfully!', 'success')
-        return redirect(url_for('customer.customer_detail', user_id=new_customer.Id))
-    return render_template('/customers/add_customer.html', form=form)
+        return redirect(url_for('customer.manage_customer'))
+    return render_template('/customers/manage_customer.html', form=form)
 
 @customer_bp.route('/edit_customer/<int:customer_id>')
 @login_required
