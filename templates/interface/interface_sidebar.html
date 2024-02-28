@@ -3,6 +3,7 @@
         <div class="logo">
             <img src="{{ url_for('static', filename='homepage_styling/img/logo.png')}}" alt="">
         </div>
+        <hr class="nav-section-divider">
         <!-- sidebar -->
         <div class="sidebar-heading">
             <button id="sidebarToggle" class="button">
@@ -10,6 +11,7 @@
                 <span>User Interface</span>
             </button>
         </div>
+        <hr class="nav-section-divider">
         <!-- sidebar content -->
         <div class="nav-link-group">
             {% if current_user.InformationPermission %}
@@ -17,9 +19,11 @@
                     <a href="{{ url_for('user_interface.dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'user_interface.dashboard' else '' }}">
                         <i class="fas fa-home"></i><span>Main</span>
                     </a>
+                    <hr class="nav-section-divider">
                     <a href="{{ url_for('customer.customer_list') }}" class="nav-link {{ 'active' if request.endpoint == 'customer.customer_list' else '' }}">
                         <i class="fas fa-users"></i><span>Customers</span>
                     </a>
+                    <hr class="nav-section-divider">
                     <a href="{{ url_for('account.account_list') }}" class="nav-link {{ 'active' if request.endpoint == 'account.account_list' else '' }}">
                         <i class="fa fa-table" aria-hidden="true"></i><span> Accounts</span>
                     </a>
@@ -29,13 +33,7 @@
             {% if current_user.ManagementPermission %}
                 <div class="nav-section">
                     <a href="{{ url_for('customer.manage_customer') }}" class="nav-link">
-                        <i class="fas fa-wrench"></i><span>Add customer</span>
-                    </a>
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
-                    </a>
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-exclamation-triangle"></i><span>placeholder</span>
+                        <i class="fas fa-wrench"></i><span>Manage Customer</span>
                     </a>
                     <hr class="nav-section-divider">
                 </div>
@@ -43,21 +41,13 @@
             {% if current_user.AdminPermission %}
                 <div class="nav-section">
                     <a href="{{ url_for('admin_tools.manage_user')}}" class="nav-link">
-                        <i class="fas fa-exclamation-triangle"></i><span>Manage user</span>
+                        <i class="fas fa-address-card"></i><span>Manage User</span>
                     </a>
                 </div> 
+                <hr class="nav-section-divider">
                 <!-- More Links Here  -->
             {% endif %}         
         </div> 
     </div>
-    <!-- /#sidebar-wrapper-->
-
-    <!-- page content -->
-    <!-- <div id="page-content-wrapper">
-        <div class="container-fluid">
-            {% block content %}{% endblock %}
-        </div>
-    </div> -->
-    <!-- /#page-content-wrapper-->
 
 </div>

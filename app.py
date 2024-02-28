@@ -1,9 +1,15 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, current_app
 from flask_migrate import Migrate, upgrade
 from flask_login import LoginManager
-from models import db, seedData, Customer, load_country_codes, User
+from sqlalchemy import text
+from models import db, seedData, Customer, load_country_codes, User, Transaction, Account, EmployeeTicket
 from config import Config, TestConfig
 from blueprints.login.login import create_initial_users
+from scripts.transaction_script import check_and_send_reports
+from threading import Thread
+import time
+from datetime import datetime, timedelta
+from flask_mailman import Mail
 import os
 
 login_manager = LoginManager()
@@ -18,7 +24,7 @@ def create_app(config_class=Config):
 
     #Registering blueprints
     from blueprints.main import main_bp
-    from blueprints.contactform.contact_form import contact_form_bp
+    from blueprints.employeeticket.employee_ticket import ticket_bp
     from blueprints.accounts.accounts import account_bp
     from blueprints.customers.customers import customer_bp
     from blueprints.transactions.transactions import transactions_bp
@@ -29,7 +35,7 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_tools_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(main_bp)
-    app.register_blueprint(contact_form_bp)
+    app.register_blueprint(ticket_bp)
     app.register_blueprint(customer_bp)
     app.register_blueprint(account_bp)
     app.register_blueprint(transactions_bp)
@@ -40,7 +46,11 @@ def create_app(config_class=Config):
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get_or_404(user_id)
+        user = User.query.get_or_404(user_id)
+        if user:
+            return user
+        else:
+            return None
 
     app.jinja_env.globals.update(is_admin=User.is_admin)
     app.jinja_env.globals.update(is_cashier=User.is_cashier)
@@ -53,12 +63,40 @@ def create_app(config_class=Config):
     return app
 
 config_class = TestConfig if os.getenv('FLASK_ENV') == 'testing' else Config
-app = create_app(config_class=TestConfig)
+app = create_app(config_class)
+mail = Mail(app)
 
+def run_daily_task(mail):
+    def task():
+        with app.app_context():
+            while True:
+                now = datetime.now()
+                if 1 <= now.hour < 6:
+                    print("It's between 01:00 and 06:00. Running task...")
+                    check_and_send_reports(mail)
+                    # Sleep for a short duration before checking the time again
+                    # This is to prevent the task from running multiple times within the target range
+                    print("Task completed. Checking again in 5 minutes.")
+                    time.sleep(300)  # Sleep for 5 minutes
+                else:
+                    # Calculate time until 01:00 if we are outside the 1 AM to 6 AM window
+                    if now.hour >= 6:
+                        # If it's past 6 AM, calculate the time until 1 AM the next day
+                        next_run_time = now.replace(day=now.day, hour=1, minute=0, second=0, microsecond=0) + timedelta(days=1)
+                    else:
+                        # If it's before 1 AM, calculate the time until 1 AM today
+                        next_run_time = now.replace(hour=1, minute=0, second=0, microsecond=0)
+                    time_to_sleep = (next_run_time - now).total_seconds()
+                    print(f"Not time yet. Current time: {now}. Sleeping for {time_to_sleep/60/60} hours.")
+                    time.sleep(time_to_sleep)
+    
+    thread = Thread(target=task)
+    thread.start()
 
 if __name__  == "__main__":
     with app.app_context():
         upgrade()
         create_initial_users()
-        seedData(db, load_country_codes('static/countrycodes/country_codes.txt'))
+        run_daily_task(mail)
+        seedData(db, 'static/countrycodes/country_codes.txt')
     app.run()

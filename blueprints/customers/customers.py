@@ -3,7 +3,7 @@ from flask_login import login_required
 from sqlalchemy import or_
 from models import Customer, db, Transaction, Account, load_country_codes
 from collections import defaultdict
-from forms.customer_forms import AddCustomerForm
+from forms.customer_forms import AddCustomerForm, EditCustomerForm
 from forms.account_forms import AddAccountForm
 from blueprints.breadcrumbs import update_breadcrumb, pop_breadcrumb, clear_breadcrumb
 from datetime import datetime
@@ -16,57 +16,7 @@ customer_bp = Blueprint('customer', __name__, url_prefix='/customers')
 @login_required
 def customer_list():
     return render_template('customers/customers.html')
-# def customer_list():
-#     page = request.args.get('page', 1, type=int)
-#     per_page = 50
-#     sort_column = request.args.get('sort_column', 'Surname')
-#     sort_order = request.args.get('sort_order', 'asc')
-#     search_query = request.args.get('search', '').strip()
 
-#     query = Customer.query
-
-#     if search_query:
-#         query = query.filter(
-#             or_(
-#                 Customer.GivenName.contains(search_query),
-#                 Customer.Surname.contains(search_query),
-#                 Customer.EmailAddress.contains(search_query),
-#                 Customer.Country.contains(search_query),
-#                 Customer.PersonalNumber.contains(search_query)
-#             ))
-        
-#     if sort_order == 'asc':
-#         query = query.order_by(getattr(Customer, sort_column).asc())
-#     else:
-#         query = query.order_by(getattr(Customer, sort_column).desc())
-        
-#     # if 'page' not in request.args and 'search' not in request.args:
-#     #     if request.args.get('sort_column') == sort_column:
-#     #         sort_order = 'desc' if sort_order == 'asc' else 'asc'
-    
-#     if request.args.get('ajax', '0') == '1':
-#         paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
-#         customers = [customer_to_dict(customer) for customer in paginated_customers]
-
-#         return jsonify({
-#             'customers': customers,
-#             'pagination': {
-#                 'total_pages': paginated_customers.pages,
-#                 'current_page': paginated_customers.page,
-#                 'has_prev': paginated_customers.has_prev,
-#                 'has_next': paginated_customers.has_next,
-#                 'prev_num': paginated_customers.prev_num if paginated_customers.has_prev else None,
-#                 'next_num': paginated_customers.next_num if paginated_customers.has_next else None,
-#             }
-#         })
-#     else:
-#         paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
-#         customers_dict = database_to_dict(paginated_customers)
-#         return render_template('/customers/customers.html', customers=customers_dict, 
-#                            paginated=paginated_customers, 
-#                            sort_column=sort_column, sort_order=sort_order)
-
-#Important for the customer list page. makes the detail page work
 def database_to_dict(customers):
     return [customer_to_dict(customer) for customer in customers]
 
@@ -119,6 +69,7 @@ def group_accounts_by_type(accounts):
 
 #Get customer details
 @customer_bp.route('/customer_detail/<int:user_id>')
+@login_required
 def customer_detail(user_id):
     clear_breadcrumb()
     update_breadcrumb('Customer detail', url_for('customer.customer_detail', user_id=user_id))
@@ -143,116 +94,130 @@ def customer_detail(user_id):
 
 
 @customer_bp.route('/manage_customer')
+@login_required
 def manage_customer():
+    print("manage loaded")
     page = request.args.get('page', 1, type=int)
-    per_page = 10  # Or any other number that fits your design
-
-    # Your existing setup for form and country codes
+    per_page = 10
+    edit_customer_form = EditCustomerForm()
     add_customer_form = AddCustomerForm()
     country_codes = load_country_codes('static/countrycodes/country_codes.txt')
     add_customer_form.country.choices = [(c['name'], c['name']) for c in country_codes]
+    edit_customer_form.country.choices = [(c['name'], c['name']) for c in country_codes]
 
-    # Fetch paginated customers instead of all customers
     paginated_customers = Customer.query.paginate(page=page, per_page=per_page)
 
-    # Pass paginated customers and pagination info to the template
     return render_template('/customers/manage_customer.html', 
                            customers=paginated_customers.items, 
                            add_customer_form=add_customer_form,
-                           pagination=paginated_customers)
+                           pagination=paginated_customers,
+                           edit_customer_form=edit_customer_form)
 
 @customer_bp.route('/add/customer', methods=['GET', 'POST'])
+@login_required
 def add_customer():
+    print("add loaded")
     form = AddCustomerForm()
     country_codes = load_country_codes('static/countrycodes/country_codes.txt')
     form.country.choices = [(c['name'], c['name']) for c in country_codes]
-    if form.validate_on_submit():
-        selected_country = form.country.data
-        selected_country_code = next((c['code'] for c in country_codes if c['name'] == selected_country), None)
-        selected_tel_code = next((c['tel_code'] for c in country_codes if c['name'] == selected_country), None)
-        birthday_str = form.birthday.data.strftime('%Y%m%d')
-        personal_number = f"{birthday_str}-{form.personalnumber_last4.data}"
-        raw_telephone = form.telephone.data
-        processed_telephone = f"({selected_tel_code}){raw_telephone.lstrip('0')}"
-        
-        # Create and add the new customer
-        new_customer = Customer(
-            GivenName=form.givenname.data.capitalize(),
-            Surname=form.surname.data.capitalize(),
-            EmailAddress=form.email.data,
-            Birthday=form.birthday.data,
-            Telephone=processed_telephone,
-            Streetaddress=form.address.data,
-            City=form.city.data.capitalize(),
-            Zipcode=form.zipcode.data,
-            Country=form.country.data,
-            CountryCode=selected_country_code,
-            TelephoneCountryCode=selected_tel_code,
-            PersonalNumber=personal_number
-        )
-        db.session.add(new_customer)
-        db.session.flush()
-        base_account = Account(
-            CustomerId=new_customer.Id,
-            AccountType='Checking',  # Assuming you have an AccountType field
-            Created=datetime.utcnow(),
-            Balance=0,
-            # Include any other necessary fields
-        )
-        db.session.add(base_account)
-        db.session.flush()
 
-        base_transaction = Transaction(
-            AccountId=base_account.Id,
-            Amount=0,
-            NewBalance=0,
-            Date=datetime.utcnow(),
-            Type='Initial',  # Assuming you have a Type field to describe the transaction type
-            Operation='Account Opening',
-            # Include any other necessary fields
-        )
+    if form.validate_on_submit():
+        customer_data = process_form_data(form, country_codes)
+        new_customer = create_customer(customer_data)
+        create_initial_account_and_transaction(new_customer)
         
-        db.session.add(base_transaction)
-        db.session.commit()
         flash('Customer added successfully!', 'success')
         return redirect(url_for('customer.manage_customer'))
+
     return render_template('/customers/manage_customer.html', form=form)
 
-@customer_bp.route('/edit_customer/<int:customer_id>')
-@login_required
-def edit_customer(customer_id):
-    # Fetch the customer, display form for editing
-    customer = Customer.query.get_or_404(customer_id)
-    return render_template('edit_customer.html', customer=customer)
+def process_form_data(form, country_codes):
+    selected_country = form.country.data
+    selected_country_code = next((c['code'] for c in country_codes if c['name'] == selected_country), None)
+    selected_tel_code = next((c['tel_code'] for c in country_codes if c['name'] == selected_country), None)
+    birthday_str = form.birthday.data.strftime('%Y%m%d')
+    personal_number = f"{birthday_str}-{form.personalnumber_last4.data}"
+    raw_telephone = form.telephone.data
+    processed_telephone = f"({selected_tel_code}){raw_telephone.lstrip('0')}"
+    
+    return {
+        'GivenName': form.givenname.data.capitalize(),
+        'Surname': form.surname.data.capitalize(),
+        'EmailAddress': form.email.data,
+        'Birthday': form.birthday.data,
+        'Telephone': processed_telephone,
+        'Streetaddress': form.address.data,
+        'City': form.city.data.capitalize(),
+        'Zipcode': form.zipcode.data,
+        'Country': form.country.data,
+        'CountryCode': selected_country_code,
+        'TelephoneCountryCode': selected_tel_code,
+        'PersonalNumber': personal_number
+    }
 
-@customer_bp.route('/customers/update/<int:id>', methods=['POST'])
-def update_customer(id):
-    customer = Customer.query.get_or_404(id)
-    customer.GivenName = request.form['first_name']
-    customer.Surname = request.form['last_name']
-    customer.Streetaddress = request.form['street_address']
-    customer.City = request.form['city']
-    customer.Zipcode = request.form['zip_code']
-    customer.Country = request.form['country']
-    customer.CountryCode = request.form['country_code']
-    customer.Birthday = request.form['birthday']
-    customer.NationalId = request.form['national_id']
-    customer.TelephoneCountryCode = request.form['telephone_country_code']
-    customer.Telephone = request.form['phone_number']
-    customer.EmailAddress = request.form['email']
+def create_customer(customer_data):
+    new_customer = Customer(**customer_data)
+    db.session.add(new_customer)
+    db.session.flush()  # Flush to get the new_customer ID if needed immediately
+    return new_customer
 
+def create_initial_account_and_transaction(customer):
+    base_account = Account(
+        CustomerId=customer.Id,
+        AccountType='Checking',
+        Created=datetime.utcnow(),
+        Balance=0
+    )
+    db.session.add(base_account)
+    db.session.flush()  # Ensure account ID is generated
+
+    base_transaction = Transaction(
+        AccountId=base_account.Id,
+        Amount=0,
+        NewBalance=0,
+        Date=datetime.utcnow(),
+        Type='Initial',
+        Operation='Account Opening'
+    )
+    db.session.add(base_transaction)
     db.session.commit()
-    return 'Customer updated Successfully'
+
+@customer_bp.route('/edit_customer', methods=['GET', 'POST'])
+@login_required
+def edit_customer():
+    print("edit loaded")
+    edit_customer_form = EditCustomerForm(request.form)
+    country_codes = load_country_codes('static/countrycodes/country_codes.txt')
+    edit_customer_form.country.choices = [(c['name'], c['name']) for c in country_codes]
+    if request.method == 'POST' and edit_customer_form.validate():
+        customer_id = edit_customer_form.id.data
+        customer = Customer.query.get_or_404(customer_id)
+        if not customer:
+            flash('Customer not found.', 'danger')
+            return redirect(url_for('customer.manage_customer'))
+        update_customer_data(customer, edit_customer_form)
+        db.session.commit()
+        flash('Customer updated successfully!', 'success')
+        return redirect(url_for('customer.customer_detail', customer_id=customer_id))
+
+        # For GET request or when the form is not validated
+    return render_template('/customers/manage_customer.html', edit_customer_form=edit_customer_form)
+
+def update_customer_data(customer, form):
+    birthday_str = form.birthday.data.strftime('%Y%m%d')
+    customer.GivenName = form.givenname.data
+    customer.Surname = form.surname.data
+    customer.EmailAddress = form.email.data
+    customer.Telephone = form.telephone.data
+    customer.Streetaddress = form.address.data
+    customer.City = form.city.data
+    customer.Zipcode = form.zipcode.data
+    customer.Country = form.country.data
+    customer.Birthday = form.birthday.data
+    customer.PersonalNumber = f"{birthday_str}-{form.personalnumber_last4.data}"
+
 
 #Deleting a customer
 @customer_bp.route('/customers/delete/<int:id>', methods=['POST'])
-def delete_customer(id):
-    customer = Customer.query.get_or_404(id)
-    db.session.delete(customer)
-    db.session.commit()
-    return 'Customer deleted successfully'
-
-#Customer count
-@customer_bp.route('/customer_count', methods=['GET'])
-def customer_count():
+def delete_customer():
     pass

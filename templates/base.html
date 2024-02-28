@@ -32,7 +32,7 @@
                         <div class="search-container">
                             {% block searchbar %}
                                 <!-- Default search bar; can be empty if you always want to override it -->
-                                <input type="text" id="headerSearch" placeholder="Search..." oninput="searchInformation(); toggleClearButtonHeader();">
+                                <input type="text" id="headerSearch" placeholder="Search..." oninput="searchInformation('headerSearch'); toggleClearButtonHeader();">
                                 <button id="clearSearchHeader" onclick="clearSearchInputHeader()" style="display: none;">Clear</button>
                             {% endblock %}
                             <div id="searchDropdown" class="search-dropdown">

@@ -1,9 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Numeric
+from faker import Faker
 import barnum
 import random
-from datetime import datetime  
-from datetime import timedelta  
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
+from sqlalchemy.sql.expression import func 
 from flask_login import current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from dateutil.relativedelta import relativedelta
@@ -24,7 +26,7 @@ class Customer(db.Model):
     Birthday = db.Column(db.DateTime, unique=False)
     PersonalNumber = db.Column(db.String(20), unique=False, nullable=False)
     TelephoneCountryCode = db.Column(db.String(20))
-    Telephone = db.Column(db.String(20), unique=False)
+    Telephone = db.Column(db.String(50), unique=False)
     EmailAddress = db.Column(db.String(50), unique=False, nullable=False)
     Accounts = db.relationship('Account', backref='Customer',
      lazy=True)
@@ -131,151 +133,155 @@ class User(db.Model):
     def get_id(self):
         return str(self.Id)
 
-class CustomerContact(db.Model):
-    __tablename__= "CustomerContact"
+class EmployeeTicket(db.Model):
+    __tablename__= "EmployeeTicket"
     Id = db.Column(db.Integer, primary_key=True)
     FirstName = db.Column(db.String(50))
     LastName = db.Column(db.String(50))
     Email = db.Column(db.String(50))
     Message = db.Column(db.String(255))
-    CustomerId = db.Column(db.Integer, db.ForeignKey('Customers.Id'), nullable=True)
+    UserId = db.Column(db.Integer, db.ForeignKey('User.Id'), nullable=True)
 
-    customer = db.relationship('Customer', backref='contacts', lazy=True)
+    User = db.relationship('User', backref='Ticket', lazy=True)
 
-# def read_european_countries(file_path):
-#     countries = []
-#     with open(file_path, 'r') as file:
-#         for line in file:
-#             _, code, name = line.strip().split('\t')
-#             countries.append((code, name))
-#         return countries
-    
 def load_country_codes(filename='country_codes.txt'):
     country_codes = []
     with open(filename, 'r') as f:
         for line in f.readlines():
             parts = line.strip().split(',')
-            if len(parts) == 3:
+            if len(parts) == 4:
                 country_codes.append({
                     'code': parts[0].strip(),
                     'name': parts[1].strip(),
-                    'tel_code': parts[2].strip()
+                    'tel_code': parts[2].strip(),
+                    'fake_code': parts[3].strip()
                 })
     return country_codes
 
-# def add_overdraft_to_debt_account(customer, overdraft_amount):
-#     debt_account = Account.query.filter_by(CustomerId=customer.Id, AccountType="Debt").first()
-#     if not debt_account:
-#         debt_account = Account(
-#             CustomerId=customer.Id,
-#             AccountType="Debt",
-#             Created=datetime.now(),
-#             Balance=0  # Start with a zero balance
-#         )
-#         db.session.add(debt_account)
-    
-#     # Add the overdraft amount to the Debt account's balance
-#     debt_account.Balance += overdraft_amount
-#     db.session.commit()
 
-# def add_overdraft_to_debt_account(customer_id, overdraft_amount):
-#     # Find or create a "Debt" account for the customer
-#     debt_account = Account.query.filter_by(CustomerId=customer_id, AccountType="Debt").first()
-#     if not debt_account:
-#         debt_account = Account(
-#             CustomerId=customer_id,
-#             AccountType="Debt",
-#             Created=datetime.now(),
-#             Balance=0
-#         )
-#         db.session.add(debt_account)
-#     # Update the debt account's balance
-#     debt_account.Balance += overdraft_amount
+def seedData(db, country_codes_filename):
+    fake = Faker()
+    country_codes = load_country_codes(country_codes_filename)
+    email_domains = ['example.com', 'mail.com', 'test.org']
+    operation_choices_credit = ['Deposit cash', 'Salary', 'Transfer to']
+    operation_choices_debit = ['ATM withdrawal', 'Payment', 'Bank withdrawal', 'Transfer from']
 
-def seedData(db, european_countries):
+    current_count = Customer.query.count()
+    target_count = 20
+
+    if current_count >= target_count:
+        print("Target count reached, skipping seeding.")
+        return
+
     try:
-        current_count =  Customer.query.count()
-        target_count = 300
-        
-        while current_count < target_count:
-            customer = Customer()
+        # Seed Customers up to target_count
+        while current_count < target_count:  # Adjust based on remaining count
+            country = random.choice(country_codes)
+            Faker.seed(random.randint(0, 9999))
+            try:
+                fake = Faker(country['fake_code'])
+            except AttributeError:
+                print(f"Faker locale `{country['fake_code']}` not supported. Using 'en_US' as fallback.")
+                fake = Faker('en_US')
             
-            customer.GivenName, customer.Surname = barnum.create_name()
-            customer.Streetaddress = barnum.create_street()
-            customer.Zipcode, customer.City, _  = barnum.create_city_state_zip()
-            country_code, country_name = random.choice(european_countries)
-            customer.Country = country_name
-            customer.CountryCode = country_code
-            customer.Birthday = barnum.create_birthday()
-            customer.set_swedish_personal_number()
-            customer.Telephone = barnum.create_phone()
-            customer.EmailAddress = barnum.create_email().lower()
+            customer = Customer()
+            customer.set_swedish_personal_number()  # Use your method for personal number generation
+            given_name = fake.first_name()
+            surname = fake.last_name()
+            email = f"{given_name}.{surname}@{random.choice(email_domains)}".lower()
 
-            for x in range(random.randint(1,4)):
-                account = Account()
-
-                c = random.randint(0,100)
-                if c < 33:
-                    account.AccountType = "Personal"    
-                elif c < 66:
-                    account.AccountType = "Checking"    
-                else:
-                    account.AccountType = "Savings"    
-
-
-                start = datetime.now() + timedelta(days=-random.randint(1000,10000))
-                account.Created = start
-                account.Balance = 0
-                
-                for n in range(random.randint(0,30)):
-                    belopp = random.randint(0,30)*100
-                    tran = Transaction()
-                    start = start+ timedelta(days=-random.randint(10,100))
-                    if start > datetime.now():
-                        break
-                    tran.Date = start
-                    account.Transactions.append(tran)
-                    tran.Amount = belopp
-                    if account.Balance - belopp < 0:
-                        tran.Type = "Debit"
-                    else:
-                        if random.randint(0,100) > 70:
-                            tran.Type = "Debit"
-                        else:
-                            tran.Type = "Credit"
-
-                    r = random.randint(0,100)
-                    if tran.Type == "Debit":
-                        account.Balance = account.Balance + belopp
-                        if r < 20:
-                            tran.Operation = "Deposit cash"
-                        elif r < 66:
-                            tran.Operation = "Salary"
-                        else:
-                            tran.Operation = "Transfer"
-                    else:
-                        account.Balance = account.Balance - belopp
-                        if r < 40:
-                            tran.Operation = "ATM withdrawal"
-                        if r < 75:
-                            tran.Operation = "Payment"
-                        elif r < 85:
-                            tran.Operation = "Bank withdrawal"
-                        else:
-                            tran.Operation = "Transfer"
-
-                    tran.NewBalance = account.Balance
-
-
-                customer.Accounts.append(account)
+            customer.GivenName = given_name
+            customer.Surname = surname
+            customer.Streetaddress = fake.street_address()[:50]
+            customer.City = fake.city()
+            customer.Zipcode = fake.postcode()
+            customer.Country = country['name']
+            customer.CountryCode = country['code']
+            customer.Birthday = datetime.strptime(customer.PersonalNumber[:8], '%Y%m%d').date()
+            customer.EmailAddress = email
+            customer.TelephoneCountryCode = country['tel_code']
+            customer.Telephone = fake.phone_number()
 
             db.session.add(customer)
+            db.session.flush()
+
+            # Seed Accounts and Transactions ensuring balance never goes below 0
+            for _ in range(random.randint(1, 3)):
+                account_created_date = datetime.now() - timedelta(days=random.randint(365, 3650))
+                initial_balance = 0
+                account = Account(
+                    AccountType=random.choice(["Personal", "Checking", "Savings"]),
+                    Created=account_created_date,
+                    Balance=initial_balance,
+                    CustomerId=customer.Id
+                )
+
+                db.session.add(account)
+                db.session.flush()
+                last_transaction_date = account.Created
+                balance = account.Balance
+
+                for _ in range(random.randint(5, 20)):  # Generate 5-20 transactions
+                    days_since_last_transaction = random.randint(1, 90)  # Up to 90 days between transactions
+                    transaction_date = last_transaction_date + timedelta(days=days_since_last_transaction)
+                    last_transaction_date = transaction_date
+
+                    # Randomly decide the transaction amount; ensure it's within a realistic range
+                    if random.choice([True, False]):  # Decide between deposit (credit) and withdrawal (debit)
+                        amount = random.uniform(50, 5000)  # Deposit amount
+                        operation = random.choice(['Deposit cash', 'Salary', 'Transfer to'])
+                        balance += amount  # Increase account balance
+                    else:
+                        if balance > 50:  # Only allow withdrawals if there's enough balance
+                            amount = -random.uniform(50, min(5000, balance))  # Withdrawal amount, ensuring balance doesn't go negative
+                            operation = random.choice(['ATM withdrawal', 'Payment', 'Bank withdrawal', 'Transfer from'])
+                            balance += amount  # Decrease account balance
+                        else:
+                            continue  # Skip withdrawal if balance is too low
+
+                    transaction = Transaction(
+                        Type="Credit" if amount > 0 else "Debit",
+                        Operation=operation,
+                        Date=transaction_date,
+                        Amount=amount,
+                        NewBalance=balance,
+                        AccountId=account.Id
+                    )
+                    db.session.add(transaction)
+
+                account.Balance = balance
+                db.session.add(account)
+
+            # Seed Users
+            for _ in range(1):  # Adjust the number as needed
+                user = User(
+                    Username=fake.user_name(),
+                    Password=generate_password_hash(fake.password()),
+                    CompanyEmail=f"{fake.user_name()}@{random.choice(email_domains)}",
+                    FirstName=fake.first_name(),
+                    LastName=fake.last_name(),
+                    Role=random.choice(['Cashier', 'Admin'])
+                )
+                db.session.add(user)
+                db.session.flush()
+                    # Seed EmployeeTickets
+                    # for _ in range(1):  # Adjust as needed
+                ticket = EmployeeTicket(
+                    FirstName=fake.first_name(),
+                    LastName=fake.last_name(),
+                    Email=f"{fake.user_name()}@{random.choice(email_domains)}",
+                    Message=fake.sentence(),
+                    UserId=user.Id
+                )
+                db.session.add(ticket)
             if current_count % 20 == 0:
                 print(f"20 records made: current: {current_count}")
                 db.session.commit()
             current_count += 1
 
+        db.session.commit()
+        print("Data seeding complete")
+
     except Exception as e:
         db.session.rollback()
-        print(f"an error occurred: {e}")
-    print("Data seeding complete")
+        print(f"An error occurred: {e}")

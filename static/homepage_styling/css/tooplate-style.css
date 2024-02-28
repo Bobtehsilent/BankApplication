@@ -908,13 +908,12 @@ tbody tr {
   top: 20px;
   left: 20px;
   z-index: 9999;
-  background-color: #00bbf0;
+  background-color: #e7eaf6;
   color: black;
   border: 1px solid gray;
   padding: 10px 20px;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  display: none;
 }
 
 /* .active {

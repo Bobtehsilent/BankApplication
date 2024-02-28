@@ -71,6 +71,10 @@ body {
     position: relative;
 }
 
+.hidden {
+  display: none;
+}
+
 .flex-container {
     display: flex;
     flex-direction: row;
@@ -171,27 +175,43 @@ body {
 .navigation.collapsed {
     width: 60px;
 }
-.navigation.collapsed .nav-link span,
+.navigation.collapsed .nav-link span {
+    display: block; 
+    font-size: 10px; 
+    margin-top: 4px; 
+    text-align: center;
+}
+
 .navigation.collapsed .sidebar-heading span {
-    display: none;
+  display: none;
+}
+
+.navigation.collapsed .nav-link,
+.navigation.collapsed .sidebar-heading {
+    display: flex;
+    flex-direction: column; 
+    align-items: center; 
 }
 
 .navigation.collapsed .nav-link i,
 .navigation.collapsed .sidebar-heading i {
-    margin: 0;
-    justify-content: center;
-    display: flex;
+  margin-right: 0;
+  margin-bottom: 0; 
 }
 
 .sidebar-heading {
     display: flex;
     justify-content: left;
-    min-height: 56px;
     padding: 10px 15px;
 }
 
 .navigation.collapsed .sidebar-heading {
     justify-content: start;
+}
+
+.navigation.collapsed .sidebar-heading button {
+  display: inline-block;
+  align-items: center;
 }
 
 .sidebar-heading .button {
@@ -224,15 +244,17 @@ body {
     transition: background-color 0.3s ease;
 }
 
+.nav-link i {
+  margin-right: 8px;
+}
+
 .nav-link:hover,
 .nav-link.active {
     background-color: var(--sidebar-active-color); 
     color: var(--sidebar-text-color); 
 }
 
-.nav-link i {
-    margin-right: 8px; 
-}
+
 
 /* responsiveness for sidebar */
 
@@ -643,7 +665,7 @@ table a:hover {
     
   }
   
-.flash-message {
+/* .flash-message {
     position: fixed;
     top: 20px;
     left: 20px;
@@ -655,7 +677,7 @@ table a:hover {
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     display: none;
-  }
+  } */
 
 .table-row:hover {
     background-color: darken(var(--background-color), 10%);
@@ -848,23 +870,11 @@ table a:hover {
 }
 
 .transaction-list.expanded {
-  display: block; /* Show when expanded */
+  display: block;
 }
 
 .transaction-list h3 {
-  cursor: pointer; /* Indicates the section can be expanded */
-}
-
-
-#loadMoreTransactions {
-  background-color: var(--details-button-bg-color);
-  color: var(--text-color);
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-  display: block;
-  margin: 20px auto;
-  transition: background-color 0.3s;
+  cursor: pointer; 
 }
 
 #loadMoreTransactions:hover {
@@ -974,12 +984,13 @@ table a:hover {
   margin-bottom: 0.5rem; /* Space above the checkbox */
   cursor: pointer;
 }
-
+.user-search-container {
+  text-align: left;
+}
 .user-search-container input {
   flex-grow: 1;
   padding: 5px;
-  border: 1px solid var(--search-input-border-color);
-  border-radius: 5px;
+
 }
 
 .clearSearch, #clearSearchHeader {

@@ -56,15 +56,20 @@
                             <div id="addTransactionForm-{{ account.Id }}" class="card-body collapse">
                                 <form method="POST" action="{{ url_for('transaction.add_transaction', account_id=account.Id) }}">
                                     {{ add_transaction_form.hidden_tag() }}
-                                    <div class="form-group">
-                                        {{ add_transaction_form.amount.label(class='form-label') }} {{ add_transaction_form.amount(class='form-control', id='amount-' ~ account.Id) }}
-                                    </div>
-                                    <div class="form-group">
-                                        {{ add_transaction_form.operation.label(class='form-label') }} {{ add_transaction_form.operation(class='form-control', id='operation-' ~ account.Id) }}
-                                    </div>
-                                    <div class="form-group">
-                                        {{ add_transaction_form.submit(class='form-submit-button') }}
-                                    </div>
+                                    <table>
+                                        <tr>
+                                            <td>{{ add_transaction_form.amount.label }}</td>
+                                            <td>{{ add_transaction_form.amount.label(class='form-label') }} {{ add_transaction_form.amount(class='form-control', id='amount-' ~ account.Id) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ add_transaction_form.operation.label }}</td>
+                                            <td>{{ add_transaction_form.operation.label(class='form-label') }} {{ add_transaction_form.operation(class='form-control', id='operation-' ~ account.Id) }}</td>
+                                        <tr>
+                                            <td colspan="2" style="text-align: center;">
+                                                {{ add_transaction_form.submit(class='form-submit-button') }}
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </form>
                             </div>
                         </div>
@@ -102,23 +107,27 @@
             </tbody>
         </table>
     </div>
-    <div class="actions">
-        <button id="addAccountBtn" onclick="toggleCollapse('addAccountForm')">Add Account</button>
+    <div class="card-header" onclick="toggleCollapse('addAccountForm')">
+        <h4>Add Account</h4>
     </div>
     <div class="card-body collapse" id="addAccountForm">
         <form action="{{ url_for('account.add_account', customer_id=customer.Id) }}" method="post">
             {{ add_account_form.hidden_tag() }}
-            <div class="form-group">
-                <label for="account_type">Account Type</label>
-                {{ add_account_form.account_type(class_='form-control') }}
-            </div>
-            <div class="form-group">
-                <label for="balance">Initial Balance</label>
-                {{ add_account_form.balance(class_='form-control') }}
-            </div>
-            <div class="form-group">
-                {{ add_account_form.submit(class_='form-submit-button') }}
-            </div>
+            <table>
+                <tr>
+                    <td>{{ add_account_form.account_type.label }}</td>
+                    <td>{{ add_account_form.account_type(class_='form-control') }}</td>
+                </tr>
+                <tr>
+                    <td>{{ add_account_form.balance.label }}</td>
+                    <td>{{ add_account_form.balance(class_='form-control') }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="text-align: center;">
+                        {{ add_account_form.submit(class_='form-submit-button') }}
+                    </td>
+                </tr>
+            </table>
         </form>
     </div>
 </div>

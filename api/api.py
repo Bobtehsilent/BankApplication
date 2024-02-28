@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, abort, Blueprint, url_for
 from collections import defaultdict
 from flask_sqlalchemy import SQLAlchemy
-from models import Customer, Account, Transaction, User, CustomerContact
+from models import Customer, Account, Transaction, User, EmployeeTicket
 from sqlalchemy import or_
 from blueprints.customers.customers import customer_to_dict
 
@@ -58,31 +58,31 @@ def get_customer_list():
     })
 
 
-@api_bp.route('/api/accounts/<int:account_id>', methods=['GET'])
-def get_account(account_id):
-    account = Account.query.get(account_id)
-    if account is None:
-        return jsonify({'error': 'Account not found'}), 404
-    return jsonify({
-        'Id': account.Id,
-        'AccountType': account.AccountType,
-        'Balance': account.Balance,
-        # Include other fields as necessary
-    })
+# @api_bp.route('/api/accounts/<int:account_id>', methods=['GET'])
+# def get_account(account_id):
+#     account = Account.query.get(account_id)
+#     if account is None:
+#         return jsonify({'error': 'Account not found'}), 404
+#     return jsonify({
+#         'Id': account.Id,
+#         'AccountType': account.AccountType,
+#         'Balance': account.Balance,
+#         # Include other fields as necessary
+#     })
 
-#transaction get
+# #transaction get
 
-@api_bp.route('/api/transactions/<int:transaction_id>', methods=['GET'])
-def get_transaction(transaction_id):
-    transaction = Transaction.query.get(transaction_id)
-    if transaction is None:
-        return jsonify({'error': 'Transaction not found'}), 404
-    return jsonify({
-        'Id': transaction.Id,
-        'Type': transaction.Type,
-        'Amount': transaction.Amount,
-        # Include other fields as necessary
-    })
+# @api_bp.route('/api/transactions/<int:transaction_id>', methods=['GET'])
+# def get_transaction(transaction_id):
+#     transaction = Transaction.query.get(transaction_id)
+#     if transaction is None:
+#         return jsonify({'error': 'Transaction not found'}), 404
+#     return jsonify({
+#         'Id': transaction.Id,
+#         'Type': transaction.Type,
+#         'Amount': transaction.Amount,
+#         # Include other fields as necessary
+#     })
 
 # Graph data
 
@@ -101,9 +101,8 @@ def transactions_graph(customer_id):
         if not balances_by_account[account_id]["type"]:
             balances_by_account[account_id]["type"] = account_type
         
-        previous_balance = balances_by_account[account_id]["balances"][-1]["cumulative_balance"] if balances_by_account[account_id]["balances"] else 0
-        # Since type is determined by the amount, just add the amount directly
-        new_balance = previous_balance + transaction.Amount
+        # Use NewBalance directly
+        new_balance = transaction.NewBalance
         
         balances_by_account[account_id]["balances"].append({
             "date": transaction.Date.strftime("%Y-%m-%d"),
@@ -182,18 +181,18 @@ def get_user(user_id):
         # Include other fields as necessary
     })
 
-@api_bp.route('/api/customercontacts/<int:contact_id>', methods=['GET'])
-def get_customer_contact(contact_id):
-    contact = CustomerContact.query.get(contact_id)
-    if contact is None:
-        return jsonify({'error': 'Contact not found'}), 404
-    return jsonify({
-        'Id': contact.Id,
-        'FirstName': contact.FirstName,
-        'LastName': contact.LastName,
-        'Email': contact.Email,
-        # Include other fields as necessary
-    })
+# @api_bp.route('/api/customercontacts/<int:contact_id>', methods=['GET'])
+# def get_customer_contact(contact_id):
+#     contact = CustomerContact.query.get(contact_id)
+#     if contact is None:
+#         return jsonify({'error': 'Contact not found'}), 404
+#     return jsonify({
+#         'Id': contact.Id,
+#         'FirstName': contact.FirstName,
+#         'LastName': contact.LastName,
+#         'Email': contact.Email,
+#         # Include other fields as necessary
+#     })
 
 
 # search to edit

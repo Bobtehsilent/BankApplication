@@ -205,7 +205,7 @@
                                 <td>${customer.personalnumber}</td>
                                 <td>${customer.address}</td>
                                 <td>${customer.city}
-                                <td>${customer.total_balance}</td>
+                                <td>$${customer.total_balance}</td>
                             </tr>`;
             });
         
@@ -219,54 +219,47 @@
         
         fillCustomerData(customerData) {
             console.log(customerData); // Check what data is received
-            let content =  `<div class="customer-details-container">`;
+            let content = `<div class="customer-details-container">`;
         
-            // Customer info and accounts are side by side
+            // Customer info
             content += `<table class="customer-info-table">
-                    <tr><th colspan="2">${customerData.GivenName} ${customerData.Surname}</th></tr>
-                    <tr><td>Birthday:</td><td>${customerData.Birthday}</td></tr>
-                    <tr><td>Personal Number:</td><td>${customerData.PersonalNumber}</td></tr>
-                    <tr><td>Address:</td><td>${customerData.Streetaddress}</td></tr>
-                    <tr><td>Zipcode:</td><td>${customerData.Zipcode}</td></tr>
-                    <tr><td>City:</td><td>${customerData.City}</td></tr>
-                    <tr><td>Country:</td><td>${customerData.Country}</td></tr>
-                    <tr><td>Phone Number:</td><td>${customerData.Telephone}</td></tr>
-                    <tr><td>Email:</td><td>${customerData.EmailAddress}</td></tr>
-                </table>`;
+                <tr><th colspan="2">${customerData.GivenName} ${customerData.Surname}</th></tr>
+                <tr><td>Birthday:</td><td>${customerData.Birthday}</td></tr>
+                <tr><td>Personal Number:</td><td>${customerData.PersonalNumber}</td></tr>
+                <tr><td>Address:</td><td>${customerData.Streetaddress}</td></tr>
+                <tr><td>Zipcode:</td><td>${customerData.Zipcode}</td></tr>
+                <tr><td>City:</td><td>${customerData.City}</td></tr>
+                <tr><td>Country:</td><td>${customerData.Country}</td></tr>
+                <tr><td>Phone Number:</td><td>${customerData.Telephone}</td></tr>
+                <tr><td>Email:</td><td>${customerData.EmailAddress}</td></tr>
+            </table>`;
         
+            // Account information
             if (customerData.Accounts && customerData.Accounts.length > 0) {
-                let totalBalance = 0;
+                let totalBalance = 0; // Initialize total balance
                 content += `<table class="accounts-info-table"><tr><th>Type</th><th>Balance</th></tr>`;
                 customerData.Accounts.forEach(account => {
-                    totalBalance += account.Balance;
-                    content += `<tr><td>${account.AccountType}</td><td>${account.Balance} SEK</td></tr>`;
+                    // Ensure balance is treated as a number
+                    let balance = parseFloat(account.Balance);
+                    totalBalance += balance; // Sum up the balance
+                    content += `<tr><td>${account.AccountType}</td><td>$${balance.toLocaleString()} SEK</td></tr>`; // Use toLocaleString() for formatting
                 });
-                content += `<tr class="total-balance"><td>Total Balance:</td><td>${totalBalance} SEK</td></tr></table>`;
+                content += `<tr class="total-balance"><td>Total Balance:</td><td>$${totalBalance.toLocaleString()} SEK</td></tr></table>`; // Format total balance
             } else {
                 content += `<p>No accounts found</p>`;
             }
             content += `</div>`;
-
-
-            // button
+        
+            // Action buttons
             const customerDetailUrl = baseCustomerDetailUrl.replace('/0', '/' + customerData.Id);
-            const manageCustomerUrl = baseManageCustomerUrl.replace('/0', '/' + customerData.Id);
             content += `<div class="details__actions">
-                                <a href="${customerDetailUrl}" class="details__button">More Details</a>
-                                <!-- Placeholder for future button -->
-                                <!-- <a href="#" class="details__button">Placeholder Button</a> -->
-                            </div>`;
+                <a href="${customerDetailUrl}" class="details__button">More Details</a>
+            </div>`;
         
-            // Append the constructed content
+            // Append constructed content
             this.DOM.description.innerHTML = content;
             this.DOM.details.classList.add('table-details-box');
-            
-        
-            content += `</div>`; // Closing the customer-details-container div
-        
-            this.DOM.description.innerHTML = content;
-            this.DOM.details.classList.add('table-details-box');
-		}
+        }
 	}; // class Details
 
 	class Item {
@@ -687,28 +680,46 @@ function openGraph(customerId) {
 
 function renderGraph(data) {
     const ctx = document.getElementById('transactionGraph').getContext('2d');
-    
-    const datasets = data.map(account => ({
-        label: `${account.account_type} (ID: ${account.account_id})`,
-        data: account.balances.map(item => item.cumulative_balance),
-        fill: false,
-        borderColor: getRandomColor(),
-        tension: 0.1
-    }));
-    
-    // Assuming all accounts cover the same date range, use the first account's dates as labels
-    const labels = data[0].balances.map(item => item.date);
 
+    // Adjust datasets to include transaction numbers instead of dates
+    const datasets = data.map(account => {
+        // Limit to the last 20 transactions
+        const last20Balances = account.balances.slice(-20);
+        return {
+            label: `${account.account_type} (ID: ${account.account_id})`,
+            data: last20Balances.map((item, index) => ({
+                x: index + 1, // Transaction number
+                y: parseFloat(item.cumulative_balance)
+            })),
+            fill: false,
+            borderColor: getRandomColor(),
+            tension: 0.1
+        };
+    });
+
+    // Create chart with transaction numbers on the x-axis
     const chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
             datasets: datasets
         },
         options: {
             scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    min: 1,
+                    title: {
+                        display: true,
+                        text: 'Transaction'
+                    }
+                },
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Balance'
+                    }
                 }
             }
         }
@@ -725,23 +736,23 @@ function getRandomColor() {
 }
 
 
-function toggleAccountType(accountType) {
-    // Get all transaction elements
-    const transactionElements = document.querySelectorAll('.transaction');
+// function toggleAccountType(accountType) {
+//     // Get all transaction elements
+//     const transactionElements = document.querySelectorAll('.transaction');
 
-    // Loop through each transaction element
-    transactionElements.forEach(transactionEl => {
-        // Check if the transaction belongs to the specified account type
-        if (transactionEl.dataset.accountType === accountType) {
-            // Toggle visibility
-            if (transactionEl.style.display === 'none') {
-                transactionEl.style.display = '';
-            } else {
-                transactionEl.style.display = 'none';
-            }
-        }
-    });
-}
+//     // Loop through each transaction element
+//     transactionElements.forEach(transactionEl => {
+//         // Check if the transaction belongs to the specified account type
+//         if (transactionEl.dataset.accountType === accountType) {
+//             // Toggle visibility
+//             if (transactionEl.style.display === 'none') {
+//                 transactionEl.style.display = '';
+//             } else {
+//                 transactionEl.style.display = 'none';
+//             }
+//         }
+//     });
+// }
 
 const navToggle = document.getElementById('navToggle');
 if (navToggle) {
@@ -772,10 +783,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // dropdown search functionality.
 
-function searchInformation() {
-    var input = document.getElementById('headerSearch');
+function searchInformation(sourceId) {
+    var input = document.getElementById(sourceId);
     var filter = input.value.trim();
-    var dropdown = document.getElementById('searchDropdown');
+    var dropdownId = sourceId === 'headerSearch' ? 'searchDropdown' : 'editCustomerResultsDropdown'; // Assuming you have a dropdown for edit customer results
+    var dropdown = document.getElementById(dropdownId);
     dropdown.innerHTML = ''; // Clear previous results
 
     if (!filter) {
@@ -783,26 +795,27 @@ function searchInformation() {
         return;
     }
 
-    // Add a general search option to the dropdown
-    const filterOption = document.createElement('div');
-    filterOption.className = 'dropdown-item filter-option';
-    filterOption.textContent = `Filter customer list with "${filter}"`;
-    filterOption.addEventListener('click', function() {
-        window.location.href = `/customers/customer_list?search=${encodeURIComponent(filter)}`;
-    });
-    dropdown.appendChild(filterOption);
+    if (sourceId === 'headerSearch') {
+        // Header search specific actions
+        const filterOption = document.createElement('div');
+        filterOption.className = 'dropdown-item filter-option';
+        filterOption.textContent = `Filter customer list with "${filter}"`;
+        filterOption.addEventListener('click', function() {
+            window.location.href = `/customers/customer_list?search=${encodeURIComponent(filter)}`;
+        });
+        dropdown.appendChild(filterOption);
 
-    // Add a separator
-    const separator = document.createElement('div');
-    separator.className = 'dropdown-divider';
-    dropdown.appendChild(separator);
+        const separator = document.createElement('div');
+        separator.className = 'dropdown-divider';
+        dropdown.appendChild(separator);
+    }
 
     // Fetch specific customer matches
     fetch(`/api/customer_lists?search=${encodeURIComponent(filter)}`)
     .then(response => response.json())
     .then(data => {
         if (data.customers && data.customers.length > 0) {
-            data.customers.forEach(customer => appendCustomerToDropdown(customer, dropdown));
+            data.customers.forEach(customer => appendCustomerToDropdown(customer, dropdown, sourceId));
             dropdown.style.display = 'block';
         } else {
             const noResults = document.createElement('div');
@@ -817,13 +830,22 @@ function searchInformation() {
     });
 }
 
-function appendCustomerToDropdown(customer, dropdown) {
+function appendCustomerToDropdown(customer, dropdown, section) {
     let customerDiv = document.createElement('div');
     customerDiv.className = 'dropdown-item';
     customerDiv.textContent = `${customer.Id} ${customer.PersonalNumber} ${customer.Surname},${customer.GivenName} ${customer.Streetaddress} ${customer.City}`;
-    customerDiv.addEventListener('click', function() {
-        window.location.href = `/customers/customer_detail/${customer.Id}`;
-    });
+    // Adjust action based on sourceId
+    if (section === 'headerSearch') {
+        customerDiv.addEventListener('click', function() {
+            window.location.href = `/customers/customer_detail/${customer.Id}`;
+        });
+    } else if (section === 'editCustomerSearch') {
+        // Define action for editing customer, e.g., filling a form
+        customerDiv.addEventListener('click', function() {
+            fillCustomerEditForm(customer); // You need to implement this function
+            clearOnClick(section)
+        });
+    }
     dropdown.appendChild(customerDiv);
 }
 
@@ -931,7 +953,8 @@ function appendUserToDropdown(user, dropdown, section) {
 }
 
 function fillEditForm(user) {
-    document.getElementById('userEditForm').user_id.value = user.id;
+    console.log(user.id)
+    document.querySelector("#userEditForm [name='user_id']").value = user.id;
     document.querySelector("#userEditForm [name='username']").value = user.username;
     document.querySelector("#userEditForm [name='email']").value = user.email;
     document.querySelector("#userEditForm [name='first_name']").value = user.first_name;
@@ -942,42 +965,64 @@ function fillEditForm(user) {
     
 }
 function fillDeleteInfo(user) {
-    // Fill in the user data
     document.getElementById('deleteUserInfoId').textContent = user.id;
     document.getElementById('deleteUserInfoUsername').textContent = user.username;
     document.getElementById('deleteUserInfoEmail').textContent = user.email;
     document.getElementById('deleteUserInfoFirstName').textContent = user.first_name;
     document.getElementById('deleteUserInfoLastName').textContent = user.last_name;
     document.getElementById('deleteUserInfoRole').textContent = user.role;
-
-    // Show the form section if it was previously hidden
     document.getElementById('deleteUserSection').classList.remove('collapse');
 }
 
 
 function fillChangePasswordInfo(user) {
-    // Update the hidden user_id input's value
     document.querySelector("#changePasswordForm [name='user_id']").value = user.id;
-
-    // Fill in the user data
     document.getElementById('userInfoId').textContent = user.id;
     document.getElementById('userInfoUsername').textContent = user.username;
     document.getElementById('userInfoEmail').textContent = user.email;
     document.getElementById('userInfoFirstName').textContent = user.first_name;
     document.getElementById('userInfoLastName').textContent = user.last_name;
     document.getElementById('userInfoRole').textContent = user.role;
-
-    // Show the form section if it was previously hidden
     document.getElementById('changePasswordSection').classList.remove('collapse');
 }
 
-function showDeleteUserConfirmation(user) {
-    const confirmationContainer = document.getElementById('deleteUserSection');
-    confirmationContainer.innerHTML = `
-        <p>Are you sure you want to delete ${user.username}?</p>
-        <button onclick="confirmDelete(${user.id})">Delete User</button>
-    `;
+function fillCustomerEditForm(customer) {
+    // Set the hidden field for customer ID
+    document.getElementById('customerIdInput').value = customer.Id;
+
+    // Update form fields with customer data
+    document.querySelector("#editCustomerForm [name='givenname']").value = customer.GivenName;
+    document.querySelector("#editCustomerForm [name='surname']").value = customer.Surname;
+    document.querySelector("#editCustomerForm [name='email']").value = customer.EmailAddress;
+    document.querySelector("#editCustomerForm [name='telephone']").value = customer.Telephone;
+    document.querySelector("#editCustomerForm [name='address']").value = customer.Streetaddress;
+    document.querySelector("#editCustomerForm [name='city']").value = customer.City;
+    document.querySelector("#editCustomerForm [name='zipcode']").value = customer.Zipcode;
+    document.querySelector("#editCustomerForm [name='country']").value = customer.Country;
+    // For birthday, you might need to format the date properly
+    document.querySelector("#editCustomerForm [name='birthday']").value = formatDate(customer.Birthday);
+    document.querySelector("#editCustomerForm [name='personalnumber_last4']").value = extractLast4Digits(customer.PersonalNumber);
 }
+
+// Utility function to format date
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+}
+
+// Utility function to extract last 4 digits of personal number
+function extractLast4Digits(personalNumber) {
+    return personalNumber.split('-').pop();
+}
+
+
+// function showDeleteUserConfirmation(user) {
+//     const confirmationContainer = document.getElementById('deleteUserSection');
+//     confirmationContainer.innerHTML = `
+//         <p>Are you sure you want to delete ${user.username}?</p>
+//         <button onclick="confirmDelete(${user.id})">Delete User</button>
+//     `;
+// }
 
 // clear searchinput
 
@@ -995,6 +1040,15 @@ function clearOnClick(section) {
         case 'deleteUserSearch':
             inputId = 'deleteUserSearch';
             dropdownId = 'deleteUserResultsDropdown';
+            break;
+        case 'editUserSearch':
+            inputId = 'editUserSearch';
+            dropdownId = 'editUserResultsDropdown';
+            break;
+        // New cases for customers
+        case 'editCustomerSearch':
+            inputId = 'editCustomerSearch';
+            dropdownId = 'editCustomerResultsDropdown';
             break;
     }
     // Clear the input field
@@ -1028,6 +1082,9 @@ function clearSearchInput(section, search, dropdown) {
         case 'clearDeleteSection':
             resetDeleteUserSection();
             break;
+        case 'clearEditCustomer':
+            resetEditCustomerForm();
+            break;
         default:
             console.error('Unknown section for clearing:', section);
     }
@@ -1035,6 +1092,13 @@ function clearSearchInput(section, search, dropdown) {
 
 function resetEditUserForm() {
     const form = document.getElementById('userEditForm');
+    if (form) {
+        form.reset();
+    }
+}
+
+function resetEditCustomerForm() {
+    const form = document.getElementById('editCustomerForm');
     if (form) {
         form.reset();
     }
@@ -1072,9 +1136,6 @@ document.addEventListener('DOMContentLoaded', function() {
         filterCustomers(1, 'Surname', 'asc', searchQuery);
     }
 });
-
-// $('#headerCustomerSearch').on('input', searchInformation);
-// Dark mode, light mode toggle
 
 document.getElementById('toggleDarkMode').addEventListener('click', function() {
     const currentTheme = document.documentElement.getAttribute('data-theme');

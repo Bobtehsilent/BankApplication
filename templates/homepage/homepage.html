@@ -26,13 +26,6 @@ https://www.tooplate.com/view/2097-pop
 </head>
 
 <body>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <div class="flash-message">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
 <div id="tm-bg"></div>
     <div id="tm-wrap">
         <div class="tm-main-content">
@@ -170,23 +163,25 @@ https://www.tooplate.com/view/2097-pop
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-12">
-                                                        <form action="{{ url_for('contact_form_bp.contact_form') }}" method="post" class="contact-form">
+                                                        <form action="{{ url_for('ticket.employee_ticket') }}" method="post" class="contact-form">
+                                                            {{ ticket_form.hidden_tag() }}
                                                             <div class="row">
                                                                 <div class="form-group col-md-6">
-                                                                  <input type="text" id="contact_first_name" name="contact_first_name" class="form-control" placeholder="First Name"  required/>
+                                                                    {{ ticket_form.first_name(class="form-control", placeholder="First Name") }}
                                                                 </div>
                                                                 <div class="form-group col-md-6">
-                                                                    <input type="text" id="contact_last_name" name="contact_last_name" class="form-control" placeholder="Last Name"  required/>
+                                                                    {{ ticket_form.last_name(class="form-control", placeholder="Last Name") }}
                                                                 </div>
                                                                 <div class="form-group col-md-12">
-                                                                  <input type="email" id="contact_email" name="contact_email" class="form-control" placeholder="Email"  required/>
+                                                                    {{ ticket_form.email(class="form-control", placeholder="Email") }}
                                                                 </div>
-                                                            </div>                                                        
-                                                            <div class="form-group">
-                                                              <textarea id="contact_message" name="contact_message" class="form-control" rows="9" placeholder="Message" required></textarea>
                                                             </div>
-                                                            <button type="submit" class="btn btn-primary tm-btn-submit">Submit</button>
+                                                            <div class="form-group">
+                                                                {{ ticket_form.message(class="form-control", rows="9", placeholder="Message") }}
+                                                            </div>
+                                                            {{ ticket_form.submit(class="btn btn-primary tm-btn-submit") }}
                                                         </form>
+                                                        
                                                     </div>
                                                 </div>
                                             </div>                                            
@@ -246,7 +241,7 @@ https://www.tooplate.com/view/2097-pop
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}
-                <div>{{ message }}</div>
+                <div class="flash-message">{{ message }}</div>
             {% endfor %}
         {% endif %}
     {% endwith %}

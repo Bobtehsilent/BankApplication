@@ -134,21 +134,5 @@ def delete_account():
     db.session.commit()
     return jsonify({'message': 'Account deleted successfully'}), 200
 
-    
-
-@account_bp.route('/accounts/<int:id>', methods=['GET'])
-def get_accounts(id):
-    account = Account.query.get_or_404(id)
-    return render_template('account_detail.html', account=account)
-
-@account_bp.route('/account/update/<int:id>', methods=['POST'])
-def update_account(id):
-    accounts = Account.query.get_or_404(id)
-    accounts.AccountType = request.form['new_type']
-    accounts.Created = request.form['new_creation_date']
-    accounts.Balance = request.form['new_start_balance']
-
-    db.session.commit()
-    return 'Account updated successfully'
 
     

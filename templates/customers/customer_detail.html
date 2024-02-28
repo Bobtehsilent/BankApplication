@@ -28,6 +28,10 @@
                         <td>{{ customer.GivenName }} {{ customer.Surname }}</td>
                     </tr>
                     <tr>
+                        <th>Personal Number:</th>
+                        <td>{{ customer.PersonalNumber }}</td>
+                    </tr>
+                    <tr>
                         <th>Email:</th>
                         <td>{{ customer.EmailAddress }}</td>
                     </tr>
@@ -37,19 +41,22 @@
                     </tr>
                     <tr>
                         <th>Address:</th>
-                        <td>{{ customer.Streetaddress }}, {{ customer.City }}, {{ customer.Zipcode }}, {{ customer.Country }}</td>
+                        <td>{{ customer.Streetaddress }}</td>
                     </tr>
                     <tr>
-                        <th>Personal Number:</th>
-                        <td>{{ customer.PersonalNumber }}</td>
+                        <th>Zipcode</th>
+                        <td>{{ customer.Zipcode }}</td>
+                    </tr>
+                    <tr>
+                        <th>City</th>
+                        <td>{{ customer.City }}</td>
+                    </tr>
+                    <tr>
+                        <th>Country</th>
+                        <td>{{ customer.Country }}</td>
                     </tr>
                 </tbody>
             </table>
-            {% if current_user.ManagementPermission %}
-            <div class="actions">
-                <button id="manageCustomerBtn">Edit Customer</button>
-            </div>
-            {% endif %}
         </div>
         <div class="account-data">
             <h3>Account Data</h3>
@@ -67,13 +74,13 @@
                             <tr>
                                 <td>{{ account.Id }}</td>
                                 <td>{{ account.AccountType }}</td>
-                                <td>{{ account.Balance }}</td>
+                                <td>${{ account.Balance }}</td>
                             </tr>
                         {% endfor %}
                         <tr>
                             <td> </td>
                             <th>Total Balance:</th>
-                            <td>{{ customer.total_balance }}</td>
+                            <td>${{ customer.total_balance }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -109,8 +116,8 @@
             </div>
         </div>
         <div class="transaction-list">
-            <div class="actions">
-                <button id="loadMoreTransactions" data-customer-id="{{ customer.Id }}">Load Transactions</button>
+            <div>
+                <button class="form-submit-button" id="loadMoreTransactions" data-customer-id="{{ customer.Id }}" style="display: inline-block;">Load Transactions</button>
             </div>
             <table id="transactionsTable">
                 <thead>
@@ -140,6 +147,8 @@
         </div>  
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 <script>
     // Assuming your template correctly renders the customer ID here
     document.addEventListener('DOMContentLoaded', function() {
@@ -159,9 +168,6 @@
         }
     }
 
-    document.getElementById('manageCustomerBtn').addEventListener('click', function() {
-        window.location.href = "{{ url_for('customer.edit_customer', customer_id=customer.Id) }}";
-    });
 
     document.getElementById('manageAccountBtn').addEventListener('click', function() {
         window.location.href = "{{ url_for('account.manage_accounts', customer_id=customer.Id) }}";
@@ -185,6 +191,7 @@
         document.querySelector(".transaction-list").classList.remove("expanded");
         document.getElementById("transactionsTable").style.display = "none"; // Hide the table
         document.getElementById("loadMore").style.display = "none"; // Hide "Load More" button
+        document.getElementById("no-more").style.display = "none"
         this.style.display = "none"; // Hide "Close" button
         document.getElementById("loadMoreTransactions").style.display = "inline-block"; // Show the initial button again
     });
@@ -203,9 +210,8 @@
             transactions.forEach(transaction => {
                 tableElement(transaction);
             });
-    
             if (!hasMore) {
-                document.getElementById("loadMoreTransactions").style.visibility = "hidden";
+                document.getElementById('loadMore').style.display = 'none'
                 document.getElementById("no-more").style.display = "block";
             }
         })
@@ -216,8 +222,8 @@
         document.querySelector("#transactionsTable tbody").innerHTML += `<tr>
             <td>${element.account_id}
             <td>${element.date}</td>
-            <td>${element.amount}$</td>
-            <td>${element.new_balance}$</td>
+            <td>$${element.amount}</td>
+            <td>$${element.new_balance}</td>
             <td>${element.type}</td>
             <td>${element.operation}</td>
         </tr>`;

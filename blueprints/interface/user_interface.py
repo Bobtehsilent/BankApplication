@@ -68,13 +68,3 @@ def get_top_customers_by_country():
     return country_top_customers
     
 
-# @interface_bp.route('/get-customers-for-country')
-# def get_customers_for_country():
-#     country_code = request.args.get('country_code')
-#     try:
-#         customers = Customer.query.filter_by(CountryCode=country_code).all()
-#         customer_data = [customer_to_dict(customer) for customer in customers]
-#         return jsonify({"countryName": country_code, "customers": customer_data})
-#     except Exception as e:
-#         print(e)
-#         return jsonify({"error": "Server error"}), 500

@@ -34,7 +34,7 @@ def add_transaction(account_id):
         if not is_valid:
             print("Error: transaction is not valid")
             flash(error_message, 'danger')
-            return render_template('transactions/transaction_handling.html', account=account, add_transaction_form=add_transaction_form, account_id=account_id)
+            return redirect(url_for('account.manage_accounts', customer_id=account.CustomerId, account_id=account_id))
         print("Ready to process")
         process_transaction(account_id, add_transaction_form.amount.data, add_transaction_form.operation.data)
         print("Process complete, success")
@@ -43,7 +43,7 @@ def add_transaction(account_id):
 
     # If not valid or it's a GET request, show the form
     print("Form errors:", add_transaction_form.errors)
-    return render_template('transactions/transaction_handling.html', add_transaction_form=add_transaction_form, account=account, account_id=account_id)
+    return render_template('accounts/manage_accounts.html', customer_id=account.CustomerId, add_transaction_form=add_transaction_form, account=account, account_id=account_id)
 
 
 def process_transaction(account_id, amount, operation):
@@ -97,28 +97,34 @@ def transfer_funds(from_account_id, to_account_id, amount):
     to_account = Account.query.get_or_404(to_account_id)
     
     if from_account.Balance < amount:
-        flash('Insufficient funds.', 'error')
-        return False
+        return False, 'Insufficient funds.'
     
+    # Adjusted to return success status and message
     process_transaction(from_account_id, -amount, f'Transfer from {from_account.Id} to {to_account.Id}')
-    
     process_transaction(to_account_id, amount, f'Transfer to {to_account.Id} from {from_account.Id}')
-    
-    return True
+    return True, 'Transfer completed successfully.'
 
 
-def validate_transaction(account_id, transaction_amount=None):
-    account = Account.query.get(account_id)
+
+def validate_transaction(account_id, transaction_amount=None, transaction_type=None):
+    account = Account.query.get_or_404(account_id)
     if not account:
         return False, "Account not found."
     
     if transaction_amount == 0:
         return False, "Transaction amount cannot be zero."
     
-    if transaction_amount < 0 and abs(transaction_amount) > account.Balance:
-        return False, "Insufficient balance for debit transaction."
+    if transaction_type == 'withdraw' and transaction_amount > 0:
+        return False, "Withdrawal amounts must be negative."
+    
+    if transaction_type == 'deposit' and transaction_amount < 0:
+        return False, "Deposit amounts must be positive."
+    
+    if transaction_type == 'withdraw' and abs(transaction_amount) > account.Balance:
+        return False, "Insufficient balance for withdrawal."
 
     return True, ""
+
 
 
 @transactions_bp.route('/delete_transaction/<int:transaction_id>', methods=['POST'])

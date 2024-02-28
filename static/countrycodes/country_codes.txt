@@ -1,48 +1,47 @@
-BE,Belgium,+32
-FR,France,+33
-BG,Bulgaria,+359
-DK,Denmark,+45
-HR,Croatia,+385
-DE,Germany,+49
-BA,Bosnia and Herz.,+387
-HU,Hungary,+36
-JE,Jersey,+44
-FI,Finland,+358
-BY,Belarus,+375
-GR,Greece,+30
-RU,Russia,+7
-NL,Netherlands,+31
-PT,Portugal,+351
-NO,Norway,+47
-LI,Liechtenstein,+423
-LV,Latvia,+371
-LT,Lithuania,+370
-LU,Luxembourg,+352
-FO,Faeroe Is.,+298
-PL,Poland,+48
-XK,Kosovo,+383
-CH,Switzerland,+41
-AD,Andorra,+376
-EE,Estonia,+372
-IS,Iceland,+354
-AL,Albania,+355
-IT,Italy,+39
-GG,Guernsey,+44
-CZ,Czech Rep.,+420
-IM,Isle of Man,+44
-GB,United Kingdom,+44
-AX,Aland,+358
-IE,Ireland,+353
-ES,Spain,+34
-ME,Montenegro,+382
-MD,Moldova,+373
-RO,Romania,+40
-RS,Serbia,+381
-MK,Macedonia,+389
-SK,Slovakia,+421
-MT,Malta,+356
-SI,Slovenia,+386
-SM,San Marino,+378
-UA,Ukraine,+380
-SE,Sweden,+46
-AT,Austria,+43
+BE,Belgium,+32,nl_BE
+FR,France,+33,fr_FR
+BG,Bulgaria,+359,bg_BG
+DK,Denmark,+45,dk_DK
+HR,Croatia,+385,hr_HR
+DE,Germany,+49,de_DE
+BA,Bosnia and Herz.,+387,bs_BA
+HU,Hungary,+36,hu_HU
+JE,Jersey,+44,en_GB
+FI,Finland,+358,fi_FI
+BY,Belarus,+375,uk_UA
+GR,Greece,+30,el_GR
+NL,Netherlands,+31,nl_NL
+PT,Portugal,+351,pt_PT
+NO,Norway,+47,no_NO
+LI,Liechtenstein,+423,de_CH
+LV,Latvia,+371,lv_LV
+LT,Lithuania,+370,lt_LT
+LU,Luxembourg,+352,de_CH
+FO,Faeroe Is.,+298,dk_DK
+PL,Poland,+48,pl_PL
+XK,Kosovo,+383,sq_AL
+CH,Switzerland,+41,de_CH
+AD,Andorra,+376,es_ES
+EE,Estonia,+372,et_EE
+IS,Iceland,+354,no_NO
+AL,Albania,+355,sq_AL
+IT,Italy,+39,it_IT
+GG,Guernsey,+44,en_GB
+CZ,Czech Rep.,+420,cs_CZ
+IM,Isle of Man,+44,en_GB
+GB,United Kingdom,+44,en_GB
+AX,Aland,+358,sv_SE
+IE,Ireland,+353,en_IE
+ES,Spain,+34,es_ES
+ME,Montenegro,+382,es_ES
+MD,Moldova,+373,ro_RO
+RO,Romania,+40,ro_RO
+RS,Serbia,+381,ro_RO
+MK,Macedonia,+389,sq_AL
+SK,Slovakia,+421,sk_SK
+MT,Malta,+356,mt_MT
+SL,Slovenia,+386,de_AT
+SM,San Marino,+378,it_IT
+UA,Ukraine,+380,uk_UA
+SE,Sweden,+46,sv_SE
+AT,Austria,+43,de_AT

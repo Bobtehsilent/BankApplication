@@ -36,17 +36,16 @@ def create_initial_users():
     #Check if there is atleast one cashier
     if not User.query.filter_by(Role='Cashier').first():
         cashier = User(
-            Username = 'cashiertest'  ,
-            Password = 'password',
-            FirstName = 'Keso',
-            LastName = 'Oboy',
+            Username = 'stefanholmbergcashier'  ,
+            FirstName = 'stefan',
+            LastName = 'holmberg',
             Role = 'Cashier',
-            CompanyEmail = 'keso.oboy@test.com',
+            CompanyEmail = 'stefan.holmberg@nackademin.se',
             InformationPermission = True,
             ManagementPermission = True,
             AdminPermission = False
         )
-        cashier.set_password('password')
+        cashier.set_password('Hejsan123')
         db.session.add(cashier)
 
         print("initial Cashier account added")
@@ -54,19 +53,18 @@ def create_initial_users():
     #check if there is atleast one customer
     if not User.query.filter_by(Role='Admin').first():
         admin = User(
-            Username = 'admintest',
-            Password = 'password',
-            FirstName = 'Joakim',
-            LastName = 'Norborg',
+            Username = 'stefanholmbergadmin',
+            FirstName = 'Stefan',
+            LastName = 'Holmberg',
             Role = 'Admin',
-            CompanyEmail = 'joakim.norborg@test.com',
+            CompanyEmail = 'stefan.holmberg@systementor.se',
             # Permissions
             InformationPermission = True,
             ManagementPermission = True,
             AdminPermission = True
         )
         #using functions to hash password and generate a personal number
-        admin.set_password('password')
+        admin.set_password('Hejsan123')
         db.session.add(admin)
         print("initial Admin account created")
     
