@@ -1,11 +1,11 @@
-from flask import Flask, render_template, current_app
+from flask import Flask, render_template
 from flask_migrate import Migrate, upgrade
 from flask_login import LoginManager
-from sqlalchemy import text
-from models import db, seedData, Customer, load_country_codes, User, Transaction, Account, EmployeeTicket
+from models import db, seedData, User, Transaction, Customer, EmployeeTicket, Account
 from config import Config, TestConfig
 from blueprints.login.login import create_initial_users
 from scripts.transaction_script import check_and_send_reports
+from scripts.truncate_tables import truncate_tables
 from threading import Thread
 import time
 from datetime import datetime, timedelta
@@ -74,17 +74,12 @@ def run_daily_task(mail):
                 if 1 <= now.hour < 6:
                     print("It's between 01:00 and 06:00. Running task...")
                     check_and_send_reports(mail)
-                    # Sleep for a short duration before checking the time again
-                    # This is to prevent the task from running multiple times within the target range
                     print("Task completed. Checking again in 5 minutes.")
-                    time.sleep(300)  # Sleep for 5 minutes
+                    time.sleep(300)
                 else:
-                    # Calculate time until 01:00 if we are outside the 1 AM to 6 AM window
                     if now.hour >= 6:
-                        # If it's past 6 AM, calculate the time until 1 AM the next day
                         next_run_time = now.replace(day=now.day, hour=1, minute=0, second=0, microsecond=0) + timedelta(days=1)
                     else:
-                        # If it's before 1 AM, calculate the time until 1 AM today
                         next_run_time = now.replace(hour=1, minute=0, second=0, microsecond=0)
                     time_to_sleep = (next_run_time - now).total_seconds()
                     print(f"Not time yet. Current time: {now}. Sleeping for {time_to_sleep/60/60} hours.")
@@ -98,5 +93,6 @@ if __name__  == "__main__":
         upgrade()
         create_initial_users()
         run_daily_task(mail)
+        #truncate_tables([Transaction, Account, EmployeeTicket, User, Customer], db.session)
         seedData(db, 'static/countrycodes/country_codes.txt')
     app.run()

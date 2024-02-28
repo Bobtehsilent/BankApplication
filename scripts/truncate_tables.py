@@ -1,3 +1,5 @@
+from sqlalchemy import text
+
 def truncate_tables(tables, session):
     """
     Truncate given tables using a SQLAlchemy session for MySQL database.

@@ -167,7 +167,7 @@ def seedData(db, country_codes_filename):
     operation_choices_debit = ['ATM withdrawal', 'Payment', 'Bank withdrawal', 'Transfer from']
 
     current_count = Customer.query.count()
-    target_count = 20
+    target_count = 500
 
     if current_count >= target_count:
         print("Target count reached, skipping seeding.")
