@@ -24,25 +24,19 @@ def transaction_handling(account_id, customer_id):
 @transactions_bp.route('/new_transaction/<int:account_id>', methods=['GET', 'POST'])
 @login_required
 def add_transaction(account_id):
-    print(request.form)
     account = Account.query.get_or_404(account_id)
     add_transaction_form = AddTransactionForm()
 
     if add_transaction_form.validate_on_submit():
-        print("Form validated")
         is_valid, error_message = validate_transaction(account_id, transaction_amount=add_transaction_form.amount.data)
         if not is_valid:
-            print("Error: transaction is not valid")
             flash(error_message, 'danger')
             return redirect(url_for('account.manage_accounts', customer_id=account.CustomerId, account_id=account_id))
-        print("Ready to process")
         process_transaction(account_id, add_transaction_form.amount.data, add_transaction_form.operation.data)
-        print("Process complete, success")
         flash('Transaction added successfully!', 'success')
         return redirect(url_for('account.manage_accounts', customer_id=account.CustomerId, account_id=account_id))
 
     # If not valid or it's a GET request, show the form
-    print("Form errors:", add_transaction_form.errors)
     return render_template('accounts/manage_accounts.html', customer_id=account.CustomerId, add_transaction_form=add_transaction_form, account=account, account_id=account_id)
 
 
@@ -88,7 +82,6 @@ def transfer_transaction(from_account_id):
         else:
             flash('Transfer not successfull.', 'failed')
             return render_template('/accounts/account_handling.html')
-    print(form.errors)
     return render_template('/accounts/account_handling.html', customer_id=customer_id, form=form, from_account_id=from_account_id)
     
 
@@ -99,7 +92,6 @@ def transfer_funds(from_account_id, to_account_id, amount):
     if from_account.Balance < amount:
         return False, 'Insufficient funds.'
     
-    # Adjusted to return success status and message
     process_transaction(from_account_id, -amount, f'Transfer from {from_account.Id} to {to_account.Id}')
     process_transaction(to_account_id, amount, f'Transfer to {to_account.Id} from {from_account.Id}')
     return True, 'Transfer completed successfully.'
@@ -126,30 +118,25 @@ def validate_transaction(account_id, transaction_amount=None, transaction_type=N
     return True, ""
 
 
-
+#Unused for now.
 @transactions_bp.route('/delete_transaction/<int:transaction_id>', methods=['POST'])
 @login_required
 def delete_transaction(transaction_id):
     transaction = Transaction.query.get_or_404(transaction_id)
     account = transaction.account
 
-    # Determine the effect of the transaction on the account balance and reverse it
     if transaction.Type == 'Credit':
-        # If it was a credit transaction, decrease the balance
         account.Balance -= transaction.Amount
     elif transaction.Type == 'Debit':
-        # If it was a debit transaction, increase the balance
         account.Balance += transaction.Amount
     else:
         flash('Invalid transaction type.', 'error')
         return redirect(url_for('transaction.transaction_handling', account_id=account.Id, customer_id=account.CustomerId))
 
-    # Remove the transaction and update the account balance
     db.session.delete(transaction)
     db.session.commit()
 
     flash('Transaction deleted and balance updated successfully.', 'success')
-    # Adjust the redirect to where you want users to go after deleting the transaction
     return redirect(url_for('some_redirect_target'))
 
 def get_total_balance(customer_id):

@@ -66,11 +66,8 @@ def get_users():
 def edit_user():
     form = EditUserForm(request.form)
     if request.method == 'POST' and form.validate():
-        print(form.data)
         user_id = form.user_id.data
-        print(user_id)
         user = User.query.get(user_id)
-        print(user)
         if not user:
             flash('User not found.', 'danger')
             return redirect(url_for('admin_tools.manage_user'))

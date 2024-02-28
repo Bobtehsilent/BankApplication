@@ -35,7 +35,6 @@ def account_list():
     if request.args.get('ajax', '0') == '1':
         paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
         customer_account_data = database_to_dict(paginated_customers.items)
-        print(customer_account_data)
         return jsonify({
             'customers': customer_account_data,
             'pagination': {

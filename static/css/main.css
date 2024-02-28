@@ -146,16 +146,13 @@ body {
   font-weight: bold;
 }
 
-/* header responsiveness */
-
-/* @media */
 
 /* Sidebar */
 .navigation {
   background-color: var(--sidebar-color);
   height: 100%;
-  width: 180px; /* Example fixed width for the sidebar */
-  overflow-y: auto; /* In case of overflow */
+  width: 190px; 
+  overflow-y: auto; 
 }
 
 .logo {

@@ -63,7 +63,6 @@ def get_top_customers_by_country():
         } for customer in top_customers]
 
         country_top_customers[country_code] = top_customers_data
-    print("Loaded")
 
     return country_top_customers
     

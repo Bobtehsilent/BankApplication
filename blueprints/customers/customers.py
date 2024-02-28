@@ -96,7 +96,6 @@ def customer_detail(user_id):
 @customer_bp.route('/manage_customer')
 @login_required
 def manage_customer():
-    print("manage loaded")
     page = request.args.get('page', 1, type=int)
     per_page = 10
     edit_customer_form = EditCustomerForm()
@@ -116,7 +115,6 @@ def manage_customer():
 @customer_bp.route('/add/customer', methods=['GET', 'POST'])
 @login_required
 def add_customer():
-    print("add loaded")
     form = AddCustomerForm()
     country_codes = load_country_codes('static/countrycodes/country_codes.txt')
     form.country.choices = [(c['name'], c['name']) for c in country_codes]
@@ -185,7 +183,6 @@ def create_initial_account_and_transaction(customer):
 @customer_bp.route('/edit_customer', methods=['GET', 'POST'])
 @login_required
 def edit_customer():
-    print("edit loaded")
     edit_customer_form = EditCustomerForm(request.form)
     country_codes = load_country_codes('static/countrycodes/country_codes.txt')
     edit_customer_form.country.choices = [(c['name'], c['name']) for c in country_codes]
