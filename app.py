@@ -62,8 +62,7 @@ def create_app(config_class=Config):
     
     return app
 
-config_class = TestConfig if os.getenv('FLASK_ENV') == 'testing' else Config
-app = create_app(config_class)
+app = create_app()
 mail = Mail(app)
 
 def run_daily_task(mail):

@@ -15,6 +15,6 @@ class Config(object):
 class TestConfig(Config):
     SECRET_KEY = 'password'
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://root:password@localhost/SpringBank_testing'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     DEBUG = True
