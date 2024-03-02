@@ -988,7 +988,7 @@ function fillChangePasswordInfo(user) {
 
 function fillCustomerEditForm(customer) {
     // Set the hidden field for customer ID
-    document.getElementById('customerIdInput').value = customer.Id;
+    document.querySelector("#editCustomerForm [name='id']").value = customer.Id;
 
     // Update form fields with customer data
     document.querySelector("#editCustomerForm [name='givenname']").value = customer.GivenName;
@@ -1015,16 +1015,6 @@ function extractLast4Digits(personalNumber) {
     return personalNumber.split('-').pop();
 }
 
-
-// function showDeleteUserConfirmation(user) {
-//     const confirmationContainer = document.getElementById('deleteUserSection');
-//     confirmationContainer.innerHTML = `
-//         <p>Are you sure you want to delete ${user.username}?</p>
-//         <button onclick="confirmDelete(${user.id})">Delete User</button>
-//     `;
-// }
-
-// clear searchinput
 
 function clearOnClick(section) {
     let inputId, dropdownId;

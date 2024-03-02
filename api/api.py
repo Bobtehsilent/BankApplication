@@ -58,17 +58,10 @@ def get_customer_list():
     })
 
 
-# @api_bp.route('/api/accounts/<int:account_id>', methods=['GET'])
-# def get_account(account_id):
-#     account = Account.query.get(account_id)
-#     if account is None:
-#         return jsonify({'error': 'Account not found'}), 404
-#     return jsonify({
-#         'Id': account.Id,
-#         'AccountType': account.AccountType,
-#         'Balance': account.Balance,
-#         # Include other fields as necessary
-#     })
+@api_bp.route('/search_accounts/<int:customer_id>', methods=['GET'])
+def search_accounts(customer_id):
+    accounts = Account.query.filter_by(CustomerId=customer_id).all()
+    return jsonify({'accounts': [account.to_dict() for account in accounts]})
 
 # #transaction get
 

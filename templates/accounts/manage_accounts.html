@@ -58,12 +58,22 @@
                                     {{ add_transaction_form.hidden_tag() }}
                                     <table>
                                         <tr>
+                                            <td colspan="2">
+                                                <p id="transactionDisclaimer">Enter a positive amount for credits and a negative amount for debits.</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
                                             <td>{{ add_transaction_form.amount.label }}</td>
-                                            <td>{{ add_transaction_form.amount.label(class='form-label') }} {{ add_transaction_form.amount(class='form-control', id='amount-' ~ account.Id) }}</td>
+                                            <td>
+                                                <span id="transactionType-{{ account.Id }}"></span>
+                                                {{ add_transaction_form.amount.label(class='form-label') }} 
+                                                {{ add_transaction_form.amount(class='form-control', id='amount-' ~ account.Id) }}
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td>{{ add_transaction_form.operation.label }}</td>
                                             <td>{{ add_transaction_form.operation.label(class='form-label') }} {{ add_transaction_form.operation(class='form-control', id='operation-' ~ account.Id) }}</td>
+                                        </tr>
                                         <tr>
                                             <td colspan="2" style="text-align: center;">
                                                 {{ add_transaction_form.submit(class='form-submit-button') }}
@@ -72,7 +82,7 @@
                                     </table>
                                 </form>
                             </div>
-                        </div>
+                        </div>                        
                         <div class="card" id="loadTransactionCard-{{ account.id }}">
                             <div class="card-header" onclick="toggleAndFetchTransactions('{{ account.Id }}', this)">
                                 <h3>Load Transactions</h3>
@@ -258,13 +268,21 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Target all amount input fields dynamically
         document.querySelectorAll('[id^="amount-"]').forEach(function(amountInput) {
             const accountId = amountInput.id.split('-')[1];
             const operationSelect = document.getElementById(`operation-${accountId}`);
+            const transactionTypeDisplay = document.getElementById(`transactionType-${accountId}`);
     
             function updateOperationOptions() {
                 const amount = parseFloat(amountInput.value) || 0;
+                
+                // Update transaction type display
+                if (amount >= 0) {
+                    transactionTypeDisplay.textContent = "Credit";
+                } else {
+                    transactionTypeDisplay.textContent = "Debit";
+                }
+    
                 const creditOptions = [
                     { value: 'Deposit cash', text: 'Deposit cash' },
                     { value: 'Salary', text: 'Salary' },
@@ -286,7 +304,7 @@
                 });
             }
     
-            // Update operation options on input
+            // Update operation options and transaction type on input
             amountInput.addEventListener('input', updateOperationOptions);
         });
     });

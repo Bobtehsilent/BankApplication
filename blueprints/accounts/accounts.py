@@ -2,7 +2,7 @@ from flask import Blueprint, request, render_template, jsonify,flash,redirect,ur
 from flask_login import login_required, current_user
 from datetime import datetime
 from models import Account, db, Customer, Transaction
-from forms.account_forms import AddAccountForm, EditAccountForm, TransferForm
+from forms.account_forms import AddAccountForm, EditAccountForm, TransferForm, CustomerTransferForm
 from forms.transaction_form import AddTransactionForm
 from ..customers.customers import database_to_dict
 from ..breadcrumbs import update_breadcrumb, pop_breadcrumb, clear_breadcrumb
@@ -69,13 +69,15 @@ def manage_accounts(customer_id):
 def account_handling(account_id, customer_id):
     update_breadcrumb('Account Handling', url_for('account.account_handling', account_id=account_id,customer_id=customer_id))
     account = Account.query.get_or_404(account_id)
+    customer_transfer_form = CustomerTransferForm()
     transfer_form = TransferForm()
-    eligible_accounts = Account.query.filter(Account.CustomerId == account.CustomerId, Account.Id != account_id).all()
-    transfer_form.to_account.choices = [(acc.Id, f'{acc.AccountType} - {acc.Id}') for acc in eligible_accounts]
 
+    eligible_accounts = Account.query.filter(Account.CustomerId == account.CustomerId, Account.Id != account_id).all()
+
+    transfer_form.to_account.choices = [(acc.Id, f'{acc.AccountType} - {acc.Id}') for acc in eligible_accounts]
     edit_account_form = EditAccountForm(obj=account)
-    # Populate forms and handle submissions as needed
-    return render_template('/accounts/account_handling.html', account=account, transfer_form=transfer_form, edit_account_form=edit_account_form)
+    return render_template('/accounts/account_handling.html', account=account, transfer_form=transfer_form, edit_account_form=edit_account_form, customer_transfer_form=customer_transfer_form)
+
 
 @account_bp.route('/add_account/<int:customer_id>', methods=['GET', 'POST'])
 @login_required

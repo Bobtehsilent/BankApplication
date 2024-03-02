@@ -13,7 +13,6 @@ class TransactionTestCase(unittest.TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
-        # Setup test data here, for example:
         self.customer = Customer(GivenName="Test", Surname="User", PersonalNumber="1234567890", EmailAddress="test@example.com")
         db.session.add(self.customer)
         db.session.commit()

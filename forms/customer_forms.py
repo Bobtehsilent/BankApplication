@@ -16,7 +16,7 @@ class AddCustomerForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class EditCustomerForm(FlaskForm):
-    id = HiddenField()  # Assuming you use a hidden field to store the customer's ID
+    id = HiddenField() 
     givenname = StringField('Given Name', validators=[DataRequired()])
     surname = StringField('Surname', validators=[DataRequired()])
     email = EmailField('Email', validators=[DataRequired(), Email()])
@@ -27,4 +27,4 @@ class EditCustomerForm(FlaskForm):
     country = SelectField('Country', choices=[], validators=[DataRequired()])
     birthday = DateField('Birthday', format='%Y-%m-%d', validators=[DataRequired()])
     personalnumber_last4 = StringField('Last 4 digits of Personal Number', validators=[DataRequired()])
-    submit = SubmitField('Update')  # Change the submit button text to "Update"
+    submit = SubmitField('Update') 

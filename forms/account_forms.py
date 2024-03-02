@@ -15,3 +15,8 @@ class TransferForm(FlaskForm):
     to_account = SelectField('To Account', coerce=int, validators=[DataRequired()])
     amount = DecimalField('Amount', validators=[DataRequired(), NumberRange(min=1)])
     submit = SubmitField('Transfer')
+
+class CustomerTransferForm(FlaskForm):
+    to_account = SelectField('To Account', coerce=int, validators=[DataRequired()])
+    amount = DecimalField('Amount', validators=[DataRequired(), NumberRange(min=0.01)])
+    submit = SubmitField('Transfer')

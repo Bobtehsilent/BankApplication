@@ -43,12 +43,54 @@
         </div>
     </div>
 
+    <div class="card">
+        <div class="card-header" onclick="toggleCollapse('customerTransfer')">
+            <h4>Customer Transfer</h4>
+        </div>
+        <div id="customerTransfer" class="collapse">
+            <div>
+                <table>
+                    <tr>
+                        <td colspan="2">
+                            <input type="text" id="customerSearch" placeholder="Enter Customer ID" onkeypress="searchAccounts(event)">
+                            <button type="button" onclick="searchAccounts()">Search</button>
+                        </td>
+                    </tr>
+                </table>
+                <!-- Initially hide the form -->
+                <div id="transferFormContainer" style="display: none;">
+                    <form id="transferForm" action="#" method="post" data-from-account-id="{{ account.Id }}">
+                        {{ customer_transfer_form.hidden_tag() }}
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td><label for="to_account">To Account:</label></td>
+                                    <td><select name="to_account" id="to_account" class="form-control">
+                                        <!-- Options will be dynamically added here -->
+                                    </select></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="amount">Amount:</label></td>
+                                    <td>{{ customer_transfer_form.amount(class='form-control') }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">{{ customer_transfer_form.submit(class='form-submit-button') }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>        
+    </div>
+    
+
     <!-- Transfer Funds Section -->
     <div class="card">
-        <div class="card-header" onclick="toggleCollapse('transferFunds')">
-            <h4>Transfer Funds</h4>
+        <div class="card-header" onclick="toggleCollapse('accountTransfer')">
+            <h4>Account Transfer</h4>
         </div>
-        <div id="transferFunds" class="collapse">
+        <div id="accountTransfer" class="collapse">
             <!-- Transfer Form -->
             <form action="{{ url_for('transaction.transfer_transaction', from_account_id=account.Id) }}" method="POST">
                 {{ transfer_form.hidden_tag() }}
@@ -154,5 +196,40 @@
             alert('Deletion cancelled');
         }
     }
+
+    function searchAccounts(event) {
+        if (event && event.type === 'keypress' && event.keyCode !== 13) {
+            return;
+        }
+    
+        const customerId = document.getElementById('customerSearch').value;
+        if (!customerId) return;
+    
+        const form = document.getElementById('transferForm');
+        const fromAccountId = form.getAttribute('data-from-account-id');
+        form.action = `/transfer_transaction/${fromAccountId}/${customerId}`;
+    
+        fetch(`/api/search_accounts/${customerId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const select = document.getElementById('to_account');
+                select.innerHTML = '';
+                data.accounts.forEach(account => {
+                    const option = new Option(`${account.AccountType} - ${account.Id}`, account.Id);
+                    select.add(option);
+                });
+    
+                document.getElementById('transferFormContainer').style.display = '';
+            })
+            .catch(error => {
+                console.error('Error fetching accounts:', error);
+            });
+    }
+    
 </script>
 {% endblock %}

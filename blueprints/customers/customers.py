@@ -195,10 +195,9 @@ def edit_customer():
         update_customer_data(customer, edit_customer_form)
         db.session.commit()
         flash('Customer updated successfully!', 'success')
-        return redirect(url_for('customer.customer_detail', customer_id=customer_id))
-
-        # For GET request or when the form is not validated
+        return redirect(url_for('customer.customer_detail', user_id=customer_id))
     return render_template('/customers/manage_customer.html', edit_customer_form=edit_customer_form)
+    
 
 def update_customer_data(customer, form):
     birthday_str = form.birthday.data.strftime('%Y%m%d')

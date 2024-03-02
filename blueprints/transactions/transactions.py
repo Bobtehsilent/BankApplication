@@ -5,7 +5,7 @@ from collections import defaultdict
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from forms.transaction_form import AddTransactionForm
-from forms.account_forms import TransferForm
+from forms.account_forms import TransferForm, CustomerTransferForm
 from blueprints.breadcrumbs import update_breadcrumb
 
 transactions_bp = Blueprint('transaction', __name__)
@@ -62,28 +62,32 @@ def process_transaction(account_id, amount, operation):
     db.session.commit()
 
 @transactions_bp.route('/transfer_transaction/<int:from_account_id>', methods=['GET', 'POST'])
+@transactions_bp.route('/transfer_transaction/<int:from_account_id>/<int:customer_id>', methods=['GET', 'POST'])
 @login_required
-def transfer_transaction(from_account_id):
+def transfer_transaction(from_account_id, customer_id=None):
     form = TransferForm()
-    from_account = Account.query.get_or_404(from_account_id)  # Fetch the from account to get the CustomerId
-    customer_id = from_account.CustomerId  # Retrieve CustomerId from the from account
+    from_account = Account.query.get_or_404(from_account_id)
 
-    # Filter accounts belonging to the same customer excluding the from_account
+    # If customer_id is provided from the search, use it. Otherwise, use from_account's customer_id
+    target_customer_id = customer_id if customer_id else from_account.CustomerId
+
+    # Filter accounts based on the target_customer_id
     form.to_account.choices = [
         (account.Id, f'{account.AccountType} - {account.Id}') 
-        for account in Account.query.filter(Account.CustomerId == customer_id, Account.Id != from_account_id).all()
+        for account in Account.query.filter(Account.CustomerId == target_customer_id).all()
     ]
+
     if form.validate_on_submit():
         amount = form.amount.data
         to_account_id = form.to_account.data
         if transfer_funds(from_account_id, to_account_id, amount):
             flash('Transfer completed successfully.', 'success')
-            return redirect(url_for('account.account_handling', customer_id=customer_id, account_id=from_account_id))
+            return redirect(url_for('account.account_handling', customer_id=from_account.CustomerId, account_id=from_account_id))
         else:
-            flash('Transfer not successfull.', 'failed')
-            return render_template('/accounts/account_handling.html')
-    return render_template('/accounts/account_handling.html', customer_id=customer_id, form=form, from_account_id=from_account_id)
-    
+            flash('Transfer not successful.', 'failed')
+            return render_template('/accounts/account_handling.html', customer_id=from_account.CustomerId, form=form, from_account_id=from_account_id)
+
+    return render_template('/accounts/account_handling.html', customer_id=target_customer_id, form=form, from_account_id=from_account_id)
 
 def transfer_funds(from_account_id, to_account_id, amount):
     from_account = Account.query.get_or_404(from_account_id)
@@ -92,8 +96,8 @@ def transfer_funds(from_account_id, to_account_id, amount):
     if from_account.Balance < amount:
         return False, 'Insufficient funds.'
     
-    process_transaction(from_account_id, -amount, f'Transfer from {from_account.Id} to {to_account.Id}')
-    process_transaction(to_account_id, amount, f'Transfer to {to_account.Id} from {from_account.Id}')
+    process_transaction(from_account_id, -amount, f'Transfer from: {from_account.CustomerId}:{from_account.Id} to {to_account.CustomerId}:{to_account.Id}')
+    process_transaction(to_account_id, amount, f'Transfer from: {from_account.CustomerId}:{from_account.Id} to {to_account.CustomerId}:{to_account.Id}')
     return True, 'Transfer completed successfully.'
 
 

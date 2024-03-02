@@ -77,6 +77,12 @@ class Account(db.Model):
     Transactions = db.relationship('Transaction', backref='Account', lazy=True)
     CustomerId = db.Column(db.Integer, db.ForeignKey('Customers.Id'), nullable=False)
 
+    def to_dict(self):
+        return {
+            'Id': self.Id,
+            'AccountType': self.AccountType,
+        }
+
 class Transaction(db.Model):
     __tablename__ = "Transactions"
     Id = db.Column(db.Integer, primary_key=True)

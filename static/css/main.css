@@ -13,8 +13,6 @@
   --sidebar-color: #5585b5;
   --sidebar-text-color: #ececec;
   --sidebar-active-color: #9fd3c7;
-  /* --header-bg-color: #5585b5;
-  --header-text-color: #2b6777; */
   --search-input-border-color: #52ab98;
   --dropdown-bg-color: #ffffff;
   --dropdown-item-hover-bg-color: #e0e0e0;
@@ -67,7 +65,7 @@ body {
     flex-direction: column;
     margin: 0;
     min-height: 100vh;
-    overflow-x: hidden; /* Prevent horizontal overflow */
+    overflow-x: hidden;
     position: relative;
 }
 
@@ -135,6 +133,7 @@ body {
   justify-content: right;
   border-radius: 4px;
   color: var(--header-text-color);
+  margin-right: 80px;
 }
 
 .user-info span {
@@ -218,11 +217,11 @@ body {
   color: var(--sidebar-text-color);
   display: flex;
   align-items: center;
-  width: 100%; /* Ensure button fills its container */
+  width: 100%; 
 }
 
 .sidebar-heading i {
-    margin-right: 10px; /* Space between icon and text */
+    margin-right: 10px; 
 }
 
 .nav-link-group {
@@ -295,10 +294,10 @@ body {
 }
 
 .user-block-stat-item {
-    display: flex; /* Ensure stat items are next to each other */
+    display: flex; 
     justify-content: start;
     width: 100%;
-    margin-bottom: 20px; /* Space between stat items and the map */
+    margin-bottom: 20px; 
 }
 
 .user-stat-item {
@@ -329,11 +328,9 @@ body {
 @media (max-width: 768px) {
     }
     .admin-stat-item {
-        margin: 0 0 20px 0; /* Stack stat items vertically on smaller screens */
+        margin: 0 0 20px 0; 
     }
-    /* .details__bg {
-        padding: 55px 40px;
-      } */
+
 
 
 
@@ -366,11 +363,7 @@ body {
     pointer-events: auto;
 }
 
-  
-/* .details__bg--down {
-    background: var(--background-color);
-  } */
-  
+
 .details__bg {
     background-color: var(--details-bg-color);
     padding: 20px;
@@ -555,11 +548,11 @@ table a:hover {
 /* account tables */
 
 .inner-table tr {
-  background-color: var(--background-color); /* Reset or specify the desired color */
+  background-color: var(--background-color); 
 }
 
 .inner-table tr:hover {
-  background-color: var(--inner-hover-bg-color); /* If you want a hover effect for inner rows */
+  background-color: var(--inner-hover-bg-color); 
   color: var(--inner-hover-text-color);
 }
 
@@ -662,19 +655,6 @@ table a:hover {
     
   }
   
-/* .flash-message {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 9999;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    padding: 10px 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    display: none;
-  } */
 
 .table-row:hover {
     background-color: darken(var(--background-color), 10%);
@@ -715,10 +695,7 @@ table a:hover {
     padding: 2px;
     margin: 20px auto;
   } 
-  
-  .table-details-box {
-  /* more if required */
-  }
+
   .details.table-details-box .details__bg {
     max-width: 1100px;
   }
@@ -784,7 +761,6 @@ table a:hover {
 
 /* customer_details styling */
 
-/* Aligning content to the center */
 .customer-details-page {
   max-width: 1200px;
   margin: 0 auto;
@@ -929,6 +905,10 @@ table a:hover {
 
 .table-list {
   margin-bottom: 0;
+}
+
+#customerSearch {
+  justify-content: center;
 }
 
 .card {

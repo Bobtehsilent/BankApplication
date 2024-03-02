@@ -116,84 +116,70 @@
     
     <!-- Edit and Delete Customer -->
     <div class="card">
-        <div class="card-header" onclick="toggleCollapse('customerManagementOptions')">
-            <h2>Manage Customers</h2>
+        <div class="card-header" onclick="toggleCollapse('editCustomerSection')">
+            <h2>Edit Customer</h2>
         </div>
-        <div class="card-body collapse" id="customerManagementOptions">
-            <div class="card-header" onclick="toggleCollapse('editCustomerSection')">
-                <h3>Edit Customer</h3>
-            </div>
-            <div class="card-body collapse" id="editCustomerSection">
-                <div class="user-search-container">
-                    <input type="text" id="editCustomerSearch" placeholder="Search Customers..." oninput="searchInformation('editCustomerSearch');">
-                    <button class="clearSearch" id="clearEditCustomer" onclick="clearSearchInput('clearEditCustomer', 'editCustomerSearch', 'editCustomerResultsDropdown')">Clear</button>
-                    <div id="editCustomerResultsDropdown" class="search-dropdown">
-                        <!-- Search results will be appended here dynamically -->
-                    </div>
-                </div>
-                <!-- Form for editing a customer will go here -->
-                <form id="editCustomerForm" action="{{ url_for('customer.edit_customer', customer_id=customers_id) }}" method="post">
-                    {{ edit_customer_form.hidden_tag() }}
-                    <input type="hidden" id="customerIdInput" name="id"> <!-- This will be filled dynamically -->
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td>{{ edit_customer_form.givenname.label }}</td>
-                                <td>{{ edit_customer_form.givenname(class_='form-control') }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ edit_customer_form.surname.label }}</td>
-                                <td>{{ edit_customer_form.surname(class_='form-control') }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ edit_customer_form.email.label }}</td>
-                                <td>{{ edit_customer_form.email(class_='form-control') }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ edit_customer_form.telephone.label }}</td>
-                                <td>{{ edit_customer_form.telephone(class_='form-control') }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ edit_customer_form.address.label }}</td>
-                                <td>{{ edit_customer_form.address(class_='form-control') }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ edit_customer_form.city.label }}</td>
-                                <td>{{ edit_customer_form.city(class_='form-control') }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ edit_customer_form.zipcode.label }}</td>
-                                <td>{{ edit_customer_form.zipcode(class_='form-control') }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ edit_customer_form.country.label }}</td>
-                                <td>{{ edit_customer_form.country(class_='form-control') }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ edit_customer_form.birthday.label }}</td>
-                                <td>{{ edit_customer_form.birthday(class_='form-control') }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ edit_customer_form.personalnumber_last4.label }}</td>
-                                <td>{{ edit_customer_form.personalnumber_last4(class_='form-control') }}</td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" style="text-align: center;">
-                                    {{ edit_customer_form.submit(class_='form-submit-button') }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
-            <div class="card">
-                <div class="card-header" onclick="toggleCollapse('deleteCustomerForm')">
-                    <h3>Delete Customer</h3>
-                </div>
-                <div class="card-body collapse" id="deleteCustomerForm">
-                    <h3>Delete Customer</h3>
+        <div class="card-body collapse" id="editCustomerSection">
+            <div class="user-search-container">
+                <input type="text" id="editCustomerSearch" placeholder="Search Customers..." oninput="searchInformation('editCustomerSearch');">
+                <button class="clearSearch" id="clearEditCustomer" onclick="clearSearchInput('clearEditCustomer', 'editCustomerSearch', 'editCustomerResultsDropdown')">Clear</button>
+                <div id="editCustomerResultsDropdown" class="search-dropdown">
+                    <!-- Search results will be appended here dynamically -->
                 </div>
             </div>
+            <!-- Form for editing a customer will go here -->
+            <form id="editCustomerForm" action="{{ url_for('customer.edit_customer', customer_id=customers_id) }}" method="post">
+                {{ edit_customer_form.hidden_tag() }}
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>{{ edit_customer_form.givenname.label }}</td>
+                            <td>{{ edit_customer_form.givenname(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ edit_customer_form.surname.label }}</td>
+                            <td>{{ edit_customer_form.surname(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ edit_customer_form.email.label }}</td>
+                            <td>{{ edit_customer_form.email(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ edit_customer_form.telephone.label }}</td>
+                            <td>{{ edit_customer_form.telephone(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ edit_customer_form.address.label }}</td>
+                            <td>{{ edit_customer_form.address(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ edit_customer_form.city.label }}</td>
+                            <td>{{ edit_customer_form.city(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ edit_customer_form.zipcode.label }}</td>
+                            <td>{{ edit_customer_form.zipcode(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ edit_customer_form.country.label }}</td>
+                            <td>{{ edit_customer_form.country(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ edit_customer_form.birthday.label }}</td>
+                            <td>{{ edit_customer_form.birthday(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ edit_customer_form.personalnumber_last4.label }}</td>
+                            <td>{{ edit_customer_form.personalnumber_last4(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="text-align: center;">
+                                {{ edit_customer_form.submit(class_='form-submit-button') }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
         </div>
     </div>
 </div>

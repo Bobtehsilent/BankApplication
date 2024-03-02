@@ -25,13 +25,6 @@
     
     <div class="table-list">
         <table>
-            <!-- <div class="filter-section" id="filterSection">
-                <div class="filter-content">
-                    <form id="filterForm" onsubmit="event.preventDefault(); filterCustomers();">
-                        <input type="text" id="listCustomerSearch" name="name" placeholder="Name..." oninput="filterCustomers()">
-                    </form>
-                </div>
-            </div>             -->
             <thead>
                 <tr>
                     <th data-sort-column="Id" data-sort-order="asc" class="sortable-column">Id</th>
@@ -40,16 +33,6 @@
                     <th data-sort-column="Streetaddress" data-sort-order="asc" class="sortable-column">Address</th>
                     <th data-sort-column="City" data-sort-order="asc" class="sortable-column">City</th>
                     <th data-sort-column="Country" data-sort-order="asc" class="sortable-column">Country</th>
-
-                    
-                        <!-- <a href="{{ url_for('customer.customer_list', sort_column = 'placeholder', sort_order = 'asc') }}">
-                            <i class='bx bxs-up-arrow'></i>
-                        </a>
-                        <a href="{{ url_for('customer.customer_list', sort_column = 'placeholder', sort_order = 'desc') }}">
-                            <i class="bx bxs-down-arrow"></i> -->
-                        </a>
-                    </th>
-                </tr>
             </thead>
             <tbody id="customerListBody">
                 <!-- filled by javascript -->
@@ -70,19 +53,12 @@
     var baseCustomerDetailUrl = "{{ url_for('customer.customer_detail', user_id=0, _external=True) }}";
     var baseManageCustomerUrl = "{{ url_for('customer.manage_customer', user_id=0, _external=True) }}";
     document.addEventListener('DOMContentLoaded', () => {
-        // Parse the URL query parameters
         const urlParams = new URLSearchParams(window.location.search);
         const searchQuery = urlParams.get('search');
-        
-        // Check if there's a search query
         if (searchQuery) {
             const searchInput = document.getElementById('listCustomerSearch');
             if (searchInput) {
-                // Set the input's value to the search query
                 searchInput.value = decodeURIComponent(searchQuery);
-                
-                // Optionally, trigger the search/filter function immediately
-                // Assuming filterCustomers is already defined and handles fetching and displaying the filtered list
                 filterCustomers();
             }
         }

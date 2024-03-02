@@ -1,0 +1,7 @@
+fixa:
+
+Skapa en transfer mellan kunder
+
+fixa edit customer
+
+fixa seeder
