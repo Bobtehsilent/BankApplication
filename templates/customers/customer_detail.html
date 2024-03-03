@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Details{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-section">
+    <div class="breadcrumb">
+        {% if 'breadcrumb' in session %}
+            {% for crumb in session['breadcrumb'] %}
+                <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                {% if not loop.last %}
+                    &gt;
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+    <!-- Back Button -->
+    <a href="{{ url_for('customer.customer_list') }}" class="back">← Back</a>
+</div>
+<div class="customer-details-page">
+    <div class="customer-container">
+        <div class="customer-details">
+            <h2>Customer Details</h2>
+            <table class="info-table">
+                <tbody>
+                    <tr>
+                        <th>Name:</th>
+                        <td>{{ customer.GivenName }} {{ customer.Surname }}</td>
+                    </tr>
+                    <tr>
+                        <th>Personal Number:</th>
+                        <td>{{ customer.PersonalNumber }}</td>
+                    </tr>
+                    <tr>
+                        <th>Email:</th>
+                        <td>{{ customer.EmailAddress }}</td>
+                    </tr>
+                    <tr>
+                        <th>Phone:</th>
+                        <td>{{ customer.Telephone }}</td>
+                    </tr>
+                    <tr>
+                        <th>Address:</th>
+                        <td>{{ customer.Streetaddress }}</td>
+                    </tr>
+                    <tr>
+                        <th>Zipcode</th>
+                        <td>{{ customer.Zipcode }}</td>
+                    </tr>
+                    <tr>
+                        <th>City</th>
+                        <td>{{ customer.City }}</td>
+                    </tr>
+                    <tr>
+                        <th>Country</th>
+                        <td>{{ customer.Country }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="account-data">
+            <h3>Account Data</h3>
+            {% if customer.Accounts %}
+                <table class="info-table">
+                    <thead>
+                        <tr>
+                            <th>Account Id</th>
+                            <th>Account Type</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account in customer.Accounts %}
+                            <tr onclick="redirectToAccountHandling('{{ url_for('account.account_handling', account_id=account.Id, customer_id=customer.Id) }}')" style="cursor: pointer;">
+                                <td>{{ account.Id }}</td>
+                                <td>{{ account.AccountType }}</td>
+                                <td>${{ account.Balance }}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td> </td>
+                            <th>Total Balance:</th>
+                            <td>${{ customer.total_balance }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"><button id="manageAccountBtn" class="form-submit-button">Manage Accounts</button></td>
+                        </tr>
+                    </tbody>
+                    
+                </table>
+            {% else %}
+                <p>No account data found</p>
+            {% endif %}
+            {% if current_user.ManagementPermission %}
+        </div>
+        <div class="transaction-list">
+            <div>
+                <button class="form-submit-button" id="loadMoreTransactions" data-customer-id="{{ customer.Id }}" style="display: inline-block;">Load Transactions</button>
+            </div>
+            <table id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>New Balance</th>
+                        <th>Type</th>
+                        <th>Operation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Transactions will be dynamically inserted here -->
+                </tbody>
+            </table>
+            <div class="actions">
+                <button id="loadMore" style="display:none;">Load More</button>
+                <button id="closeTransactions" style="display:none;">Close</button>
+            </div>
+            <p id="no-more" style="display:none; text-align:center;">No more transactions to show</p>
+        </div>
+        {% endif %}
+        <div class="transaction-graph">
+            <h3>Last 20 Transactions</h3>
+            <canvas id="transactionGraph"></canvas>
+        </div>  
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        openGraph({{ customer.Id }});
+    });
+
+    function redirectToAccountHandling(url) {
+        window.location.href = url;
+    }
+
+    function toggleCollapse(elementId) {
+        var element = document.getElementById(elementId);
+        if (element.style.display === "none" || element.classList.contains('collapse')) {
+            element.style.display = "";
+            element.classList.remove('collapse');
+            element.classList.add('expanded');
+        } else {
+            element.style.display = "none";
+            element.classList.remove('expanded');
+            element.classList.add('collapse');
+        }
+    }
+
+
+    document.getElementById('manageAccountBtn').addEventListener('click', function() {
+        window.location.href = "{{ url_for('account.manage_accounts', customer_id=customer.Id) }}";
+    });
+    let loadIterationCount = 1; 
+    let hasMore = true;
+
+    document.getElementById("loadMoreTransactions").addEventListener("click", function () {
+        this.style.display = "none";
+        document.getElementById("transactionsTable").style.display = "table"; 
+        document.getElementById("loadMore").style.display = "inline-block"; 
+        document.getElementById("closeTransactions").style.display = "inline-block";
+        fetchMore({{ customer.Id }});
+    });
+
+    document.getElementById("loadMore").addEventListener("click", function () {
+        fetchMore({{ customer.Id }});
+    });
+
+    document.getElementById("closeTransactions").addEventListener("click", function () {
+        document.querySelector(".transaction-list").classList.remove("expanded");
+        document.getElementById("transactionsTable").style.display = "none"; 
+        document.getElementById("loadMore").style.display = "none";
+        document.getElementById("no-more").style.display = "none"
+        this.style.display = "none";
+        document.getElementById("loadMoreTransactions").style.display = "inline-block";
+    });
+
+    function fetchMore(customer_id) {
+        const url = `/api/customers/${customer_id}/transactions?page=${loadIterationCount}`;
+    
+        fetch(url)
+        .then(response => response.json())
+        .then(([transactions, hasMoreData]) => {
+            document.getElementById("transactionsTable").style.display = "table"; 
+            document.querySelector(".transaction-list").classList.add("expanded");
+            hasMore = hasMoreData;
+            loadIterationCount += 1;
+            transactions.forEach(transaction => {
+                tableElement(transaction);
+            });
+            if (!hasMore) {
+                document.getElementById('loadMore').style.display = 'none'
+                document.getElementById("no-more").style.display = "block";
+            }
+        })
+        .catch(error => console.error('Error during fetch:', error));
+    }
+
+    function tableElement(element) {
+        document.querySelector("#transactionsTable tbody").innerHTML += `<tr>
+            <td>${element.account_id}
+            <td>${element.date}</td>
+            <td>$${element.amount}</td>
+            <td>$${element.new_balance}</td>
+            <td>${element.type}</td>
+            <td>${element.operation}</td>
+        </tr>`;
+    }
+    
+</script>
+    
+{% endblock %}

@@ -6,36 +6,77 @@
     <title>{% block title %}Default Title{% endblock %}</title>
         <!-- load CSS -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300">  <!-- Google web font "Open Sans" -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/fontawesome-all.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='slick/slick.css') }}"/>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='slick/slick-theme.css') }}"/>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='homepage_styling/fontawesome/css/fontawesome-all.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='jmap/jquery-jvectormap-2.0.5.css') }}">
     <script>document.documentElement.className="js";var supportsCssVars=function(){var e,t=document.createElement("style");return t.innerHTML="root: { --tmp-var: bold; }",document.head.appendChild(t),e=!!(window.CSS&&window.CSS.supports&&window.CSS.supports("font-weight","var(--tmp-var)")),t.parentNode.removeChild(t),e};supportsCssVars()||alert("Please view this in a modern browser such as latest version of Chrome or Microsoft Edge.");</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     {% block head %}{% endblock %}
 </head>
 <body class="{% block body_classes %}{% endblock %}">
-    <div id="tm-bg"></div>
-    <div id="tm-wrap">
-        <div class="tm-main-content">
-            {% block content %}{% endblock %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% if current_user.is_authenticated %}
+    <div class="flex-container"> 
+        {% include '/interface/interface_sidebar.html' %}
+        <div class="main-content">
+            <header>
+                <!-- header -->
+                <div class="page-content-wrapper">
+                    <div class="page-header">
+                        <div class="search-container">
+                            {% block searchbar %}
+                                <input type="text" id="headerSearch" placeholder="Search..." oninput="searchInformation('headerSearch'); toggleClearButtonHeader();" onkeypress="handleKeyPress(event, 'headerSearch')">
+                                <button id="clearSearchHeader" onclick="clearSearchInputHeader()" style="display: none;">Clear</button>
+                            {% endblock %}
+                            <div id="searchDropdown" class="search-dropdown">
+                                <!-- Search results -->
+                            </div>
+                        </div>                        
+                        <div class="user-info">
+                            <span>{{ current_user.FirstName }} {{ current_user.LastName }}<button id="toggleDarkMode"><i class="far fa-copyright"></i></button></span>
+                        </div>
+                        <div>
+                        <a href="{{ url_for('login.logout') }}" class="user-logout">
+                            <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                        </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            {% block content %} {% endblock %}
         </div>
     </div>
-    <footer>
-        <p class="small tm-copyright-text">Copyright &copy; <span class="tm-current-year">2020</span> Your Company. 
-                
-        Design: <a rel="nofollow" href="https://www.tooplate.com" class="tm-text-highlight">Tooplate</a></p>
-    </footer>
-
-    <!-- commmon scripts -->
+    {% endif %}
+            <!-- Details overlay structure -->
+    <div class="details">
+        <div class="details__bg details__bg--down">
+            <button class="details__close"><i class="fas fa-2x fa-times icon--cross tm-fa-close"></i></button>
+            <div class="details__description"></div>
+        </div>
+    </div>
     <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='slick/slick.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='homepage_styling/slick/slick.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/anime.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='jmap/jquery-jvectormap-2.0.5.min.js') }}"></script>
     <script src="{{ url_for('static', filename='jmap/jquery-jvectormap-europe-merc.js') }}"></script>
-    <script>      
+    <script>    
+        function handleKeyPress(event, sourceId) {
+            if (event.key === 'Enter') {
+                var input = document.getElementById(sourceId);
+                var filter = input.value.trim();
+        
+                if (filter) {
+                    window.location.href = `/customers/customer_list?search=${encodeURIComponent(filter)}`;
+                }
+            }
+        }          
 
         function setupFooter() {
             var pageHeight = $('.tm-site-header-container').height() + $('footer').height() + 100;
@@ -48,29 +89,36 @@
             else {
                 main.removeClass('tm-footer-relative');   
             }
-        }
+        } 
 
         /* DOM is ready
         ------------------------------------------------*/
-        $(function(){
-
-            setupFooter();
-
-            $(window).resize(function(){
-                setupFooter();
-            });
-
-            $('.tm-current-year').text(new Date().getFullYear());  // Update year in copyright           
-        });
-    </script>   
-    {% block scripts %}{% endblock %}
         
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <div>{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+        $(document).ready(function() {
+            // Check if there is a flash message
+            if ($('.flash-message').length) {
+                // Show the flash message
+                $('.flash-message').slideDown(300).delay(3000).slideUp(300);
+            }
+        });
+        function clearSearchInputHeader() {
+            document.getElementById('headerSearch').value = '';
+            toggleClearButtonHeader();
+            // Optionally, clear the search results or reset the state here
+            document.getElementById('searchDropdown').style.display = 'none';
+        }
+        
+        function toggleClearButtonHeader() {
+            const searchInput = document.getElementById('headerSearch');
+            const clearButton = document.getElementById('clearSearchHeader');
+            if (searchInput.value) {
+                clearButton.style.display = 'inline-block'; 
+            } else {
+                clearButton.style.display = 'none'; 
+            }
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
 </body>
 </html>

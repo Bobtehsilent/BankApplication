@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Customers list{% endblock %}
+{% block searchbar %}
+    <div class="filter-content">
+        <form id="filterForm" onsubmit="event.preventDefault(); filterCustomers();">
+            <input type="text" id="listCustomerSearch" name="name" placeholder="Search Customers..." oninput="filterCustomers()">
+        </form>
+    </div>
+{% endblock %}
+{% block content %}
+    {% macro sort_link(column, title, current_sort_order, current_search_query, current_page) %}
+        {% set new_sort_order = 'asc' if current_sort_order == 'desc' and sort_column == column else 'desc' %}
+        <a href="{{ url_for('customer.customer_list', page=current_page, sort_column=column, sort_order=new_sort_order, search=current_search_query) }}">
+            {{ title }}
+            {% if sort_column == column %}
+                {% if current_sort_order == 'asc' %}
+                    <span class="sort-arrow">&#9650;</span> 
+                {% else %}
+                    <span class="sort-arrow">&#9660;</span> 
+                {% endif %}
+            {% endif %}
+        </a>
+    {% endmacro %}
+    
+    <div class="table-list">
+        <table>
+            <thead>
+                <tr>
+                    <th data-sort-column="Id" data-sort-order="asc" class="sortable-column">Id</th>
+                    <th data-sort-column="PersonalNumber" data-sort-order="asc" class="sortable-column">Personal Number</th>
+                    <th data-sort-column="Surname" data-sort-order="asc" class="sortable-column">Name</th>
+                    <th data-sort-column="Streetaddress" data-sort-order="asc" class="sortable-column">Address</th>
+                    <th data-sort-column="City" data-sort-order="asc" class="sortable-column">City</th>
+                    <th data-sort-column="Country" data-sort-order="asc" class="sortable-column">Country</th>
+            </thead>
+            <tbody id="customerListBody">
+                <!-- filled by javascript -->
+            </tbody>
+        </table>
+        <div class="table-row-pagination">
+            <!-- filled by javascript -->
+        </div>
+        <div class="table-details" style="display: none;">
+            <div class="details__bg details__bg--down table-detail-description">
+                <button class="details__close"><i class="fas fa-2x fa-times icon--cross tm-fa-close"></i></button>
+                <div class="details__description table-detail-description">
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+    var baseCustomerDetailUrl = "{{ url_for('customer.customer_detail', user_id=0, _external=True) }}";
+    var baseManageCustomerUrl = "{{ url_for('customer.manage_customer', user_id=0, _external=True) }}";
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchQuery = urlParams.get('search');
+        if (searchQuery) {
+            const searchInput = document.getElementById('listCustomerSearch');
+            if (searchInput) {
+                searchInput.value = decodeURIComponent(searchQuery);
+                filterCustomers();
+            }
+        }
+    });
+</script>
+{% endblock %}

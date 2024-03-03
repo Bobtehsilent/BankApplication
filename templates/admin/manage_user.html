@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="manage-container">
+    <!-- Add User Card -->
+    <div class="card" id="readUsercard">
+        <div class="card-header" onclick="toggleCollapse('readUserSection')">
+            <h2>User List</h2>
+        </div>
+        <div class="card-body collapse" id="readUserSection">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody id="userList">
+                    <!-- Users will be dynamically inserted here -->
+                </tbody>
+            </table>
+            <div id="paginationControls"></div>
+        </div>
+    </div>       
+    <div class="card" id="addUserCard">
+        <div class="card-header" onclick="toggleCollapse('addUserForm')">
+            <h2>Add User</h2>
+        </div>
+        <div class="card-body {{ 'collapse' if not add_user_form.errors else '' }}" id="addUserForm">
+            <form action="{{ url_for('admin_tools.manage_user') }}" method="post">
+                {{ add_user_form.hidden_tag() }}
+                <table class="table-list">
+                    <tbody>
+                        <tr>
+                            <td>{{ add_user_form.username.label }}</td>
+                            <td>
+                                {{ add_user_form.username(class_='form-control') }}
+                                {% if add_user_form.username.errors %}
+                                    <div class="error-message">{{ add_user_form.username.errors[0] }}</div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ add_user_form.password.label }}</td>
+                            <td>
+                                {{ add_user_form.password(class_='form-control') }}
+                                {% if add_user_form.password.errors %}
+                                    <div class="error-message">{{ add_user_form.password.errors[0] }}</div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td>{{ add_user_form.confirm.label }}</td>
+                            <td>
+                                {{ add_user_form.confirm(class_='form-control') }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ add_user_form.email.label }}</td>
+                            <td>{{ add_user_form.email(class_='form-control') }}
+                                {% if add_user_form.email.errors %}
+                                    <div class="error-message">{{ add_user_form.email.errors[0] }}</div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ add_user_form.first_name.label }}</td>
+                            <td>{{ add_user_form.first_name(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ add_user_form.last_name.label }}</td>
+                            <td>{{ add_user_form.last_name(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ add_user_form.role.label }}</td>
+                            <td>{{ add_user_form.role(class_='form-control') }}</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Permissions:
+                            </td>
+                            <td colspan="6">
+                                <div class="permissions-container">
+                                    <div class="permission">
+                                        <label for="information_permission">Info</label>
+                                        {{ add_user_form.information_permission(class_='form-check-input') }}
+                                    </div>
+                                    <div class="permission">
+                                        <label for="management_permission">Manage</label>
+                                        {{ add_user_form.management_permission(class_='form-check-input') }}
+                                    </div>
+                                    <div class="permission">
+                                        <label for="admin_permission">Admin</label>
+                                        {{ add_user_form.admin_permission(class_='form-check-input') }}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="text-align: center;">
+                                {{ add_user_form.submit(class_='form-submit-button') }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Edit User -->
+    <div class="card" id="addUserCard">
+        <!-- Edit User Card -->
+        <div class="card-header" onclick="toggleCollapse('userManagementOptions')">
+            <h2>Edit User</h2>
+        </div>
+        <div class="card-body {{ 'collapse' if not change_password_form.errors else '' }}" id="userManagementOptions">
+            <div class="card-header" onclick="toggleCollapse('editUserSection')">
+                <h3>Edit existing user</h3>
+            </div>
+            <div class="card-body collapse" id="editUserSection">    
+                    <form id="userEditForm" action="{{ url_for('admin_tools.edit_user') }}" method="POST">
+                    {{ edit_user_form.hidden_tag() }}
+                    <table class="table-list">
+                        <tbody>
+                            <tr>
+                                <td>Search for Users: </td>
+                                <td>
+                                    <input class="form-control" type="text" id="editUserSearch" placeholder="Search Users..." oninput="searchEditUser('editUserSearch')">
+                                    <div id="editUserResultsDropdown" class="search-dropdown">
+                                        <!-- Search results will be appended here dynamically -->
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{ edit_user_form.username.label }}</td>
+                                <td>{{ edit_user_form.username(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ edit_user_form.email.label }}</td>
+                                <td>{{ edit_user_form.email(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ edit_user_form.first_name.label }}</td>
+                                <td>{{ edit_user_form.first_name(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ edit_user_form.last_name.label }}</td>
+                                <td>{{ edit_user_form.last_name(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ edit_user_form.role.label }}</td>
+                                <td>{{ edit_user_form.role(class_='form-control') }}</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Permissions:
+                                </td>
+                                <td colspan="6">
+                                    <div class="permissions-container">
+                                        <div class="permission">
+                                            <label for="information_permission">Info</label>
+                                            {{ edit_user_form.information_permission(class_='form-check-input') }}
+                                        </div>
+                                        <div class="permission">
+                                            <label for="management_permission">Manage</label>
+                                            {{ edit_user_form.management_permission(class_='form-check-input') }}
+                                        </div>
+                                        <div class="permission">
+                                            <label for="admin_permission">Admin</label>
+                                            {{ edit_user_form.admin_permission(class_='form-check-input') }} 
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="text-align: center;">
+                                    {{ edit_user_form.submit(class_='form-submit-button') }}
+                                    <button class="clearSearch" id="clearEditUser" onclick="clearSearchInput('clearEditUser', 'editUserSearch', 'editUserResultsDropdown')">Clear</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+            <div class="card-header" onclick="toggleCollapse('changePasswordSection')">
+                <h3>Change Password</h3>
+            </div>
+            <div class="card-body {{ 'collapse' if not change_password_form.errors else 'show' }}" id="changePasswordSection">
+                    <table class="table-list" id="userInfoTable">
+                        <thead>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>FirstName</th>
+                            <th>LastName</th>
+                            <th>Role</th>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="2">Search User</td>
+                                <td colspan="4">
+                                    <input class="form-control" type="text" id="changePasswordSearch" name="changePasswordSearch" placeholder="Search Users..." value="{{ request.args.get('search_query', '') }}" oninput="searchEditUser('changePasswordSearch')">
+                                    <div id="changePasswordResultsDropdown" class="search-dropdown">
+                                        <!-- Search results will be appended here dynamically -->
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td id="userInfoId"></td>
+                                <td id="userInfoUsername"></td>
+                                <td id="userInfoEmail"></td>
+                                <td id="userInfoFirstName"></td>
+                                <td id="userInfoLastName"></td>
+                                <td id="userInfoRole"></td>
+                            </tr>
+                        </tbody>
+                    </table>              
+                    <form id="changePasswordForm" action="{{ url_for('admin_tools.change_password') }}" method="post">
+                        {{ change_password_form.hidden_tag() }}
+                        <table class="table-list">
+                            <tbody>
+                                <tr>
+                                    <td>{{ change_password_form.password.label }}</td>
+                                    <td>
+                                        {{ change_password_form.password(class_='form-control') }}
+                                        {% if change_password_form.password.errors %}
+                                            <div class="error-message">{{ change_password_form.password.errors[0] }}</div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ change_password_form.confirm.label }}</td>
+                                    <td>
+                                        {{ change_password_form.confirm(class_='form-control') }}
+                                        {% if change_password_form.confirm.errors %}
+                                            <div class="error-message">{{ change_password_form.confirm.errors[0] }}</div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="text-align: center;">
+                                        {{ change_password_form.submit(class_='form-submit-button') }}
+                                        <button class="clearSearch" id="clearChangePassword" onclick="clearSearchInput('clearChangePassword', 'changePasswordSearch', 'changePasswordResultsDropdown')">Clear</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form> 
+            </div>                   
+            <div class="card-header" onclick="toggleCollapse('deleteUserSection')">
+                <h3>Delete User</h3>
+            </div>
+            <div class="card-body collapse" id="deleteUserSection">
+                <table class="table-list">
+                    <tr>
+                        <td colspan="2">Search User</td>
+                        <td colspan="4">
+                            <input class="form-control" type="text" id="deleteUserSearch" placeholder="Search Users..." oninput="searchEditUser('deleteUserSearch')">
+                                <div id="deleteUserResultsDropdown" class="search-dropdown">
+                                <!-- Search results will be appended here dynamically -->
+                                </div>
+                        </td>
+                    </tr>
+                </table>
+                <table class="table-list" id="userInfoTable">
+                    <thead>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>FirstName</th>
+                        <th>LastName</th>
+                        <th>Role</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="deleteUserInfoId"></td>
+                            <td id="deleteUserInfoUsername"></td>
+                            <td id="deleteUserInfoEmail"></td>
+                            <td id="deleteUserInfoFirstName"></td>
+                            <td id="deleteUserInfoLastName"></td>
+                            <td id="deleteUserInfoRole"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="form-submit-button" onclick="confirmDelete(document.getElementById('deleteUserInfoId').textContent)">Delete User</button>
+                <button class="clearSearch" id="clearDeleteSection" onclick="clearSearchInput('clearDeleteSection','deleteUserSearch', 'deleteUserResultsDropdown')">Clear</button>               
+            </div>
+        </div>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchUsers();
+    });
+
+
+    function toggleCollapse(elementId) {
+        var element = document.getElementById(elementId);
+        if (element.classList.contains('collapse')) {
+            element.classList.remove('collapse');
+            element.classList.add('collapsed');
+        } else {
+            element.classList.remove('collapsed');
+            element.classList.add('collapse');
+        }
+    }
+
+    function confirmDelete(userId) {
+        const confirmationText = prompt('Type CONFIRM to delete the user');
+        if (confirmationText === 'CONFIRM') {
+            fetch('/delete_user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                },
+                body: JSON.stringify({ user_id: userId, confirm_text: confirmationText })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('User deleted successfully');
+                    resetDeleteUserSection();
+                } else {
+                    alert('Error deleting user');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        } else {
+            alert('Deletion cancelled');
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Accounts{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-section">
+    <div class="breadcrumb">
+        {% if 'breadcrumb' in session %}
+            {% for crumb in session['breadcrumb'] %}
+                <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                {% if not loop.last %}
+                    &gt;
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+    <!-- Back Button -->
+    <a href="javascript:history.back()" class="back">← Back</a>
+</div>
+<div class="manage-container">
+    <h2>Manage Accounts for {{ customer.GivenName }} {{ customer.Surname }}</h2>
+    <div class="account-container">
+        <table class="table-list">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Account Type</th>
+                    <th>Created</th>
+                    <th>Balance</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for account in customer.Accounts %}
+                <tr class="table-row" onclick="toggleCollapse('accountDetails-{{ account.Id }}')">
+                    <td>{{ account.Id }}</td>
+                    <td>{{ account.AccountType }}</td>
+                    <td>{{ account.Created.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ account.Balance }}</td>
+                    <td>Click for options</td>
+                </tr>
+                <!-- Details Row -->
+                <tr id="accountDetails-{{ account.Id}}" class="account-details-row collapse" style="display:none;">
+                    <td colspan="7">
+                        <a href="{{ url_for('account.account_handling', customer_id=customer.Id, account_id=account.Id) }}" style="text-decoration: none; color: inherit;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Manage Account</h3>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="card" id="addTransactionCard">
+                            <div class="card-header" onclick="toggleCollapse('addTransactionForm-{{ account.Id }}')">
+                                <h3>Add Transaction</h3>
+                            </div>
+                            <div id="addTransactionForm-{{ account.Id }}" class="card-body collapse">
+                                <form method="POST" action="{{ url_for('transaction.add_transaction', account_id=account.Id) }}">
+                                    {{ add_transaction_form.hidden_tag() }}
+                                    <table>
+                                        <tr>
+                                            <td colspan="2">
+                                                <p id="transactionDisclaimer">Enter a positive amount for credits and a negative amount for debits.</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ add_transaction_form.amount.label }}</td>
+                                            <td>
+                                                <span id="transactionType-{{ account.Id }}"></span>
+                                                {{ add_transaction_form.amount.label(class='form-label') }} 
+                                                {{ add_transaction_form.amount(class='form-control', id='amount-' ~ account.Id) }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ add_transaction_form.operation.label }}</td>
+                                            <td>{{ add_transaction_form.operation.label(class='form-label') }} {{ add_transaction_form.operation(class='form-control', id='operation-' ~ account.Id) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" style="text-align: center;">
+                                                {{ add_transaction_form.submit(class='form-submit-button') }}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </form>
+                            </div>
+                        </div>                        
+                        <div class="card" id="loadTransactionCard-{{ account.id }}">
+                            <div class="card-header" onclick="toggleAndFetchTransactions('{{ account.Id }}', this)">
+                                <h3>Load Transactions</h3>
+                            </div>
+                            <div id="loadTransactions-{{ account.Id }}" class="transaction-list collapse">
+                                <table id="transactionsTable-{{ account.Id }}">
+                                    <thead>
+                                        <tr>
+                                            <th>Account</th>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>New Balance</th>
+                                            <th>Type</th>
+                                            <th>Operation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Transactions will be dynamically inserted here -->
+                                    </tbody>
+                                </table>
+                                <div class="actions">
+                                    <button id="loadMore-{{ account.Id }}" style="display:none;">Load More</button>
+                                    <button id="closeTransactions-{{ account.Id }}" style="display:none;" onclick="closeTransactions('{{ account.Id }}')">Close</button>
+                                </div>
+                                <p id="no-more-{{ account.Id }}" style="display:none;">No more transactions to show</p>
+                            </div>
+                        </div>
+                    </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="card-header" onclick="toggleCollapse('addAccountForm')">
+        <h4>Add Account</h4>
+    </div>
+    <div class="card-body collapse" id="addAccountForm">
+        <form action="{{ url_for('account.add_account', customer_id=customer.Id) }}" method="post">
+            {{ add_account_form.hidden_tag() }}
+            <table>
+                <tr>
+                    <td>{{ add_account_form.account_type.label }}</td>
+                    <td>{{ add_account_form.account_type(class_='form-control') }}</td>
+                </tr>
+                <tr>
+                    <td>{{ add_account_form.balance.label }}</td>
+                    <td>{{ add_account_form.balance(class_='form-control') }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="text-align: center;">
+                        {{ add_account_form.submit(class_='form-submit-button') }}
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleCollapse(elementId) {
+        var element = document.getElementById(elementId);
+        var isExpanded = !element.classList.contains('collapse');
+        element.style.display = isExpanded ? "none" : "";
+        element.classList.toggle('collapse', isExpanded);
+        element.classList.toggle('expanded', !isExpanded);
+        localStorage.setItem(elementId, isExpanded ? 'collapsed' : 'expanded');
+    }
+    
+    function toggleAndFetchTransactions(accountId) {
+        const transactionListDiv = document.getElementById(`loadTransactions-${accountId}`);
+        const isCollapsed = transactionListDiv.classList.contains('collapse');
+        transactionListDiv.classList.toggle('collapse');
+    
+        if (isCollapsed) {
+            transactionListDiv.style.display = '';
+            transactionListDiv.classList.remove('collapse');
+            transactionListDiv.classList.add('expanded');
+            localStorage.setItem(`loadTransactions-${accountId}`, 'expanded');
+            if (!transactionListDiv.classList.contains('has-loaded')) {
+                fetchMore(accountId);
+                transactionListDiv.classList.add('has-loaded');
+            }
+        } else {
+            transactionListDiv.classList.remove('expanded');
+            transactionListDiv.classList.add('collapse');
+            transactionListDiv.style.display = 'none';
+            localStorage.removeItem(`loadTransactions-${accountId}`);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.account-details-row').forEach(function(section) {
+            const id = section.getAttribute('id');
+            const state = localStorage.getItem(id);
+            if (state === 'expanded') {
+                section.style.display = '';
+                section.classList.add('expanded');
+                section.classList.remove('collapse');
+            }
+        });
+    
+        document.querySelectorAll('.transaction-list').forEach(function(section) {
+            const id = section.getAttribute('id');
+            const state = localStorage.getItem(id);
+            if (state === 'expanded') {
+                section.style.display = '';
+                section.classList.add('expanded');
+                section.classList.remove('collapse');
+                const accountId = id.split('-')[1]; 
+                if (!section.classList.contains('has-loaded')) {
+                    fetchMore(accountId);
+                    section.classList.add('has-loaded');
+                }
+            }
+        });
+    });
+    
+    function confirmDeleteAccount(accountId) {
+        event.stopPropagation();
+
+        if (confirm("Are you sure you want to delete this account?")) {
+            console.log("Deleting account:", accountId);
+        }
+    }
+
+    let loadIterationCount = 1;  
+    let hasMore = true;
+
+
+    function fetchMore(accountId) {
+        const url = `/api/accounts/${accountId}/transactions?page=${loadIterationCount}`;
+    
+        fetch(url)
+        .then(response => response.json())
+        .then(([transactions, hasMoreData]) => {
+            const transactionsTable = document.getElementById(`transactionsTable-${accountId}`);
+            transactionsTable.style.display = "table";
+    
+            transactions.forEach(transaction => {
+                tableElement(transaction, accountId);
+            });
+    
+            hasMore = hasMoreData;
+            if (!hasMore) {
+                document.getElementById(`loadMore-${accountId}`).style.display = "none";
+                document.getElementById(`no-more-${accountId}`).style.display = "block";
+            }
+        })
+        .catch(error => console.error('Error during fetch:', error));
+    }
+    
+    function tableElement(transaction, accountId) {
+        const transactionsTable = document.getElementById(`transactionsTable-${accountId}`).querySelector('tbody');
+        transactionsTable.innerHTML += `<tr>
+            <td>${transaction.account_id}</td>
+            <td>${transaction.date}</td>
+            <td>${transaction.amount}$</td>
+            <td>${transaction.new_balance}$</td>
+            <td>${transaction.type}</td>
+            <td>${transaction.operation}</td>
+        </tr>`;
+    }
+
+    function closeTransactions(accountId) {
+        var transactionListDiv = document.getElementById(`loadTransactions-${accountId}`);
+        transactionListDiv.classList.add('collapse');
+        transactionListDiv.classList.remove('has-loaded');
+        document.getElementById(`transactionsTable-${accountId}`).innerHTML = '';
+        
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[id^="amount-"]').forEach(function(amountInput) {
+            const accountId = amountInput.id.split('-')[1];
+            const operationSelect = document.getElementById(`operation-${accountId}`);
+            const transactionTypeDisplay = document.getElementById(`transactionType-${accountId}`);
+    
+            function updateOperationOptions() {
+                const amount = parseFloat(amountInput.value) || 0;
+                
+                if (amount >= 0) {
+                    transactionTypeDisplay.textContent = "Credit";
+                } else {
+                    transactionTypeDisplay.textContent = "Debit";
+                }
+    
+                const creditOptions = [
+                    { value: 'Deposit cash', text: 'Deposit cash' },
+                    { value: 'Salary', text: 'Salary' },
+                    { value: 'Transfer to', text: 'Transfer to' }
+                ];
+                const debitOptions = [
+                    { value: 'ATM withdrawal', text: 'ATM withdrawal' },
+                    { value: 'Payment', text: 'Payment' },
+                    { value: 'Bank withdrawal', text: 'Bank withdrawal' },
+                    { value: 'Transfer from', text: 'Transfer from' }
+                ];
+    
+                operationSelect.innerHTML = '';
+    
+                const options = amount >= 0 ? creditOptions : debitOptions;
+                options.forEach(option => {
+                    const optionElement = new Option(option.text, option.value);
+                    operationSelect.appendChild(optionElement);
+                });
+            }
+    
+            amountInput.addEventListener('input', updateOperationOptions);
+        });
+    });
+</script>
+{% endblock %}

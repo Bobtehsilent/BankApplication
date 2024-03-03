@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+    <div class="user-content">
+        <div class="user-stats">
+            <div class="user-block-stat-item">
+                <div class="user-stat-item">
+                    <div class="product">
+                        <div class="product__bg"></div>
+                        <div class="user-nav-link">
+                            <h2>{{ customer_count }}</h2>
+                            <p>Total customers</p>
+                        </div>
+                        <div class="product__description">
+                            <div>
+                                <h2>Top 5 Customers Globally</h2>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>Name</th>
+                                            <th>Personalnumber</th>
+                                            <th>Country</th>
+                                            <th>Total Balance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for customer in top_customers_globally %}
+                                        <tr onclick="window.location='{{ url_for('customer.customer_detail', user_id=customer.id) }}'" style="cursor: pointer;">
+                                            <td>{{ customer.id }}</td>
+                                            <td>{{ customer.name }} {{ customer.lastname }}</td>
+                                            <td>{{ customer.personalnumber }}</td>
+                                            <td>{{ customer.country }}</td>
+                                            <td>{{ customer.total_balance }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-stat-item">
+                    <div class="product">
+                        <div class="product__bg"></div>
+                        <div class="user-nav-link">
+                            <h2>{{ account_count }}</h2>
+                            <p>Total Accounts</p>    
+                        </div>
+                        <div class="product__description">
+                            <div>
+                                <h2>Top 5 Customers Globally</h2>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Customer Id</th>
+                                            <th>Account ID</th>
+                                            <th>Name</th>
+                                            <th>Country</th>
+                                            <th>Account Balance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for account in top_accounts_globally %}
+                                        <tr onclick="window.location='{{ url_for('customer.customer_detail', user_id=account.customer_id) }}'" style="cursor: pointer;">
+                                            <td>{{ account.customer_id }}</td>
+                                            <td>{{ account.account_id }}</td>
+                                            <td>{{ account.customer_name}}</td>
+                                            <td>{{ account.customer_country }}</td>
+                                            <td>{{ account.balance }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>       
+                </div>  
+                <div class="user-stat-item">
+                    <div class="product">
+                        <div class="product__bg"></div>
+                        <div class="user-nav-link">
+                            <h2>${{ total_balance }}</h2>
+                            <p>Total Balance</p>
+                        </div>
+                        <div class="product__description">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Name</th>
+                                        <th>Personalnumber</th>
+                                        <th>Country</th>
+                                        <th>Total Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for customer in top_customers_globally %}
+                                    <tr onclick="window.location='{{ url_for('customer.customer_detail', user_id=customer.id) }}'" style="cursor: pointer;">
+                                        <td>{{ customer.id }}</td>
+                                        <td>{{ customer.name }} {{ customer.lastname }}</td>
+                                        <td>{{ customer.personalnumber }}</td>
+                                        <td>{{ customer.country }}</td>
+                                        <td>{{ customer.total_balance }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid__item country-details" style="display: none;">
+                <div class="product">
+                    <div class="user-nav-link">
+                        <h2 id="country-name">yes</h2>
+                    </div>
+                    <div class="product__description">
+                        <ul id="country-customers">yes</ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Jvectormap container -->
+            <div class="user-map-container">
+                <div class="product">
+                    <div id="europe-map"></div>
+                    <div class="product__description">
+                    <!-- content for map details overlay-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script class="text/javascript">
+    var customerDetailUrl = "{{ url_for('customer.customer_detail', user_id=0, _external=True) }}";
+    
+    
+    $(function(){
+        var customerData = {{ customer_data | tojson }};
+        var countryCustomerData = {{ country_customer_data | tojson }};
+        console.log(customerData)
+        $('#europe-map').vectorMap({
+            map: 'europe_merc',
+            series: {
+                regions: [{
+                    values: customerData,
+                    scale: ['#cefad0', '#008631'],
+                    normalizeFunction: 'polynomial'
+                }]
+            },
+            onRegionTipShow: function(e, el, code){
+                el.html(el.html() + ' (Customers - ' + (customerData[code] || 0) + ')');
+            },
+            onRegionClick: function(event, code) {
+                var countryData = countryCustomerData[code] || [];
+                var preparedData = {
+                    countryName: code,
+                    customers: countryData.map(customer => {
+                        return {
+                            id: customer.id,
+                            name: customer.name,
+                            lastname: customer.lastname,
+                            personalnumber: customer.personalnumber,
+                            address: customer.address,
+                            city: customer.city,
+                            total_balance: customer.total_balance
+                        };
+                    })
+                };
+                openDetailsWithData(preparedData);
+            }
+        });
+    });
+</script>
+{% endblock %}

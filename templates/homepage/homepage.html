@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>SpringBank</title>
+<!--
+
+Template 2097 Pop
+
+https://www.tooplate.com/view/2097-pop
+
+-->
+    <!-- load CSS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300">  <!-- Google web font "Open Sans" -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='homepage_styling/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='homepage_styling/fontawesome/css/fontawesome-all.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='homepage_styling/slick/slick.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='homepage_styling/slick/slick-theme.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='homepage_styling/css/tooplate-style.css') }}">
+
+
+    <script>document.documentElement.className="js";var supportsCssVars=function(){var e,t=document.createElement("style");return t.innerHTML="root: { --tmp-var: bold; }",document.head.appendChild(t),e=!!(window.CSS&&window.CSS.supports&&window.CSS.supports("font-weight","var(--tmp-var)")),t.parentNode.removeChild(t),e};supportsCssVars()||alert("Please view this in a modern browser such as latest version of Chrome or Microsoft Edge.");</script>
+    
+</head>
+
+<body>
+<div id="tm-bg"></div>
+    <div id="tm-wrap">
+        <div class="tm-main-content">
+            <div class="container tm-site-header-container">
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-md-col-xl-6 mb-md-0 mb-sm-4 mb-4 tm-site-header-col">
+                        <div class="tm-site-header">
+                            <h1 class="mb-4">SpringBank</h1>
+                            <img src="{{ url_for('static', filename='homepage_styling/img/underline.png') }}" class="img-fluid mb-4">
+                            <p>Working at our bank will give you experiences you will cherish forever</p>        
+                        </div>                        
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="content">
+                            <div class="grid">
+                                <div class="grid__item" id="home-link">
+                                    <div class="product">
+                                        <div class="tm-nav-link">
+                                            <i class="fas fa-home fa-3x tm-nav-icon"></i>
+                                            <span class="tm-nav-text">Welcome</span>
+                                            <div class="product__bg"></div>        
+                                        </div>                                    
+                                        <div class="product__description">
+                                            <div class="row mb-3">
+                                                <div class="col-12">
+                                                    <h2 class="tm-page-title">Welcome to SpringBank, when you work we thrive!</h2>        
+                                                </div>
+                                            </div>                                        
+                                            <div class="row">
+                                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                                    <img src="{{ url_for('static', filename='homepage_styling/img/welcome-1.jpg') }}" class="img-fluid mb-3">
+                                                    <p>Welcome to SpringBank, where your professional journey begins with trust and excellence.</p>
+                                                    <p>Discover personalized banking solutions designed to fit your unique needs.</p>    
+                                                </div>
+                                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                                    <p>Experience seamless, secure banking, empowering you to achieve more every day.</p>
+                                                    <p>Join us to unlock a world of opportunities with our innovative services and expert guidance tailored for you.</p>
+                                                    <img src="{{ url_for('static', filename='homepage_styling/img/welcome-2.jpg') }}" class="img-fluid">
+                                                </div>                                        
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid__item" id="login-link">
+                                    <div class="product">
+                                        <div class="tm-nav-link">
+                                            <i class="fas fa-sign-in-alt fa-3x tm-nav-icon"></i>
+                                            <span class="tm-nav-text">Login</span>
+                                            <div class="product__bg"></div>            
+                                        </div>                                     
+                                        <div class="product__description">
+                                            <div class="p-sm-4 p-2">
+                                                <div class="row mb-3">
+                                                    <div class="col-12">
+                                                        <h2 class="tm-page-title">Log in to start your workday</h2>        
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <form action="{{ url_for('login.login') }}" method="post">
+                                                        {{ form.hidden_tag() }}
+                                                        <div class="form-group">
+                                                            {{ form.username.label }}
+                                                            {{ form.username(class="form-control") }}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{ form.password.label }}
+                                                            {{ form.password(class="form-control") }}
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary">Log in</button>
+                                                    </form>
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid__item">
+                                    <div class="product">
+                                        <div class="tm-nav-link">
+                                            <i class="fas fa-handshake fa-3x tm-nav-icon"></i>
+                                            <span class="tm-nav-text">Our Work</span>
+                                            <div class="product__bg"></div>             
+                                        </div>                                                                 
+                                        <div class="product__description">
+                                            <div class="p-sm-4 p-2">
+                                                <div class="row mb-3">
+                                                    <div class="col-12">
+                                                        <h2 class="tm-page-title">Our Work</h2>        
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-12">
+                                                        <p>At SpringBank, we're more than a bank; we're a community dedicated to your success. Our team of experts is here to support you with cutting-edge financial solutions and personalized advice.</p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <div class="p-sm-4 p-2 tm-img-container">
+                                                            <div class="tm-img-slider" id="tmImgSlider">
+                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='homepage_styling/img/gallery-img-01-tn.jpg') }}" alt="Image 1" class="img-fluid tm-slider-img"></a>
+                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='homepage_styling/img/gallery-img-02-tn.jpg') }}" alt="Image 2" class="img-fluid tm-slider-img"></a>
+                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='homepage_styling/img/gallery-img-03-tn.jpg') }}" alt="Image 3" class="img-fluid tm-slider-img"></a>
+                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='homepage_styling/img/gallery-img-04-tn.jpg') }}" alt="Image 4" class="img-fluid tm-slider-img"></a>
+                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='homepage_styling/img/gallery-img-05-tn.jpg') }}" alt="Image 5" class="img-fluid tm-slider-img"></a>
+                                                              <a href="#" class="tm-slider-img-link"><img src="{{ url_for('static', filename='homepage_styling/img/gallery-img-06-tn.jpg') }}" alt="Image 6" class="img-fluid tm-slider-img"></a>
+                                                            </div>
+                                                        </div>  
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>       
+                                    </div>
+                                </div>
+                                <div class="grid__item" id="contact-link">
+                                    <div class="product">
+                                        <div class="tm-nav-link">
+                                            <i class="fas fa-comments fa-3x tm-nav-icon"></i>
+                                            <span class="tm-nav-text">Contact</span>
+                                            <div class="product__bg"></div>             
+                                        </div>                                                              
+                                        <div class="product__description">
+                                            <div class="pt-sm-4 pb-sm-4 pl-sm-5 pr-sm-5 pt-2 pb-2 pl-3 pr-3">
+                                                <div class="row mb-3">
+                                                    <div class="col-12">
+                                                        <h2 class="tm-page-title">Employee Ticket</h2>        
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-4">
+                                                    <div class="col-12">
+                                                        <p>Our employees are at the heart of our success, driving innovation and excellence in every interaction.</p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <form action="{{ url_for('ticket.employee_ticket') }}" method="post" class="contact-form">
+                                                            {{ ticket_form.hidden_tag() }}
+                                                            <div class="row">
+                                                                <div class="form-group col-md-6">
+                                                                    {{ ticket_form.first_name(class="form-control", placeholder="First Name") }}
+                                                                </div>
+                                                                <div class="form-group col-md-6">
+                                                                    {{ ticket_form.last_name(class="form-control", placeholder="Last Name") }}
+                                                                </div>
+                                                                <div class="form-group col-md-12">
+                                                                    {{ ticket_form.email(class="form-control", placeholder="Email") }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                {{ ticket_form.message(class="form-control", rows="9", placeholder="Message") }}
+                                                            </div>
+                                                            {{ ticket_form.submit(class="btn btn-primary tm-btn-submit") }}
+                                                        </form>
+                                                        
+                                                    </div>
+                                                </div>
+                                            </div>                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>                       
+                    </div>
+                </div>                
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- <footer>
+        <p class="small tm-copyright-text">Copyright &copy; <span class="tm-current-year">2020</span> Your Company. 
+        
+        Design: <a rel="nofollow" href="https://www.tooplate.com" class="tm-text-highlight">Tooplate</a></p>
+    </footer> -->
+</div> <!-- .tm-main-content -->  
+    </div>
+    <!-- load JS -->
+    <script src="{{ url_for('static', filename='js/jquery-3.2.1.slim.min.js') }}"></script>    
+    <script src="{{ url_for('static', filename='homepage_styling/slick/slick.min.js') }}"></script>  
+    <script src="{{ url_for('static', filename='js/anime.min.js') }}"></script> 
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>  
+    <script>      
+
+        function setupFooter() {
+        var pageHeight = $('.tm-site-header-container').height() + $('footer').height() + 100;
+
+        var main = $('.tm-main-content');
+
+        if($(window).height() < pageHeight) {
+            main.addClass('tm-footer-relative');
+        }
+        else {
+            main.removeClass('tm-footer-relative');   
+        }
+        }
+
+        /* DOM is ready
+        ------------------------------------------------*/
+        $(function(){
+
+        setupFooter();
+
+        $(window).resize(function(){
+            setupFooter();
+        });
+
+        $('.tm-current-year').text(new Date().getFullYear());  // Update year in copyright           
+        });
+
+    </script>   
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+
+</body>
+</html>
