@@ -67,9 +67,3 @@ def check_and_send_reports(mail):
 #     check_and_send_reports(mail)
 #     print("Initial check completed.")
 
-
-# def start_daily_task_thread(mail):
-#     task_thread = Thread(target=run_daily_task, args=(mail,))
-#     task_thread.daemon = True 
-#     task_thread.start()
-

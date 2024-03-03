@@ -1,7 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Numeric
 from faker import Faker
-import barnum
 import random
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -46,7 +45,6 @@ class Customer(db.Model):
     
     #i changed nationalid to personalnumber. since it is a swedish bank you must have one.
     def set_swedish_personal_number(self):
-        #generate a random date between 1960 and 2020
         start_date = datetime(1960, 1, 1)
         end_date = datetime(2020, 12, 31)
         time_between_dates = end_date - start_date
@@ -54,13 +52,8 @@ class Customer(db.Model):
         random_number_of_days = random.randrange(days_between_dates)
         random_date = start_date + relativedelta(days=random_number_of_days)
 
-        #format it to yyyymmdd
         date_part = random_date.strftime('%Y%m%d')
-
-        #generate three random digits
         three_digits = random.randint(100,999)
-
-        #combine and calculate the control using luhn
         temp_number = f"{date_part}{three_digits}"
         control_digit = self.calculate_luhn(temp_number)
 
@@ -102,8 +95,7 @@ class User(db.Model):
     CompanyEmail = db.Column(db.String(50))
     FirstName = db.Column(db.String(50))
     LastName = db.Column(db.String(50))
-    Role = db.Column(db.String(50), default='Cashier') #admin or cashier
-    # Permissions
+    Role = db.Column(db.String(50), default='Cashier')
     InformationPermission = db.Column(db.Boolean, default=True)
     ManagementPermission = db.Column(db.Boolean, default=False)
     AdminPermission = db.Column(db.Boolean, default=False)
@@ -115,7 +107,6 @@ class User(db.Model):
     def is_cashier(self):
         return current_user.is_authenticated and current_user.Role == 'Cashier'
 
-    #creating and checking passwords
     def set_password(self, password):
         self.Password = generate_password_hash(password)
     
@@ -180,8 +171,7 @@ def seedData(db, country_codes_filename):
         return
 
     try:
-        # Seed Customers up to target_count
-        while current_count < target_count:  # Adjust based on remaining count
+        while current_count < target_count: 
             country = random.choice(country_codes)
             Faker.seed(random.randint(0, 9999))
             try:
@@ -191,7 +181,7 @@ def seedData(db, country_codes_filename):
                 fake = Faker('en_US')
             
             customer = Customer()
-            customer.set_swedish_personal_number()  # Use your method for personal number generation
+            customer.set_swedish_personal_number()  
             given_name = fake.first_name()
             surname = fake.last_name()
             email = f"{given_name}.{surname}@{random.choice(email_domains)}".lower()
@@ -227,24 +217,22 @@ def seedData(db, country_codes_filename):
                 last_transaction_date = account.Created
                 balance = account.Balance
 
-                for _ in range(random.randint(5, 20)):  # Generate 5-20 transactions
-                    days_since_last_transaction = random.randint(1, 90)  # Up to 90 days between transactions
+                for _ in range(random.randint(5, 20)): 
+                    days_since_last_transaction = random.randint(1, 90) 
                     transaction_date = last_transaction_date + timedelta(days=days_since_last_transaction)
                     last_transaction_date = transaction_date
 
-                    # Randomly decide the transaction amount; ensure it's within a realistic range
-                    if random.choice([True, False]):  # Decide between deposit (credit) and withdrawal (debit)
-                        amount = random.uniform(50, 5000)  # Deposit amount
+                    if random.choice([True, False]):  
+                        amount = random.uniform(50, 5000)  
                         operation = random.choice(['Deposit cash', 'Salary', 'Transfer to'])
-                        balance += amount  # Increase account balance
+                        balance += amount  
                     else:
-                        if balance > 50:  # Only allow withdrawals if there's enough balance
-                            amount = -random.uniform(50, min(5000, balance))  # Withdrawal amount, ensuring balance doesn't go negative
+                        if balance > 50:  
+                            amount = -random.uniform(50, min(5000, balance))  
                             operation = random.choice(['ATM withdrawal', 'Payment', 'Bank withdrawal', 'Transfer from'])
-                            balance += amount  # Decrease account balance
+                            balance += amount  
                         else:
-                            continue  # Skip withdrawal if balance is too low
-
+                            continue  
                     transaction = Transaction(
                         Type="Credit" if amount > 0 else "Debit",
                         Operation=operation,
@@ -258,8 +246,7 @@ def seedData(db, country_codes_filename):
                 account.Balance = balance
                 db.session.add(account)
 
-            # Seed Users
-            for _ in range(1):  # Adjust the number as needed
+            for _ in range(1):  
                 user = User(
                     Username=fake.user_name(),
                     Password=generate_password_hash(fake.password()),
@@ -270,8 +257,7 @@ def seedData(db, country_codes_filename):
                 )
                 db.session.add(user)
                 db.session.flush()
-                    # Seed EmployeeTickets
-                    # for _ in range(1):  # Adjust as needed
+
                 ticket = EmployeeTicket(
                     FirstName=fake.first_name(),
                     LastName=fake.last_name(),

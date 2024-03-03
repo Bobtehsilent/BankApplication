@@ -120,18 +120,19 @@
             <h2>Edit Customer</h2>
         </div>
         <div class="card-body collapse" id="editCustomerSection">
-            <div class="user-search-container">
-                <input type="text" id="editCustomerSearch" placeholder="Search Customers..." oninput="searchInformation('editCustomerSearch');">
-                <button class="clearSearch" id="clearEditCustomer" onclick="clearSearchInput('clearEditCustomer', 'editCustomerSearch', 'editCustomerResultsDropdown')">Clear</button>
-                <div id="editCustomerResultsDropdown" class="search-dropdown">
-                    <!-- Search results will be appended here dynamically -->
-                </div>
-            </div>
-            <!-- Form for editing a customer will go here -->
             <form id="editCustomerForm" action="{{ url_for('customer.edit_customer', customer_id=customers_id) }}" method="post">
                 {{ edit_customer_form.hidden_tag() }}
                 <table>
                     <tbody>
+                        <tr>
+                            <td>Search for customer</td>
+                            <td>
+                                <input class="form-control" type="text" id="editCustomerSearch" placeholder="Search Customers..." oninput="searchInformation('editCustomerSearch');">
+                                <div id="editCustomerResultsDropdown" class="search-dropdown">
+                                    <!-- Search results will be appended here dynamically -->
+                                </div>
+                            </td>
+                        </tr>
                         <tr>
                             <td>{{ edit_customer_form.givenname.label }}</td>
                             <td>{{ edit_customer_form.givenname(class_='form-control') }}</td>
@@ -175,6 +176,7 @@
                         <tr>
                             <td colspan="2" style="text-align: center;">
                                 {{ edit_customer_form.submit(class_='form-submit-button') }}
+                                <button class="clearSearch" id="clearEditCustomer" onclick="clearSearchInput('clearEditCustomer', 'editCustomerSearch', 'editCustomerResultsDropdown')">Clear</button>
                             </td>
                         </tr>
                     </tbody>
@@ -199,19 +201,13 @@
     }
     function setupPagination(paginationData) {
         const container = document.querySelector('.table-row-pagination');
-        container.innerHTML = ''; // Clear existing controls
-    
-        // Create and append pagination controls based on paginationData
-        // Example: Previous Page Button
+        container.innerHTML = ''; 
         if (paginationData.has_prev) {
             const prevButton = document.createElement('button');
             prevButton.textContent = 'Previous';
             prevButton.onclick = () => filterCustomers(paginationData.prev_num);
             container.appendChild(prevButton);
         }
-    
-        // Similarly, create Next Page button, page numbers, etc.
     }
-    
 </script>
 {% endblock %}

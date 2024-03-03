@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, BooleanField, HiddenField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
 from models import User  # Adjust the import based on your application structure
+import re
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -13,7 +14,7 @@ class RegisterForm(FlaskForm):
     password = PasswordField('Password', validators=[
         DataRequired(),
         Length(min=6, max=35),
-        EqualTo('confirm', message='Passwords must match')
+        EqualTo('confirm', message='Passwords must match'),
     ])
     confirm = PasswordField('Repeat Password')
     first_name = StringField('First Name', validators=[DataRequired()])
@@ -33,7 +34,15 @@ class RegisterForm(FlaskForm):
         user = User.query.filter_by(CompanyEmail=email.data).first()
         if user:
             raise ValidationError('That email is already in use. Please choose a different one.')
-
+        
+    def validate_password(self, field):
+        password = field.data
+        if not re.search(r"[A-Z]", password):
+            raise ValidationError("The password must contain at least one uppercase letter.")
+        if not re.search(r"\d", password):
+            raise ValidationError("The password must contain at least one digit.")
+        # if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        #     raise ValidationError("The password must contain at least one special character.")
 
 class EditUserForm(FlaskForm):
     user_id = HiddenField()
@@ -52,7 +61,16 @@ class EditUserPasswordForm(FlaskForm):
     password = PasswordField('Password', validators=[
         DataRequired(),
         Length(min=6, max=35),
-        EqualTo('confirm', message='Passwords must match')
+        EqualTo('confirm', message='Passwords must match'),
     ])
     confirm = PasswordField('Repeat Password')
     submit = SubmitField('Register')
+
+    def validate_password(self, field):
+        password = field.data
+        if not re.search(r"[A-Z]", password):
+            raise ValidationError("The password must contain at least one uppercase letter.")
+        if not re.search(r"\d", password):
+            raise ValidationError("The password must contain at least one digit.")
+        # if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        #     raise ValidationError("The password must contain at least one special character.")

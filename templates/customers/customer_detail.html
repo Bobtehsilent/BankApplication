@@ -71,7 +71,7 @@
                     </thead>
                     <tbody>
                         {% for account in customer.Accounts %}
-                            <tr>
+                            <tr onclick="redirectToAccountHandling('{{ url_for('account.account_handling', account_id=account.Id, customer_id=customer.Id) }}')" style="cursor: pointer;">
                                 <td>{{ account.Id }}</td>
                                 <td>{{ account.AccountType }}</td>
                                 <td>${{ account.Balance }}</td>
@@ -82,38 +82,16 @@
                             <th>Total Balance:</th>
                             <td>${{ customer.total_balance }}</td>
                         </tr>
+                        <tr>
+                            <td colspan="3"><button id="manageAccountBtn" class="form-submit-button">Manage Accounts</button></td>
+                        </tr>
                     </tbody>
+                    
                 </table>
             {% else %}
                 <p>No account data found</p>
             {% endif %}
             {% if current_user.ManagementPermission %}
-            <div class="actions">
-                <button id="manageAccountBtn">Manage Account</button>
-                <button id="addAccountBtn" onclick="toggleCollapse('addAccountForm')">Add Account</button>
-            </div>
-            <div class="card-body collapse" id="addAccountForm">
-                <form action="{{ url_for('account.add_account', customer_id=customer.Id) }}" method="post">
-                    {{ form.hidden_tag() }}
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td>{{ form.account_type.label }}</td>
-                                <td>{{ form.account_type(class_='form-control') }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ form.balance.label }}</td>
-                                <td>{{ form.balance(class_='form-control') }}</td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" style="text-align: center;">
-                                    {{ form.submit(class_='form-submit-button', value="Add Customer") }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
         </div>
         <div class="transaction-list">
             <div>
@@ -138,11 +116,11 @@
                 <button id="loadMore" style="display:none;">Load More</button>
                 <button id="closeTransactions" style="display:none;">Close</button>
             </div>
-            <p id="no-more" style="display:none;">No more transactions to show</p>
+            <p id="no-more" style="display:none; text-align:center;">No more transactions to show</p>
         </div>
         {% endif %}
         <div class="transaction-graph">
-            <h3>Last 50 Transactions</h3>
+            <h3>Last 20 Transactions</h3>
             <canvas id="transactionGraph"></canvas>
         </div>  
     </div>
@@ -150,10 +128,13 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 <script>
-    // Assuming your template correctly renders the customer ID here
     document.addEventListener('DOMContentLoaded', function() {
         openGraph({{ customer.Id }});
     });
+
+    function redirectToAccountHandling(url) {
+        window.location.href = url;
+    }
 
     function toggleCollapse(elementId) {
         var element = document.getElementById(elementId);
@@ -172,14 +153,14 @@
     document.getElementById('manageAccountBtn').addEventListener('click', function() {
         window.location.href = "{{ url_for('account.manage_accounts', customer_id=customer.Id) }}";
     });
-    let loadIterationCount = 1;  // Start from the first page
+    let loadIterationCount = 1; 
     let hasMore = true;
 
     document.getElementById("loadMoreTransactions").addEventListener("click", function () {
-        this.style.display = "none"; // Hide the initial button
-        document.getElementById("transactionsTable").style.display = "table"; // Show the table
-        document.getElementById("loadMore").style.display = "inline-block"; // Show "Load More" button
-        document.getElementById("closeTransactions").style.display = "inline-block"; // Show "Close" button
+        this.style.display = "none";
+        document.getElementById("transactionsTable").style.display = "table"; 
+        document.getElementById("loadMore").style.display = "inline-block"; 
+        document.getElementById("closeTransactions").style.display = "inline-block";
         fetchMore({{ customer.Id }});
     });
 
@@ -189,11 +170,11 @@
 
     document.getElementById("closeTransactions").addEventListener("click", function () {
         document.querySelector(".transaction-list").classList.remove("expanded");
-        document.getElementById("transactionsTable").style.display = "none"; // Hide the table
-        document.getElementById("loadMore").style.display = "none"; // Hide "Load More" button
+        document.getElementById("transactionsTable").style.display = "none"; 
+        document.getElementById("loadMore").style.display = "none";
         document.getElementById("no-more").style.display = "none"
-        this.style.display = "none"; // Hide "Close" button
-        document.getElementById("loadMoreTransactions").style.display = "inline-block"; // Show the initial button again
+        this.style.display = "none";
+        document.getElementById("loadMoreTransactions").style.display = "inline-block";
     });
 
     function fetchMore(customer_id) {
@@ -202,8 +183,7 @@
         fetch(url)
         .then(response => response.json())
         .then(([transactions, hasMoreData]) => {
-            console.log(transactions, hasMoreData);  // Corrected logging
-            document.getElementById("transactionsTable").style.display = "table"; // Optionally make the table visible directly
+            document.getElementById("transactionsTable").style.display = "table"; 
             document.querySelector(".transaction-list").classList.add("expanded");
             hasMore = hasMoreData;
             loadIterationCount += 1;

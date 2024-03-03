@@ -158,7 +158,6 @@
         transactionListDiv.classList.toggle('collapse');
     
         if (isCollapsed) {
-            // If it's currently collapsed and we're expanding it
             transactionListDiv.style.display = '';
             transactionListDiv.classList.remove('collapse');
             transactionListDiv.classList.add('expanded');
@@ -168,7 +167,6 @@
                 transactionListDiv.classList.add('has-loaded');
             }
         } else {
-            // If it's currently expanded and we're collapsing it
             transactionListDiv.classList.remove('expanded');
             transactionListDiv.classList.add('collapse');
             transactionListDiv.style.display = 'none';
@@ -177,7 +175,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Restore the state of detail rows
         document.querySelectorAll('.account-details-row').forEach(function(section) {
             const id = section.getAttribute('id');
             const state = localStorage.getItem(id);
@@ -188,7 +185,6 @@
             }
         });
     
-        // Restore the state of transaction lists
         document.querySelectorAll('.transaction-list').forEach(function(section) {
             const id = section.getAttribute('id');
             const state = localStorage.getItem(id);
@@ -196,8 +192,7 @@
                 section.style.display = '';
                 section.classList.add('expanded');
                 section.classList.remove('collapse');
-                // Fetch transactions if not loaded
-                const accountId = id.split('-')[1]; // Assuming id format is 'loadTransactions-{accountId}'
+                const accountId = id.split('-')[1]; 
                 if (!section.classList.contains('has-loaded')) {
                     fetchMore(accountId);
                     section.classList.add('has-loaded');
@@ -207,17 +202,14 @@
     });
     
     function confirmDeleteAccount(accountId) {
-        // Prevent the row click event from firing
         event.stopPropagation();
 
         if (confirm("Are you sure you want to delete this account?")) {
-            // Perform the delete operation
             console.log("Deleting account:", accountId);
-            // Redirect or refresh the page after delete
         }
     }
 
-    let loadIterationCount = 1;  // Start from the first page
+    let loadIterationCount = 1;  
     let hasMore = true;
 
 
@@ -227,7 +219,6 @@
         fetch(url)
         .then(response => response.json())
         .then(([transactions, hasMoreData]) => {
-            // Correctly target the transactions table for this account
             const transactionsTable = document.getElementById(`transactionsTable-${accountId}`);
             transactionsTable.style.display = "table";
     
@@ -237,7 +228,6 @@
     
             hasMore = hasMoreData;
             if (!hasMore) {
-                // Correctly hide "Load More" button for this account
                 document.getElementById(`loadMore-${accountId}`).style.display = "none";
                 document.getElementById(`no-more-${accountId}`).style.display = "block";
             }
@@ -245,7 +235,6 @@
         .catch(error => console.error('Error during fetch:', error));
     }
     
-    // Adjusted to target the correct account's transactions table
     function tableElement(transaction, accountId) {
         const transactionsTable = document.getElementById(`transactionsTable-${accountId}`).querySelector('tbody');
         transactionsTable.innerHTML += `<tr>
@@ -261,10 +250,9 @@
     function closeTransactions(accountId) {
         var transactionListDiv = document.getElementById(`loadTransactions-${accountId}`);
         transactionListDiv.classList.add('collapse');
-        transactionListDiv.classList.remove('has-loaded'); // Reset loading state for potential refetch
-        // Reset the transactions table
+        transactionListDiv.classList.remove('has-loaded');
         document.getElementById(`transactionsTable-${accountId}`).innerHTML = '';
-        // Optionally, reset/hide "Load More" and "Close" buttons
+        
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -276,7 +264,6 @@
             function updateOperationOptions() {
                 const amount = parseFloat(amountInput.value) || 0;
                 
-                // Update transaction type display
                 if (amount >= 0) {
                     transactionTypeDisplay.textContent = "Credit";
                 } else {
@@ -295,7 +282,7 @@
                     { value: 'Transfer from', text: 'Transfer from' }
                 ];
     
-                operationSelect.innerHTML = ''; // Clear existing options
+                operationSelect.innerHTML = '';
     
                 const options = amount >= 0 ? creditOptions : debitOptions;
                 options.forEach(option => {
@@ -304,7 +291,6 @@
                 });
             }
     
-            // Update operation options and transaction type on input
             amountInput.addEventListener('input', updateOperationOptions);
         });
     });

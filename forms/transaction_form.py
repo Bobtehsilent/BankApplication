@@ -10,5 +10,4 @@ class AddTransactionForm(FlaskForm):
     ]
     operation = SelectField('Operation', choices=operation_choices)
     amount = DecimalField('Amount', validators=[DataRequired(), NumberRange(min=-999999, max=999999)], places=2)
-    # Add transaction_type as a RadioField or SelectField as per your requirement
     submit = SubmitField('Submit')

@@ -125,7 +125,7 @@ def add_customer():
         create_initial_account_and_transaction(new_customer)
         
         flash('Customer added successfully!', 'success')
-        return redirect(url_for('customer.manage_customer'))
+        return redirect(url_for('customer.customer_detail', user_id=new_customer.Id))
 
     return render_template('/customers/manage_customer.html', form=form)
 
@@ -156,7 +156,7 @@ def process_form_data(form, country_codes):
 def create_customer(customer_data):
     new_customer = Customer(**customer_data)
     db.session.add(new_customer)
-    db.session.flush()  # Flush to get the new_customer ID if needed immediately
+    db.session.flush()
     return new_customer
 
 def create_initial_account_and_transaction(customer):
@@ -167,7 +167,7 @@ def create_initial_account_and_transaction(customer):
         Balance=0
     )
     db.session.add(base_account)
-    db.session.flush()  # Ensure account ID is generated
+    db.session.flush()
 
     base_transaction = Transaction(
         AccountId=base_account.Id,
@@ -212,8 +212,3 @@ def update_customer_data(customer, form):
     customer.Birthday = form.birthday.data
     customer.PersonalNumber = f"{birthday_str}-{form.personalnumber_last4.data}"
 
-
-#Deleting a customer
-@customer_bp.route('/customers/delete/<int:id>', methods=['POST'])
-def delete_customer():
-    pass

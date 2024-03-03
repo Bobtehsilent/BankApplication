@@ -10,10 +10,9 @@ admin_tools_bp = Blueprint('admin_tools', __name__)
 @login_required
 def manage_user():
     if not current_user.is_authenticated or current_user.Role != 'Admin':
-        # Redirect non-admin users
         return redirect(url_for('user_interface.interface'))
     edit_user_form = EditUserForm()
-    change_password_form = EditUserPasswordForm()
+    change_password_form = request.args.get('change_password_form', EditUserPasswordForm())
     add_user_form = RegisterForm()
     if add_user_form.validate_on_submit():
         user = User(
@@ -29,9 +28,12 @@ def manage_user():
         )
         user.set_password(add_user_form.password.data)
         db.session.add(user)
+        print(f"User added: {user}")
         db.session.commit()
         flash('New user has been successfully registered.', 'success')
         return redirect(url_for('admin_tools.manage_user'))
+    else:
+        print("Form errors:", add_user_form.errors)
     return render_template('/admin/manage_user.html', add_user_form=add_user_form, edit_user_form=edit_user_form, change_password_form=change_password_form)
 
 @admin_tools_bp.route('/get_users')
@@ -48,7 +50,6 @@ def get_users():
         'first_name': user.FirstName,
         'last_name': user.LastName,
         'role': user.Role,
-        # Add other fields as necessary
     } for user in users]
 
     return jsonify({
@@ -72,7 +73,6 @@ def edit_user():
             flash('User not found.', 'danger')
             return redirect(url_for('admin_tools.manage_user'))
 
-        # Update user details
         user.Username = form.username.data
         user.CompanyEmail = form.email.data
         user.FirstName = form.first_name.data
@@ -86,25 +86,27 @@ def edit_user():
         flash('User updated successfully.', 'success')
         return redirect(url_for('admin_tools.manage_user'))
 
-    # For GET request or initial page load
     return render_template('/admin/manage_user.html', form=form)
 
-@admin_tools_bp.route('/change_password', methods=['POST'])
+
+@admin_tools_bp.route('/change_password', methods=['GET','POST'])
 @login_required
 def change_password():
     form = EditUserPasswordForm(request.form)
+    search_query = request.form.get('changePasswordSearch')
+    add_user_form = RegisterForm()
+    edit_user_form = EditUserForm()
     if form.validate_on_submit():
         user = User.query.get(form.user_id.data)
         if user:
-            # Assuming you have a method to hash the password
             user.password = user.set_password(form.password.data)
             db.session.commit()
             flash('Password updated successfully', 'success')
         else:
             flash('User not found', 'danger')
     else:
-        flash('Error updating password', 'danger')
-    return redirect(url_for('admin_tools.manage_user'))
+        flash('Error updating password, Try again', 'danger')
+    return render_template('/admin/manage_user.html', search_query=search_query, change_password_form=form, add_user_form=add_user_form, edit_user_form=edit_user_form)
 
 @admin_tools_bp.route('/delete_user', methods=['POST'])
 @login_required

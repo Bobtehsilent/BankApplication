@@ -1,11 +1,9 @@
-from flask import Blueprint, request, render_template, jsonify, flash, redirect, url_for
-from flask_login import login_required, current_user
-from models import db, Transaction, Account,Customer
-from collections import defaultdict
-from sqlalchemy.exc import IntegrityError
+from flask import Blueprint, render_template, jsonify, flash, redirect, url_for
+from flask_login import login_required
+from models import db, Transaction, Account
 from datetime import datetime
 from forms.transaction_form import AddTransactionForm
-from forms.account_forms import TransferForm, CustomerTransferForm
+from forms.account_forms import TransferForm
 from blueprints.breadcrumbs import update_breadcrumb
 
 transactions_bp = Blueprint('transaction', __name__)
@@ -17,7 +15,6 @@ def transaction_handling(account_id, customer_id):
     account = Account.query.get_or_404(account_id)
     transactions = Transaction.query.filter_by(AccountId=account.Id).all()
     add_transaction_form = AddTransactionForm()
-    # Set up your forms and pass them to the template
     return render_template('/transactions/transaction_handling.html', account=account, transactions=transactions, add_transaction_form=add_transaction_form)
 
 
@@ -35,24 +32,19 @@ def add_transaction(account_id):
         process_transaction(account_id, add_transaction_form.amount.data, add_transaction_form.operation.data)
         flash('Transaction added successfully!', 'success')
         return redirect(url_for('account.manage_accounts', customer_id=account.CustomerId, account_id=account_id))
-
-    # If not valid or it's a GET request, show the form
     return render_template('accounts/manage_accounts.html', customer_id=account.CustomerId, add_transaction_form=add_transaction_form, account=account, account_id=account_id)
 
 
 def process_transaction(account_id, amount, operation):
     account = Account.query.get_or_404(account_id)
-    # Determine transaction type based on the sign of the amount
     transaction_type = 'Credit' if amount >= 0 else 'Debit'
-    # Directly add the amount to the account's balance (it can be negative for debit transactions)
     new_balance = account.Balance + amount
     
-    # Create and save the transaction record
     transaction = Transaction(
         AccountId=account_id,
         Type=transaction_type,
         Operation=operation,
-        Amount=amount,  # Keep the signed value of the amount
+        Amount=amount, 
         NewBalance=new_balance,
         Date=datetime.utcnow()
     )
@@ -68,10 +60,8 @@ def transfer_transaction(from_account_id, customer_id=None):
     form = TransferForm()
     from_account = Account.query.get_or_404(from_account_id)
 
-    # If customer_id is provided from the search, use it. Otherwise, use from_account's customer_id
     target_customer_id = customer_id if customer_id else from_account.CustomerId
 
-    # Filter accounts based on the target_customer_id
     form.to_account.choices = [
         (account.Id, f'{account.AccountType} - {account.Id}') 
         for account in Account.query.filter(Account.CustomerId == target_customer_id).all()
@@ -120,28 +110,6 @@ def validate_transaction(account_id, transaction_amount=None, transaction_type=N
         return False, "Insufficient balance for withdrawal."
 
     return True, ""
-
-
-#Unused for now.
-@transactions_bp.route('/delete_transaction/<int:transaction_id>', methods=['POST'])
-@login_required
-def delete_transaction(transaction_id):
-    transaction = Transaction.query.get_or_404(transaction_id)
-    account = transaction.account
-
-    if transaction.Type == 'Credit':
-        account.Balance -= transaction.Amount
-    elif transaction.Type == 'Debit':
-        account.Balance += transaction.Amount
-    else:
-        flash('Invalid transaction type.', 'error')
-        return redirect(url_for('transaction.transaction_handling', account_id=account.Id, customer_id=account.CustomerId))
-
-    db.session.delete(transaction)
-    db.session.commit()
-
-    flash('Transaction deleted and balance updated successfully.', 'success')
-    return redirect(url_for('some_redirect_target'))
 
 def get_total_balance(customer_id):
     accounts = Account.query.filter_by(CustomerId=customer_id).all()

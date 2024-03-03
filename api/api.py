@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, abort, Blueprint, url_for
+from flask import jsonify, request, Blueprint
 from collections import defaultdict
 from flask_sqlalchemy import SQLAlchemy
 from models import Customer, Account, Transaction, User, EmployeeTicket
@@ -63,19 +63,7 @@ def search_accounts(customer_id):
     accounts = Account.query.filter_by(CustomerId=customer_id).all()
     return jsonify({'accounts': [account.to_dict() for account in accounts]})
 
-# #transaction get
 
-# @api_bp.route('/api/transactions/<int:transaction_id>', methods=['GET'])
-# def get_transaction(transaction_id):
-#     transaction = Transaction.query.get(transaction_id)
-#     if transaction is None:
-#         return jsonify({'error': 'Transaction not found'}), 404
-#     return jsonify({
-#         'Id': transaction.Id,
-#         'Type': transaction.Type,
-#         'Amount': transaction.Amount,
-#         # Include other fields as necessary
-#     })
 
 # Graph data
 
@@ -93,8 +81,7 @@ def transactions_graph(customer_id):
         
         if not balances_by_account[account_id]["type"]:
             balances_by_account[account_id]["type"] = account_type
-        
-        # Use NewBalance directly
+
         new_balance = transaction.NewBalance
         
         balances_by_account[account_id]["balances"].append({
@@ -154,8 +141,8 @@ def account_transactions(account_id):
     transactions_data = [{
         'account_id': transaction.AccountId,
         'date': transaction.Date.strftime('%Y-%m-%d'),
-        'amount': str(transaction.Amount),  # Ensure amount is JSON serializable
-        'new_balance': str(transaction.NewBalance),  # Ensure new_balance is JSON serializable
+        'amount': str(transaction.Amount),  
+        'new_balance': str(transaction.NewBalance), 
         'type': transaction.Type,
         'operation': transaction.Operation
     } for transaction in transactions]
@@ -171,24 +158,8 @@ def get_user(user_id):
         'Id': user.Id,
         'Username': user.Username,
         'Role': user.Role,
-        # Include other fields as necessary
     })
 
-# @api_bp.route('/api/customercontacts/<int:contact_id>', methods=['GET'])
-# def get_customer_contact(contact_id):
-#     contact = CustomerContact.query.get(contact_id)
-#     if contact is None:
-#         return jsonify({'error': 'Contact not found'}), 404
-#     return jsonify({
-#         'Id': contact.Id,
-#         'FirstName': contact.FirstName,
-#         'LastName': contact.LastName,
-#         'Email': contact.Email,
-#         # Include other fields as necessary
-#     })
-
-
-# search to edit
 
 @api_bp.route('/search_users', methods=['GET'])
 def search_users():
@@ -196,7 +167,7 @@ def search_users():
     users = User.query.filter(
         or_(
             User.Username.ilike(f'%{query}%'),
-            User.CompanyEmail.ilike(f'%{query}%'),  # Assuming this is the correct field name for email
+            User.CompanyEmail.ilike(f'%{query}%'),
             User.FirstName.ilike(f'%{query}%'),
             User.LastName.ilike(f'%{query}%')
         )
@@ -205,12 +176,12 @@ def search_users():
     users_data = [{
         'id': user.Id,
         'username': user.Username,
-        'email': user.CompanyEmail,  # Assuming this is the correct field name for email
+        'email': user.CompanyEmail,
         'first_name': user.FirstName,
         'last_name': user.LastName,
         'role': user.Role,
         'information_permission': user.InformationPermission,
-        'management_permmission': user.ManagementPermission,
+        'management_permission': user.ManagementPermission,
         'admin_permission': user.AdminPermission
     } for user in users]
 

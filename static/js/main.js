@@ -13,7 +13,6 @@
 			this.DOM.details = document.createElement('div');
 			this.DOM.details.className = 'details';
 			this.DOM.details.innerHTML = detailsTmpl;
-			// DOM.content.appendChild(this.DOM.details);
 			const appendTarget = document.getElementById('tm-wrap') || document.body;
 			appendTarget.appendChild(this.DOM.details);
 			this.init();
@@ -26,17 +25,13 @@
 			this.initEvents();
 		}
 		initEvents() {
-			// close page when outside of page is clicked.
 			document.body.addEventListener('click', () => this.close());
-			// prevent close page when inside of page is clicked.
 			this.DOM.bgDown.addEventListener('click', function(event) {
 							event.stopPropagation();
 						});
-			// close page when cross button is clicked.
 			this.DOM.close.addEventListener('click', () => this.close());
 		}
 		fill(info) {
-			// fill current page info
 			this.DOM.description.innerHTML = info.description;
 		}		
 		getProductDetailsRect(){
@@ -161,7 +156,7 @@
           
 	        let slider = $('.details .tm-img-slider');
 
-	        if(slider.length) { // check if slider exist
+	        if(slider.length) { 
 
 		        if (slider.hasClass('slick-initialized')) {
 		            slider.slick('destroy');
@@ -190,35 +185,29 @@
         fillCountryData(countryData) {
             let content = `<h2>Top 5 Customers in ${countryData.countryName}</h2>`;
         
-            // Sort customers by total balance in descending order
             let sortedCustomers = countryData.customers.sort((a, b) => b.total_balance - a.total_balance).slice(0, 10);
         
-            // Start table
             content += `<table><thead><tr><th>Rank</th><th>Id</th><th>Name</th><th>Personalnumber</th><th>Address</th><th>City</th><th>Total Balance</th></tr></thead><tbody>`;
         
-            // Add customers to the table with ranks
             sortedCustomers.forEach((customer, index) => {
-                content += `<tr>
+                const customerUrl = customerDetailUrl.replace('/0', '/' + customer.id);
+                content += `<tr onclick="window.location.href='${customerUrl}';" style="cursor:pointer;">
                                 <td>${index + 1}</td>
                                 <td>${customer.id}</td>
                                 <td>${customer.name} ${customer.lastname}</td>
                                 <td>${customer.personalnumber}</td>
                                 <td>${customer.address}</td>
-                                <td>${customer.city}
+                                <td>${customer.city}</td>
                                 <td>$${customer.total_balance}</td>
                             </tr>`;
             });
         
-            // Close table
             content += `</tbody></table>`;
-        
-            // Update the DOM
             console.log(content)
             this.DOM.description.innerHTML = content;
         }
         
         fillCustomerData(customerData) {
-            console.log(customerData); // Check what data is received
             let content = `<div class="customer-details-container">`;
         
             // Customer info
@@ -236,12 +225,11 @@
         
             // Account information
             if (customerData.Accounts && customerData.Accounts.length > 0) {
-                let totalBalance = 0; // Initialize total balance
+                let totalBalance = 0; 
                 content += `<table class="accounts-info-table"><tr><th>Type</th><th>Balance</th></tr>`;
                 customerData.Accounts.forEach(account => {
-                    // Ensure balance is treated as a number
                     let balance = parseFloat(account.Balance);
-                    totalBalance += balance; // Sum up the balance
+                    totalBalance += balance; 
                     content += `<tr><td>${account.AccountType}</td><td>$${balance.toLocaleString()} SEK</td></tr>`; // Use toLocaleString() for formatting
                 });
                 content += `<tr class="total-balance"><td>Total Balance:</td><td>$${totalBalance.toLocaleString()} SEK</td></tr></table>`; // Format total balance
@@ -280,7 +268,6 @@
 		}
 		open() {
 			if (this.DOM.el.classList.contains('map-container')) {
-				// Handle map container differently or do nothing
 			} else {
 				if (this.DOM.productBg) {
 					DOM.details.fill(this.info);
@@ -299,7 +286,6 @@
 				this.customerData = JSON.parse(this.DOM.el.getAttribute('data-customer'));
 			} catch (e) {
 				console.error('Error parsing JSON:', e);
-				// Handle the error or set a default value
 				this.customerData = {};
 			}
 			this.i
@@ -370,7 +356,7 @@
 	
 
 	function openDetailsWithData(data) {
-		console.log("Data received:", data); // Debugging line 
+		console.log("Data received:", data);  
 		DOM.details.fillCountryData(data);
         console.log('It should')
 		DOM.details.open(data);
@@ -395,7 +381,6 @@ function initializeSortingAndFiltering() {
     let filterFunction;
     let searchInputId;
 
-    // Determine which page we're on and set the appropriate filter function and search input ID
     if (currentPagePath.includes('/customers/customer_list')) {
         filterFunction = filterCustomers;
         searchInputId = 'listCustomerSearch';
@@ -406,15 +391,11 @@ function initializeSortingAndFiltering() {
         filterFunction = filterCustomers;
         searchInputId = 'listCustomerSearch'
     }
-    // Proceed with setting up sorting and the search event listener if on a recognized page
     if (filterFunction && searchInputId) {
-        // Sorting Event Listeners
         setupSorting(filterFunction);
 
-        // Initial fetch with default sort parameters
         filterFunction();
 
-        // Search Event Listener
         const searchInput = document.getElementById(searchInputId);
         if (searchInput) {
             searchInput.addEventListener('input', () => {
@@ -430,30 +411,24 @@ function setupSorting(filterFunction) {
             const sortColumn = this.getAttribute('data-sort-column');
             let newSortOrder = this.getAttribute('data-sort-order') === 'asc' ? 'desc' : 'asc';
 
-            // Update global sorting variables
             currentSortColumn = sortColumn;
             currentSortOrder = newSortOrder;
 
-            // Update the sort order attribute immediately for this column
             this.setAttribute('data-sort-order', newSortOrder);
 
             console.log(`Sorting by ${currentSortColumn} in ${currentSortOrder} order`);
 
-            // Update UI for sorting
             updateSortingUI(this, newSortOrder);
-            // Fetch with new sort parameters
             filterFunction(1, currentSortColumn, currentSortOrder);
         });
     });
 }
 
 function updateSortingUI(column, newSortOrder) {
-    // First, remove existing arrows from all sortable columns
     document.querySelectorAll('.sortable-column').forEach(col => {
-        col.innerHTML = col.innerHTML.replace(' ↑', '').replace(' ↓', ''); // Adjust based on your actual content
+        col.innerHTML = col.innerHTML.replace(' ↑', '').replace(' ↓', ''); 
     });
 
-    // Then, append the correct arrow to the clicked column header based on the new sort order
     const arrow = newSortOrder === 'asc' ? ' ↑' : ' ↓';
     column.innerHTML += arrow;
 }
@@ -462,7 +437,6 @@ function updateSortingUI(column, newSortOrder) {
 function filterCustomers(pageNum = 1, sortColumn = 'Surname', sortOrder = 'asc', searchQueryFromURL = '') {
     let searchQuery = searchQueryFromURL || document.getElementById('listCustomerSearch').value;
 
-    // Adjust the fetch URL to match the new API endpoint
     fetch(`/api/customer_lists?search=${encodeURIComponent(searchQuery)}&page=${pageNum}&sort_column=${sortColumn}&sort_order=${sortOrder}`)
     .then(response => {
         if (!response.ok) {
@@ -492,7 +466,6 @@ function filterCustomers(pageNum = 1, sortColumn = 'Surname', sortOrder = 'asc',
                     <td>${customer.Country}</td>
                 `;
 
-                // Attach click event listener for each row
                 row.addEventListener('click', () => {
                     DOM.details.fillCustomerData(customer);
                     DOM.details.open();
@@ -534,7 +507,6 @@ function filterAccounts(pageNum = 1, sortColumn = 'Surname', sortOrder = 'asc') 
 
             row.innerHTML = `<td>${customer.Surname}, ${customer.GivenName}</td>${accountsHtml}<td>${customer.total_balance} SEK</td>`;
             
-			// Attach click event listener for each row
 			row.addEventListener('click', () => {
 				DOM.details.fillCustomerData(customer);
 				DOM.details.open();
@@ -555,7 +527,7 @@ function filterAccounts(pageNum = 1, sortColumn = 'Surname', sortOrder = 'asc') 
 function updatePaginationControls(pagination) {
     console.log(pagination)
     const paginationContainer = document.querySelector('.table-row-pagination');
-    paginationContainer.innerHTML = ''; // Clear existing controls
+    paginationContainer.innerHTML = '';
 
     // Previous page link
     if (pagination.has_prev) {
@@ -645,14 +617,12 @@ document.addEventListener("DOMContentLoaded", function() {
     const sidebarWrapper = document.getElementById('sidebar-wrapper');
     const sidebarToggle = document.getElementById('sidebarToggle');
 
-    // Function to toggle sidebar state
     function toggleSidebar() {
         const isCollapsed = sidebarWrapper.classList.contains('collapsed');
         sidebarWrapper.classList.toggle('collapsed', !isCollapsed);
         localStorage.setItem('sidebarCollapsed', !isCollapsed);
     }
 
-    // Set initial state of sidebar from localStorage
     const sidebarShouldBeCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
     if (sidebarShouldBeCollapsed) {
         sidebarWrapper.classList.add('collapsed');
@@ -660,7 +630,6 @@ document.addEventListener("DOMContentLoaded", function() {
         sidebarWrapper.classList.remove('collapsed');
     }
 
-    // Toggle sidebar on button click
     sidebarToggle.addEventListener('click', toggleSidebar);
 });
 
@@ -669,11 +638,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
 //Graph functionality
 function openGraph(customerId) {
-    // Fetch data
     fetch(`/api/graph_transactions/${customerId}`)
         .then(response => response.json())
         .then(data => {
-            console.log(data); // Check the structure of the data
             renderGraph(data);
         });
 }
@@ -681,14 +648,12 @@ function openGraph(customerId) {
 function renderGraph(data) {
     const ctx = document.getElementById('transactionGraph').getContext('2d');
 
-    // Adjust datasets to include transaction numbers instead of dates
     const datasets = data.map(account => {
-        // Limit to the last 20 transactions
         const last20Balances = account.balances.slice(-20);
         return {
             label: `${account.account_type} (ID: ${account.account_id})`,
             data: last20Balances.map((item, index) => ({
-                x: index + 1, // Transaction number
+                x: index + 1, 
                 y: parseFloat(item.cumulative_balance)
             })),
             fill: false,
@@ -736,24 +701,6 @@ function getRandomColor() {
 }
 
 
-// function toggleAccountType(accountType) {
-//     // Get all transaction elements
-//     const transactionElements = document.querySelectorAll('.transaction');
-
-//     // Loop through each transaction element
-//     transactionElements.forEach(transactionEl => {
-//         // Check if the transaction belongs to the specified account type
-//         if (transactionEl.dataset.accountType === accountType) {
-//             // Toggle visibility
-//             if (transactionEl.style.display === 'none') {
-//                 transactionEl.style.display = '';
-//             } else {
-//                 transactionEl.style.display = 'none';
-//             }
-//         }
-//     });
-// }
-
 const navToggle = document.getElementById('navToggle');
 if (navToggle) {
     navToggle.addEventListener('click', function() {
@@ -788,7 +735,7 @@ function searchInformation(sourceId) {
     var filter = input.value.trim();
     var dropdownId = sourceId === 'headerSearch' ? 'searchDropdown' : 'editCustomerResultsDropdown'; // Assuming you have a dropdown for edit customer results
     var dropdown = document.getElementById(dropdownId);
-    dropdown.innerHTML = ''; // Clear previous results
+    dropdown.innerHTML = ''; 
 
     if (!filter) {
         dropdown.style.display = 'none';
@@ -796,7 +743,6 @@ function searchInformation(sourceId) {
     }
 
     if (sourceId === 'headerSearch') {
-        // Header search specific actions
         const filterOption = document.createElement('div');
         filterOption.className = 'dropdown-item filter-option';
         filterOption.textContent = `Filter customer list with "${filter}"`;
@@ -834,15 +780,13 @@ function appendCustomerToDropdown(customer, dropdown, section) {
     let customerDiv = document.createElement('div');
     customerDiv.className = 'dropdown-item';
     customerDiv.textContent = `${customer.Id} ${customer.PersonalNumber} ${customer.Surname},${customer.GivenName} ${customer.Streetaddress} ${customer.City}`;
-    // Adjust action based on sourceId
     if (section === 'headerSearch') {
         customerDiv.addEventListener('click', function() {
             window.location.href = `/customers/customer_detail/${customer.Id}`;
         });
     } else if (section === 'editCustomerSearch') {
-        // Define action for editing customer, e.g., filling a form
         customerDiv.addEventListener('click', function() {
-            fillCustomerEditForm(customer); // You need to implement this function
+            fillCustomerEditForm(customer); 
             clearOnClick(section)
         });
     }
@@ -953,15 +897,14 @@ function appendUserToDropdown(user, dropdown, section) {
 }
 
 function fillEditForm(user) {
-    console.log(user.id)
     document.querySelector("#userEditForm [name='user_id']").value = user.id;
     document.querySelector("#userEditForm [name='username']").value = user.username;
     document.querySelector("#userEditForm [name='email']").value = user.email;
     document.querySelector("#userEditForm [name='first_name']").value = user.first_name;
     document.querySelector("#userEditForm [name='last_name']").value = user.last_name;
-    document.querySelector("#userEditForm [name='information_permission']").checked = user.information_permission;
-    document.querySelector("#userEditForm [name='management_permission']").checked = user.management_permission;
-    document.querySelector("#userEditForm [name='admin_permission']").checked = user.admin_permission;
+    document.querySelector("#userEditForm [name='information_permission']").checked = user.information_permission === true;
+    document.querySelector("#userEditForm [name='management_permission']").checked = user.management_permission === true;
+    document.querySelector("#userEditForm [name='admin_permission']").checked = user.admin_permission === true;
     
 }
 function fillDeleteInfo(user) {
@@ -987,10 +930,7 @@ function fillChangePasswordInfo(user) {
 }
 
 function fillCustomerEditForm(customer) {
-    // Set the hidden field for customer ID
     document.querySelector("#editCustomerForm [name='id']").value = customer.Id;
-
-    // Update form fields with customer data
     document.querySelector("#editCustomerForm [name='givenname']").value = customer.GivenName;
     document.querySelector("#editCustomerForm [name='surname']").value = customer.Surname;
     document.querySelector("#editCustomerForm [name='email']").value = customer.EmailAddress;
@@ -999,18 +939,15 @@ function fillCustomerEditForm(customer) {
     document.querySelector("#editCustomerForm [name='city']").value = customer.City;
     document.querySelector("#editCustomerForm [name='zipcode']").value = customer.Zipcode;
     document.querySelector("#editCustomerForm [name='country']").value = customer.Country;
-    // For birthday, you might need to format the date properly
     document.querySelector("#editCustomerForm [name='birthday']").value = formatDate(customer.Birthday);
     document.querySelector("#editCustomerForm [name='personalnumber_last4']").value = extractLast4Digits(customer.PersonalNumber);
 }
 
-// Utility function to format date
 function formatDate(dateString) {
     const date = new Date(dateString);
-    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+    return date.toISOString().split('T')[0]; 
 }
 
-// Utility function to extract last 4 digits of personal number
 function extractLast4Digits(personalNumber) {
     return personalNumber.split('-').pop();
 }
@@ -1035,24 +972,20 @@ function clearOnClick(section) {
             inputId = 'editUserSearch';
             dropdownId = 'editUserResultsDropdown';
             break;
-        // New cases for customers
         case 'editCustomerSearch':
             inputId = 'editCustomerSearch';
             dropdownId = 'editCustomerResultsDropdown';
             break;
     }
-    // Clear the input field
     if (inputId) {
         document.getElementById(inputId).value = '';
     }
-    // Hide the dropdown
     if (dropdownId) {
         document.getElementById(dropdownId).style.display = 'none';
     }
 }
 
 function clearSearchInput(section, search, dropdown) {
-    // Hide the clear button immediately
     document.getElementById(section);
     if (search) {
         document.getElementById(search).value = '';
@@ -1061,7 +994,6 @@ function clearSearchInput(section, search, dropdown) {
         document.getElementById(dropdown).style.display = 'none';
     }
 
-    // Switch case to handle section-specific clearing
     switch (section) {
         case 'clearEditUser':
             resetEditUserForm();
@@ -1094,28 +1026,22 @@ function resetEditCustomerForm() {
     }
 }
 
-// Add similar reset functions for change password and delete user sections
 function resetChangePasswordForm() {
     const form = document.getElementById('changePasswordForm')
-    // Clear user information
     document.getElementById('userInfoId').textContent = '';
     document.getElementById('userInfoUsername').textContent = '';
     document.getElementById('userInfoEmail').textContent = '';
-    // Clear form fields
     if (form) {
         form.reset();
     }
-    // Optionally, hide the form section or reset any other visual cues
 }
 function resetDeleteUserSection() {
-    // Clear displayed user information
     document.getElementById('deleteUserInfoId').textContent = '';
     document.getElementById('deleteUserInfoUsername').textContent = '';
     document.getElementById('deleteUserInfoEmail').textContent = '';
     document.getElementById('deleteUserInfoFirstName').textContent = '';
     document.getElementById('deleteUserInfoLastName').textContent = '';
     document.getElementById('deleteUserInfoRole').textContent = '';
-    // Hide the delete section or any additional cleanup as needed
 }
 
 
@@ -1135,7 +1061,6 @@ document.getElementById('toggleDarkMode').addEventListener('click', function() {
     localStorage.setItem('theme', newTheme);
   });
   
-  // Apply the saved theme on page load
   document.addEventListener('DOMContentLoaded', (event) => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);

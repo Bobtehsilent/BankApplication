@@ -4,55 +4,10 @@ from datetime import datetime
 from models import Account, db, Customer, Transaction
 from forms.account_forms import AddAccountForm, EditAccountForm, TransferForm, CustomerTransferForm
 from forms.transaction_form import AddTransactionForm
-from ..customers.customers import database_to_dict
-from ..breadcrumbs import update_breadcrumb, pop_breadcrumb, clear_breadcrumb
+from ..breadcrumbs import update_breadcrumb
 
 
 account_bp = Blueprint('account', __name__)
-
-
-@account_bp.route('/account_list', endpoint='account_list')
-@login_required
-def account_list():
-    page = request.args.get('page', 1, type=int)
-    per_page = 10
-    search_query = request.args.get('search', '')
-    sort_column = request.args.get('sort_column', 'Surname')
-    sort_order = request.args.get('sort_order', 'asc')
-
-    query = Customer.query.join(Account)
-
-    if search_query:
-        query = query.filter(Customer.Surname.contains(search_query))
-
-    query = query.group_by(Customer.Id)
-
-    if sort_order == 'asc':
-        query = query.order_by(getattr(Customer, sort_column).asc())
-    else:
-        query = query.order_by(getattr(Customer, sort_column).desc())
-
-    if request.args.get('ajax', '0') == '1':
-        paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
-        customer_account_data = database_to_dict(paginated_customers.items)
-        return jsonify({
-            'customers': customer_account_data,
-            'pagination': {
-                'total_pages': paginated_customers.pages,
-                'current_page': paginated_customers.page,
-                'has_prev': paginated_customers.has_prev,
-                'has_next': paginated_customers.has_next,
-                'prev_num': paginated_customers.prev_num if paginated_customers.has_prev else None,
-                'next_num': paginated_customers.next_num if paginated_customers.has_next else None,
-            }
-        })
-    else:    
-        paginated_customers = query.paginate(page=page, per_page=per_page, error_out=False)
-        customer_account_data = database_to_dict(paginated_customers.items)
-        return render_template('accounts/accounts.html', customer_account_data=customer_account_data,
-                            paginated=paginated_customers, search_query=search_query,
-                            sort_column=sort_column, sort_order=sort_order)
-
 
 @account_bp.route('/manage_accounts/<int:customer_id>')
 @login_required
@@ -95,7 +50,6 @@ def add_account(customer_id):
         db.session.commit()
         flash('Account added successfully!', 'success')
         return redirect(url_for('customer.customer_detail', user_id=customer_id))
-    # If the form is not submitted or validation fails
     return render_template('customers/customer_detail.html', form=form, customer_id=customer_id)
 
 
@@ -128,7 +82,6 @@ def delete_account():
     if account.Balance > 0:
         return jsonify({'message': 'Cannot delete account with a balance.'}), 400
 
-    # Delete all transactions associated with this account
     Transaction.query.filter_by(AccountId=account_id).delete()
 
     db.session.delete(account)

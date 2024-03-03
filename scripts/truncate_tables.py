@@ -7,7 +7,6 @@ def truncate_tables(tables, session):
     :param tables: A list of table model classes to be truncated.
     :param session: The SQLAlchemy session.
     """
-    # Temporarily disable foreign key constraint checking for MySQL
     session.execute(text('SET FOREIGN_KEY_CHECKS=0;'))
     try:
         for table in tables:

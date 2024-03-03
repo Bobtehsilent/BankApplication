@@ -3,7 +3,6 @@ from models import Customer, db, User
 from flask_login import login_user, logout_user
 from forms.login_form import LoginForm
 
-#Logging in blueprint and functionality
 login_bp = Blueprint('login', __name__)
 
 
@@ -13,9 +12,8 @@ def login():
     form = LoginForm(request.form)
     if form.validate_on_submit():
         user = User.query.filter_by(Username=form.username.data).first()
-        if user and user.check_password(form.password.data):  # Adjust this check based on your model
+        if user and user.check_password(form.password.data): 
             login_user(user)
-            # Redirect to the next page or dashboard after successful login
             return redirect(url_for('user_interface.dashboard'))
         else:
             flash('Login unsuccessful. Please check your username and password', 'danger')
@@ -23,7 +21,6 @@ def login():
         for fieldName, errorMessages in form.errors.items():
             for err in errorMessages:
                 flash(f"{fieldName}: {err}", 'danger')
-    # Redirect back to the home page (or wherever your popup is) if login fails
     return redirect(url_for('main.homepage')) 
     
 @login_bp.route('/logout')
@@ -33,7 +30,6 @@ def logout():
 
 #check/create if there is any cashier/admin   
 def create_initial_users():
-    #Check if there is atleast one cashier
     if not User.query.filter_by(Role='Cashier').first():
         cashier = User(
             Username = 'stefanholmbergcashier'  ,
@@ -50,7 +46,6 @@ def create_initial_users():
 
         print("initial Cashier account added")
 
-    #check if there is atleast one customer
     if not User.query.filter_by(Role='Admin').first():
         admin = User(
             Username = 'stefanholmbergadmin',
@@ -58,12 +53,10 @@ def create_initial_users():
             LastName = 'Holmberg',
             Role = 'Admin',
             CompanyEmail = 'stefan.holmberg@systementor.se',
-            # Permissions
             InformationPermission = True,
             ManagementPermission = True,
             AdminPermission = True
         )
-        #using functions to hash password and generate a personal number
         admin.set_password('Hejsan123')
         db.session.add(admin)
         print("initial Admin account created")

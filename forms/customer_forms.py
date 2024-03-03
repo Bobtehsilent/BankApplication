@@ -13,7 +13,7 @@ class AddCustomerForm(FlaskForm):
     country = SelectField('Country', choices=[], validators=[DataRequired()]) 
     birthday = DateField('Birthday', format='%Y-%m-%d', validators=[DataRequired()])
     personalnumber_last4 = StringField('Last 4 digits of Personal Number', validators=[DataRequired()])
-    submit = SubmitField('Submit')
+    submit = SubmitField('Submit Add')
 
 class EditCustomerForm(FlaskForm):
     id = HiddenField() 
@@ -27,4 +27,4 @@ class EditCustomerForm(FlaskForm):
     country = SelectField('Country', choices=[], validators=[DataRequired()])
     birthday = DateField('Birthday', format='%Y-%m-%d', validators=[DataRequired()])
     personalnumber_last4 = StringField('Last 4 digits of Personal Number', validators=[DataRequired()])
-    submit = SubmitField('Update') 
+    submit = SubmitField('Submit Edit') 

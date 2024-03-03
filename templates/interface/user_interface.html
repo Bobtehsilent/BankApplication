@@ -13,8 +13,31 @@
                             <p>Total customers</p>
                         </div>
                         <div class="product__description">
-                            <h2>Will show number of customers for different statistics, country, balance and so on.</h2>
-                            <!-- Content that will be shown in the details overlay -->
+                            <div>
+                                <h2>Top 5 Customers Globally</h2>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>Name</th>
+                                            <th>Personalnumber</th>
+                                            <th>Country</th>
+                                            <th>Total Balance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for customer in top_customers_globally %}
+                                        <tr onclick="window.location='{{ url_for('customer.customer_detail', user_id=customer.id) }}'" style="cursor: pointer;">
+                                            <td>{{ customer.id }}</td>
+                                            <td>{{ customer.name }} {{ customer.lastname }}</td>
+                                            <td>{{ customer.personalnumber }}</td>
+                                            <td>{{ customer.country }}</td>
+                                            <td>{{ customer.total_balance }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -26,8 +49,31 @@
                             <p>Total Accounts</p>    
                         </div>
                         <div class="product__description">
-                            <h2>Will show number of accounts and other interesting facts.</h2>
-                            <!-- Content that will be shown in the details overlay-->
+                            <div>
+                                <h2>Top 5 Customers Globally</h2>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Customer Id</th>
+                                            <th>Account ID</th>
+                                            <th>Name</th>
+                                            <th>Country</th>
+                                            <th>Account Balance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for account in top_accounts_globally %}
+                                        <tr onclick="window.location='{{ url_for('customer.customer_detail', user_id=account.customer_id) }}'" style="cursor: pointer;">
+                                            <td>{{ account.customer_id }}</td>
+                                            <td>{{ account.account_id }}</td>
+                                            <td>{{ account.customer_name}}</td>
+                                            <td>{{ account.customer_country }}</td>
+                                            <td>{{ account.balance }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>       
                 </div>  
@@ -39,7 +85,28 @@
                             <p>Total Balance</p>
                         </div>
                         <div class="product__description">
-                            <!-- Content that will be shown in the details overlay-->
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Name</th>
+                                        <th>Personalnumber</th>
+                                        <th>Country</th>
+                                        <th>Total Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for customer in top_customers_globally %}
+                                    <tr onclick="window.location='{{ url_for('customer.customer_detail', user_id=customer.id) }}'" style="cursor: pointer;">
+                                        <td>{{ customer.id }}</td>
+                                        <td>{{ customer.name }} {{ customer.lastname }}</td>
+                                        <td>{{ customer.personalnumber }}</td>
+                                        <td>{{ customer.country }}</td>
+                                        <td>{{ customer.total_balance }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -59,7 +126,6 @@
                 <div class="product">
                     <div id="europe-map"></div>
                     <div class="product__description">
-                        <p>hello</p>
                     <!-- content for map details overlay-->
                     </div>
                 </div>
@@ -71,6 +137,9 @@
 
 {% block scripts %}
 <script class="text/javascript">
+    var customerDetailUrl = "{{ url_for('customer.customer_detail', user_id=0, _external=True) }}";
+    
+    
     $(function(){
         var customerData = {{ customer_data | tojson }};
         var countryCustomerData = {{ country_customer_data | tojson }};

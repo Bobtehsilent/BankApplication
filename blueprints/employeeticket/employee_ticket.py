@@ -1,4 +1,4 @@
-from flask import Blueprint, request, flash, redirect, url_for, render_template
+from flask import Blueprint, flash, redirect, url_for, render_template
 from models import db, User, EmployeeTicket
 from forms.employee_ticket_forms import EmployeeTicketForm
 
@@ -30,6 +30,4 @@ def employee_ticket():
         db.session.commit()
         flash('Thank you for your ticket')
         return redirect(url_for('main.homepage'))
-
-    # For GET requests, or if form is not valid
     return render_template('/homepage/homepage.html', form=form)
