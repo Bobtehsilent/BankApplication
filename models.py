@@ -13,7 +13,7 @@ import string
 db = SQLAlchemy()
 
 class Customer(db.Model):
-    __tablename__= "Customers"
+    __tablename__= "Customer"
     Id = db.Column(db.Integer, primary_key=True)
     GivenName = db.Column(db.String(50), unique=False, nullable=False)
     Surname = db.Column(db.String(50), unique=False, nullable=False)
@@ -68,7 +68,7 @@ class Account(db.Model):
     Created = db.Column(db.DateTime, nullable=False)
     Balance = db.Column(Numeric(10, 2), nullable=False)
     Transactions = db.relationship('Transaction', backref='Account', lazy=True)
-    CustomerId = db.Column(db.Integer, db.ForeignKey('Customers.Id'), nullable=False)
+    CustomerId = db.Column(db.Integer, db.ForeignKey('Customer.Id'), nullable=False)
 
     def to_dict(self):
         return {

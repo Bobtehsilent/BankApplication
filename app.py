@@ -55,10 +55,6 @@ def create_app(config_class=Config):
     app.jinja_env.globals.update(is_admin=User.is_admin)
     app.jinja_env.globals.update(is_cashier=User.is_cashier)
 
-    @app.errorhandler(Exception)
-    def handle_exception(e):
-        app.logger.error(f"Error: {str(e)}")
-        return render_template('error.html'), 500
     
     return app
 
